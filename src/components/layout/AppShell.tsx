@@ -124,7 +124,7 @@ export function DesktopShell({ nav, reading, sidebar, onCloseSidebar }: DesktopS
 export function MobileShell({ reading, tabBar }: { reading: ReactNode; tabBar: ReactNode }) {
   return (
     <div className="h-[100dvh] flex flex-col overflow-hidden bg-bg">
-      <main className="flex-1 overflow-hidden min-h-0">
+      <main className="flex-1 overflow-hidden min-h-0 flex flex-col">
         {reading}
       </main>
       {tabBar}
