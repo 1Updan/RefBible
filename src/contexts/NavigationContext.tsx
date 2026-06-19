@@ -1,48 +1,22 @@
-import { createContext, useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-
-export interface CrossRefTarget {
-  verseId: string
-  bookId: number
-  chapter: number
-  reference: string
-}
-
-export type ActiveTab = 'crossrefs' | 'notes' | 'ai'
+import { NavigationContext } from './navigation'
+import type { NavigationContextValue, CrossRefTarget, ActiveTab, AiTarget } from './navigation'
 
 interface NavEntry {
   bookId: number
   chapter: number
 }
 
-interface NavigationContextValue {
-  activePanel: 'none' | 'settings' | 'study' | 'bookmarks' | 'search'
-  setActivePanel: (p: NavigationContextValue['activePanel']) => void
-  crossRefTarget: CrossRefTarget | null
-  openCrossReferences: (target: CrossRefTarget) => void
-  studyTab: ActiveTab
-  setStudyTab: (t: ActiveTab) => void
-  bookId: number
-  chapter: number
-  navigateTo: (bookId: number, chapter: number, verseId?: string, pushHistory?: boolean) => void
-  goBack: () => void
-  canGoBack: boolean
-  onNavigate: (cb: (bookId: number, chapter: number, verseId?: string) => void) => void
-  verseScrollRef: React.MutableRefObject<Map<string, number>>
-  noteVerseId: string | null
-  openNote: (verseId: string) => void
-  closeNote: () => void
-}
-
-export const NavigationContext = createContext<NavigationContextValue>(null!)
-
 export function NavigationProvider({ children }: { children: ReactNode }) {
   const [activePanel, setActivePanel] = useState<NavigationContextValue['activePanel']>('none')
   const [crossRefTarget, setCrossRefTarget] = useState<CrossRefTarget | null>(null)
+  const [aiTarget, setAiTarget] = useState<AiTarget | null>(null)
   const [studyTab, setStudyTab] = useState<ActiveTab>('crossrefs')
   const [[bookId, chapter], setNav] = useState<[number, number]>([43, 1])
   const [navStack, setNavStack] = useState<NavEntry[]>([])
   const [noteVerseId, setNoteVerseId] = useState<string | null>(null)
+  const [pendingRange, setPendingRange] = useState<{ verseStart: number; verseEnd: number } | null>(null)
   const navigateListeners = useRef<((bookId: number, chapter: number, verseId?: string) => void)[]>([])
   const verseScrollRef = useRef<Map<string, number>>(new Map())
 
@@ -78,6 +52,10 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     navigateListeners.current.push(cb)
   }, [])
 
+  const setCrossRefTargetDirect = useCallback((target: CrossRefTarget | null) => {
+    setCrossRefTarget(target)
+  }, [])
+
   const openCrossReferences = useCallback((target: CrossRefTarget) => {
     setCrossRefTarget(target)
     setStudyTab('crossrefs')
@@ -98,7 +76,10 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
         activePanel,
         setActivePanel,
         crossRefTarget,
+        setCrossRefTarget: setCrossRefTargetDirect,
         openCrossReferences,
+        aiTarget,
+        setAiTarget,
         studyTab,
         setStudyTab,
         bookId,
@@ -111,6 +92,8 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
         noteVerseId,
         openNote,
         closeNote,
+        pendingRange,
+        setPendingRange,
       }}
     >
       {children}

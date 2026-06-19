@@ -16,6 +16,7 @@ import { SearchPanel } from './components/panels/SearchPanel'
 import { BottomSheet } from './components/sheets/BottomSheet'
 import { ensureSeeded, saveBookmark, removeBookmark, getInstalledTranslations, saveNote, getNotes } from './lib/db'
 import { getBook } from '@/data/books'
+import { useNetworkState } from './hooks/useNetworkState'
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
@@ -32,13 +33,15 @@ function AppContent() {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const { theme, setTheme } = useTheme()
   const { prefs, update, toggleVersion } = useReadingPreferences()
-  const { activePanel, setActivePanel, bookId, chapter, navigateTo, noteVerseId, closeNote, openNote, setStudyTab, goBack, canGoBack } = useNavigation()
+  const { activePanel, setActivePanel, bookId, chapter, navigateTo, noteVerseId, closeNote, openNote, studyTab, setStudyTab, goBack, canGoBack, setPendingRange } = useNavigation()
   const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [bookmarks, setBookmarks] = useState<Set<string>>(new Set())
   const [bookmarkRefresh, setBookmarkRefresh] = useState(0)
   const [installedVersions, setInstalledVersions] = useState<string[]>(['KJV', 'NASB'])
   const [noteText, setNoteText] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const isOnline = useNetworkState()
 
   useEffect(() => {
     ensureSeeded()
@@ -59,9 +62,8 @@ function AppContent() {
       getNotes(noteVerseId).then((notes) => {
         setNoteText(notes.length > 0 ? notes[0].text_content : '')
       })
-    } else {
-      setNoteText('')
     }
+    return () => { setNoteText('') }
   }, [noteVerseId])
 
   const handleToggleBookmark = useCallback(async (verseId: string) => {
@@ -113,20 +115,40 @@ function AppContent() {
     )
   }
 
-  const handlePanelToggle = (panel: 'bookmarks' | 'ai' | 'settings' | 'study') => {
+  const handlePanelToggle = (panel: 'bookmarks' | 'ai' | 'settings' | 'study' | 'search' | 'crossrefs') => {
     if (activePanel === panel) {
       setActivePanel('none')
-    } else {
-      if (panel === 'ai') {
+    } else if (panel === 'ai') {
+      if (activePanel === 'study' && studyTab === 'ai') {
+        setActivePanel('none')
+      } else {
         setStudyTab('ai')
         setActivePanel('study')
-      } else {
-        setActivePanel(panel)
       }
+    } else if (panel === 'crossrefs') {
+      if (activePanel === 'study' && studyTab === 'crossrefs') {
+        setActivePanel('none')
+      } else {
+        setStudyTab('crossrefs')
+        setActivePanel('study')
+      }
+    } else {
+      setActivePanel(panel)
     }
   }
 
+  const handleSearch = (q: string) => {
+    setSearchQuery(q)
+    setActivePanel('search')
+  }
+
   const currentBook = getBook(bookId)
+
+  const offlineBanner = !isOnline ? (
+    <div className="px-3 py-1.5 text-xs font-medium text-center bg-danger text-white shrink-0">
+      You are offline — AI features are unavailable
+    </div>
+  ) : null
 
   const nav = (
     <BookChapterNav
@@ -138,6 +160,7 @@ function AppContent() {
 
   const reading = (
     <>
+      {offlineBanner}
       <ChapterHeader
         bookName={currentBook?.name ?? 'John'}
         chapter={chapter}
@@ -147,11 +170,14 @@ function AppContent() {
         onPrevChapter={() => chapter > 1 && navigateTo(bookId, chapter - 1)}
         onNextChapter={() => chapter < (currentBook?.chapters ?? 21) && navigateTo(bookId, chapter + 1)}
         activePanel={activePanel}
+        studyTab={studyTab}
         onTogglePanel={handlePanelToggle}
         isDesktop={isDesktop}
         visibleVersions={prefs.visibleVersions}
         installedVersions={installedVersions}
         onToggleVersion={toggleVersion}
+        onSearch={handleSearch}
+        onNavigateToRef={(b, c, range) => { setPendingRange(range ?? null); navigateTo(b, c) }}
       />
       <ReadingView
         bookId={bookId}
@@ -160,6 +186,7 @@ function AppContent() {
         fontSize={prefs.fontSize}
         bookmarks={bookmarks}
         isDesktop={isDesktop}
+        isOnline={isOnline}
         onToggleBookmark={handleToggleBookmark}
         onOpenNote={handleOpenNote}
       />
@@ -191,17 +218,9 @@ function AppContent() {
           </div>
         )
       case 'search':
-        return <SearchPanel onNavigate={(b, c) => navigateTo(b, c)} />
+        return <SearchPanel key={searchQuery} initialQuery={searchQuery} visibleVersions={prefs.visibleVersions} onNavigate={(b, c, range) => { setPendingRange(range ?? null); navigateTo(b, c) }} />
       default:
-        return (
-          <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-            <div className="w-10 h-10 rounded-full bg-accent-light flex items-center justify-center mb-3">
-              <span className="text-accent text-lg font-semibold">R</span>
-            </div>
-            <p className="text-sm font-semibold text-text-primary">RefBible</p>
-            <p className="text-xs text-text-tertiary mt-1">Select a verse to study</p>
-          </div>
-        )
+        return null
     }
   }
 
@@ -229,7 +248,7 @@ function AppContent() {
       }
     >
       {activePanel === 'study' && <StudyPanel />}
-      {activePanel === 'search' && <SearchPanel onNavigate={(b, c) => navigateTo(b, c)} />}
+      {activePanel === 'search' && <SearchPanel key={searchQuery} initialQuery={searchQuery} visibleVersions={prefs.visibleVersions} onNavigate={(b, c, range) => { setPendingRange(range ?? null); navigateTo(b, c) }} />}
       {activePanel === 'bookmarks' && <BookmarksPanel refreshKey={bookmarkRefresh} onNavigate={handleNavigateBookmark} />}
       {activePanel === 'settings' && (
         <SettingsPanel
@@ -270,6 +289,7 @@ function AppContent() {
         nav={nav}
         reading={reading}
         sidebar={renderSidebar()}
+        onCloseSidebar={() => setActivePanel('none')}
       />
     )
   }

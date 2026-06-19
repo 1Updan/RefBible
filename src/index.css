@@ -100,8 +100,7 @@ body {
 }
 
 #root {
-  min-height: 100svh;
-  min-height: 100dvh;
+  height: 100%;
 }
 
 @keyframes fadeIn {

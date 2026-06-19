@@ -1,5 +1,5 @@
 import { useRef, useCallback } from 'react'
-import { BookmarkCheck } from 'lucide-react'
+import { BookmarkCheck, MessageSquareMore } from 'lucide-react'
 import { CrossReferenceChip } from './CrossReferenceChip'
 import { formatVerseId } from '@/lib/utils'
 import clsx from 'clsx'
@@ -13,8 +13,9 @@ interface VerseRowProps {
   fontSize: number
   isSelected: boolean
   isBookmarked: boolean
+  hasNote: boolean
   isDesktop: boolean
-  onToggleSelect: () => void
+  onToggleSelect: (e: React.MouseEvent) => void
   onNavigateToRef: (verseId: string) => void
   onOpenCrossRefs: (verseId: string) => void
 }
@@ -27,6 +28,7 @@ export function VerseRow({
   fontSize,
   isSelected,
   isBookmarked,
+  hasNote,
   isDesktop,
   onToggleSelect,
   onNavigateToRef,
@@ -39,13 +41,13 @@ export function VerseRow({
     longPressFired.current = false
     longPressRef.current = setTimeout(() => {
       longPressFired.current = true
-      onToggleSelect()
+      onToggleSelect({ shiftKey: false } as React.MouseEvent)
     }, 500)
   }, [onToggleSelect])
 
   const handleTouchEnd = useCallback(() => {
     if (longPressRef.current) clearTimeout(longPressRef.current)
-    if (!longPressFired.current) onToggleSelect()
+    if (!longPressFired.current) onToggleSelect({ shiftKey: false } as React.MouseEvent)
   }, [onToggleSelect])
 
   const handleTouchMove = useCallback(() => {
@@ -102,8 +104,11 @@ export function VerseRow({
                   {vt.text_data}
                 </div>
               </div>
-              {i === 0 && isBookmarked && (
-                <BookmarkCheck size={14} className="text-accent shrink-0 mt-0.5" />
+              {i === 0 && (
+                <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                  {isBookmarked && <BookmarkCheck size={14} className="text-accent" />}
+                  {hasNote && <MessageSquareMore size={14} className="text-text-tertiary" />}
+                </div>
               )}
             </div>
           )

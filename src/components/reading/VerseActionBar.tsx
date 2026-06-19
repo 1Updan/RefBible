@@ -1,26 +1,32 @@
-import { Bookmark, BookmarkCheck, Crosshair, MessageSquareMore, Sparkles, X } from 'lucide-react'
+import { Bookmark, BookmarkCheck, Crosshair, MessageSquareMore, Sparkles, X, List, XCircle } from 'lucide-react'
 import clsx from 'clsx'
 
 interface VerseActionBarProps {
   selectedCount: number
   isDesktop: boolean
+  isOnline: boolean
   allBookmarked: boolean
   onToggleBookmark: () => void
   onAddNote: () => void
   onCrossReferences: () => void
   onAiCommentary: () => void
   onClearSelection: () => void
+  onRangeSelect?: () => void
+  isRangeMode?: boolean
 }
 
 export function VerseActionBar({
   selectedCount,
   isDesktop,
+  isOnline,
   allBookmarked,
   onToggleBookmark,
   onAddNote,
   onCrossReferences,
   onAiCommentary,
   onClearSelection,
+  onRangeSelect,
+  isRangeMode,
 }: VerseActionBarProps) {
   if (isDesktop) {
     return (
@@ -30,9 +36,17 @@ export function VerseActionBar({
         </span>
         <span className="w-px h-5 bg-white/20" />
         <ActionButton icon={allBookmarked ? <BookmarkCheck size={15} /> : <Bookmark size={15} />} label={allBookmarked ? 'Unbookmark' : 'Bookmark'} onClick={onToggleBookmark} />
+        {onRangeSelect && selectedCount === 1 && (
+          <ActionButton
+            icon={isRangeMode ? <XCircle size={15} /> : <List size={15} />}
+            label={isRangeMode ? 'Cancel' : 'Range'}
+            onClick={onRangeSelect}
+            highlighted={isRangeMode}
+          />
+        )}
         <ActionButton icon={<MessageSquareMore size={15} />} label="Note" onClick={onAddNote} />
         <ActionButton icon={<Crosshair size={15} />} label="Refs" onClick={onCrossReferences} />
-        <ActionButton icon={<Sparkles size={15} />} label="AI" onClick={onAiCommentary} />
+        <ActionButton icon={<Sparkles size={15} />} label="AI" onClick={onAiCommentary} disabled={!isOnline} />
         <span className="w-px h-5 bg-white/20" />
         <button
           type="button"
@@ -63,6 +77,19 @@ export function VerseActionBar({
           {allBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
           <span className="text-[10px]">Save</span>
         </button>
+        {onRangeSelect && selectedCount === 1 && (
+          <button
+            type="button"
+            onClick={onRangeSelect}
+            className={clsx(
+              'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all duration-150 cursor-pointer',
+              isRangeMode ? 'text-accent bg-white/15' : 'text-white/80 hover:text-white',
+            )}
+          >
+            {isRangeMode ? <XCircle size={18} /> : <List size={18} />}
+            <span className="text-[10px]">{isRangeMode ? 'Cancel' : 'Range'}</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={onAddNote}
@@ -82,7 +109,8 @@ export function VerseActionBar({
         <button
           type="button"
           onClick={onAiCommentary}
-          className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-white/80 hover:text-white transition-all duration-150 cursor-pointer"
+          disabled={!isOnline}
+          className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed text-white/80 hover:text-white"
         >
           <Sparkles size={18} />
           <span className="text-[10px]">AI</span>
@@ -101,15 +129,21 @@ export function VerseActionBar({
   )
 }
 
-function ActionButton({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+function ActionButton({ icon, label, onClick, disabled, highlighted }: { icon: React.ReactNode; label: string; onClick: () => void; disabled?: boolean; highlighted?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all duration-150 cursor-pointer"
+      disabled={disabled}
+      className={clsx(
+        'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent',
+        highlighted ? 'text-accent bg-white/15' : 'text-white/80 hover:text-white hover:bg-white/10',
+      )}
     >
       {icon}
       <span className="text-xs font-medium">{label}</span>
     </button>
   )
 }
+
+

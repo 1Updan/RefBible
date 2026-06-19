@@ -32,7 +32,7 @@ export function CrossReferencePanel() {
         if (first) {
           map.set(x.target_verse_id, {
             verseId: x.target_verse_id,
-            text: first.text_data.slice(0, 120) + (first.text_data.length > 120 ? '…' : ''),
+            text: first.text_data,
             reference: formatVerseId(x.target_verse_id),
           })
         }
@@ -99,7 +99,7 @@ export function CrossReferencePanel() {
                 <span className="text-xs font-semibold text-accent">{preview?.reference ?? formatVerseId(xref.target_verse_id)}</span>
                 <ArrowRight size={12} className="text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
               </div>
-              <p className="text-xs text-text-secondary leading-relaxed line-clamp-2">
+              <p className="text-xs text-text-secondary leading-relaxed">
                 {preview?.text ?? 'Loading…'}
               </p>
             </button>

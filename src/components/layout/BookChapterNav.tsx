@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Book, ChevronRight, ChevronDown } from 'lucide-react'
 import { BOOKS } from '@/data/books'
 import clsx from 'clsx'
@@ -14,8 +14,17 @@ const NT_BOOKS = BOOKS.filter((b) => b.testament === 'NT')
 
 export function BookChapterNav({ selectedBook, selectedChapter, onSelect }: BookChapterNavProps) {
   const [expandedBook, setExpandedBook] = useState<number>(selectedBook)
-  const [showOT, setShowOT] = useState(true)
-  const [showNT, setShowNT] = useState(true)
+  const [showOT, setShowOT] = useState(() => {
+    const saved = localStorage.getItem('nav-show-ot')
+    return saved !== null ? saved === 'true' : true
+  })
+  const [showNT, setShowNT] = useState(() => {
+    const saved = localStorage.getItem('nav-show-nt')
+    return saved !== null ? saved === 'true' : true
+  })
+
+  useEffect(() => { localStorage.setItem('nav-show-ot', String(showOT)) }, [showOT])
+  useEffect(() => { localStorage.setItem('nav-show-nt', String(showNT)) }, [showNT])
 
   const handleBookClick = (bookId: number) => {
     setExpandedBook((prev) => (prev === bookId ? -1 : bookId))

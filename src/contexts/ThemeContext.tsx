@@ -1,17 +1,7 @@
-import { createContext, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-
-export type Theme = 'light' | 'sepia' | 'dark'
-
-interface ThemeContextValue {
-  theme: Theme
-  setTheme: (t: Theme) => void
-}
-
-export const ThemeContext = createContext<ThemeContextValue>({
-  theme: 'light',
-  setTheme: () => {},
-})
+import { ThemeContext } from './theme'
+import type { Theme } from './theme'
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {

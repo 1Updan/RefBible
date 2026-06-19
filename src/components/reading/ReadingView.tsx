@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { VerseRow } from './VerseRow'
 import { VerseActionBar } from './VerseActionBar'
-import { getCrossReferences, getTranslations, getVerses } from '@/lib/db'
+import { getCrossReferences, getTranslations, getVerses, getNotesForChapter } from '@/lib/db'
 import { useNavigation } from '@/hooks/useNavigation'
 import { getBook } from '@/data/books'
 import { parseOsisId } from '@/lib/utils'
@@ -14,6 +14,7 @@ interface ReadingViewProps {
   fontSize: number
   bookmarks: Set<string>
   isDesktop: boolean
+  isOnline: boolean
   onToggleBookmark: (verseId: string) => void
   onOpenNote: (verseId: string) => void
 }
@@ -25,24 +26,34 @@ export function ReadingView({
   fontSize,
   bookmarks,
   isDesktop,
+  isOnline,
   onToggleBookmark,
   onOpenNote,
 }: ReadingViewProps) {
-  const { openCrossReferences, setStudyTab, setActivePanel, navigateTo } = useNavigation()
+  const { openCrossReferences, setCrossRefTarget, setStudyTab, setActivePanel, navigateTo, setAiTarget, pendingRange, setPendingRange, activePanel, studyTab } = useNavigation()
   const [verses, setVerses] = useState<Verse[]>([])
   const [data, setData] = useState<Map<string, { texts: ContentText[]; xrefs: CrossReference[] }>>(new Map())
   const [loading, setLoading] = useState(true)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [selectionAnchor, setSelectionAnchor] = useState<string | null>(null)
+  const [rangeMode, setRangeMode] = useState(false)
+  const [verseNotes, setVerseNotes] = useState<Set<string>>(new Set())
   const topRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setSelectedIds(new Set())
     let cancelled = false
-    setLoading(true)
     async function load() {
-      const vs = await getVerses(bookId, chapter)
+      setSelectedIds(new Set())
+      setSelectionAnchor(null)
+      setRangeMode(false)
+      setLoading(true)
+      const [vs, noteIds] = await Promise.all([
+        getVerses(bookId, chapter),
+        getNotesForChapter(bookId, chapter),
+      ])
       if (cancelled) return
       setVerses(vs)
+      setVerseNotes(noteIds)
       const map = new Map<string, { texts: ContentText[]; xrefs: CrossReference[] }>()
       const batch = vs.map(async (v) => {
         const [texts, xrefs] = await Promise.all([
@@ -55,24 +66,80 @@ export function ReadingView({
       if (!cancelled) {
         setData(map)
         setLoading(false)
+        if (pendingRange) {
+          const ids = vs
+            .filter((v) => v.verse_num >= pendingRange.verseStart && v.verse_num <= pendingRange.verseEnd)
+            .map((v) => v.id)
+          setSelectedIds(new Set(ids))
+          setPendingRange(null)
+        }
       }
     }
     load()
     return () => { cancelled = true }
-  }, [bookId, chapter])
+  }, [bookId, chapter, pendingRange, setPendingRange])
 
-  const handleToggleSelect = useCallback((verseId: string) => {
+  const handleToggleSelect = useCallback((verseId: string, shiftKey?: boolean) => {
+    if ((shiftKey || rangeMode) && selectionAnchor) {
+      const anchorIdx = verses.findIndex(v => v.id === selectionAnchor)
+      const clickIdx = verses.findIndex(v => v.id === verseId)
+      if (anchorIdx !== -1 && clickIdx !== -1) {
+        const start = Math.min(anchorIdx, clickIdx)
+        const end = Math.max(anchorIdx, clickIdx)
+        const ids = verses.slice(start, end + 1).map(v => v.id)
+        setSelectedIds(new Set(ids))
+        setRangeMode(false)
+        return
+      }
+    }
     setSelectedIds((prev) => {
       const next = new Set(prev)
       if (next.has(verseId)) next.delete(verseId)
       else next.add(verseId)
       return next
     })
-  }, [])
+    setSelectionAnchor(verseId)
+    setRangeMode(false)
+  }, [verses, selectionAnchor, rangeMode])
+
+  const handleRangeSelect = useCallback(() => {
+    if (rangeMode) {
+      setRangeMode(false)
+    } else if (selectedIds.size === 1) {
+      const anchor = [...selectedIds][0]
+      setSelectionAnchor(anchor)
+      setRangeMode(true)
+    }
+  }, [rangeMode, selectedIds])
 
   const handleClearSelection = useCallback(() => {
     setSelectedIds(new Set())
+    setRangeMode(false)
   }, [])
+
+  useEffect(() => {
+    if (selectedIds.size === 1 && !rangeMode) {
+      const verseId = [...selectedIds][0]
+      if (bookmarks.has(verseId) && verseNotes.has(verseId)) {
+        onOpenNote(verseId)
+      }
+    }
+  }, [selectedIds, bookmarks, verseNotes, onOpenNote, rangeMode])
+
+  useEffect(() => {
+    if (selectedIds.size === 1 && activePanel === 'study' && studyTab === 'crossrefs') {
+      const verseId = [...selectedIds][0]
+      const v = verses.find((x) => x.id === verseId)
+      if (!v) return
+      const book = getBook(bookId)
+      setCrossRefTarget({
+        verseId,
+        bookId: v.book_id,
+        chapter: v.chapter_num,
+        reference: `${book?.name ?? 'John'} ${chapter}:${v.verse_num}`,
+      })
+    }
+  }, [selectedIds, activePanel, studyTab, verses, bookId, chapter, setCrossRefTarget])
 
   const handleNavigateToRef = useCallback((targetId: string) => {
     const parsed = parseOsisId(targetId)
@@ -128,10 +195,24 @@ export function ReadingView({
 
   const handleActionAi = useCallback(() => {
     if (selectedList.length === 1) {
+      const verseId = selectedList[0]
+      const v = verses.find((x) => x.id === verseId)
+      const d = data.get(verseId)
+      if (!v || !d) return
+      const book = getBook(bookId)
+      const firstText = d.texts.find((t) => t.translation_code === 'KJV') ?? d.texts[0]
+      setAiTarget({
+        verseId,
+        bookId: v.book_id,
+        chapter: v.chapter_num,
+        verseNum: v.verse_num,
+        reference: `${book?.name ?? 'John'} ${chapter}:${v.verse_num}`,
+        text: firstText?.text_data ?? '',
+      })
       setStudyTab('ai')
       setActivePanel('study')
     }
-  }, [selectedList, setStudyTab, setActivePanel])
+  }, [selectedList, verses, data, bookId, chapter, setStudyTab, setActivePanel, setAiTarget])
 
   if (loading) {
     return (
@@ -145,9 +226,9 @@ export function ReadingView({
   }
 
   return (
-    <div className="relative h-full">
-      <div className="h-full overflow-y-auto overflow-x-hidden" ref={topRef}>
-        <div className="max-w-[680px] mx-auto py-3 space-y-0.5">
+    <div className="relative flex flex-col flex-1 min-h-0">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden" ref={topRef}>
+        <div className="max-w-6xl ml-auto mr-4 py-3 space-y-0.5">
           {verses.map((verse) => {
             const d = data.get(verse.id)
             return (
@@ -160,8 +241,9 @@ export function ReadingView({
                 fontSize={fontSize}
                 isSelected={selectedIds.has(verse.id)}
                 isBookmarked={bookmarks.has(verse.id)}
+                hasNote={verseNotes.has(verse.id)}
                 isDesktop={isDesktop}
-                onToggleSelect={() => handleToggleSelect(verse.id)}
+                onToggleSelect={(e) => handleToggleSelect(verse.id, e.shiftKey)}
                 onNavigateToRef={handleNavigateToRef}
                 onOpenCrossRefs={handleOpenCrossRefs}
               />
@@ -174,12 +256,15 @@ export function ReadingView({
         <VerseActionBar
           selectedCount={selectedIds.size}
           isDesktop={isDesktop}
+          isOnline={isOnline}
           allBookmarked={allBookmarked}
           onToggleBookmark={handleActionBookmark}
           onAddNote={handleActionNote}
           onCrossReferences={handleActionCrossRefs}
           onAiCommentary={handleActionAi}
           onClearSelection={handleClearSelection}
+          onRangeSelect={handleRangeSelect}
+          isRangeMode={rangeMode}
         />
       )}
     </div>

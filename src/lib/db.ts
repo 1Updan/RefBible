@@ -1,9 +1,14 @@
 import Database from '@tauri-apps/plugin-sql'
 import type { Verse, ContentText, CrossReference, Bookmark, Note } from '@/types/db'
 import { toOsis } from '@/data/osis'
+import { parseReference } from './utils'
 
 let db: Database | null = null
 let seeded = false
+
+function isTauriContext(): boolean {
+  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
+}
 
 interface KjvVerse {
   n: number
@@ -28,6 +33,9 @@ interface KjvData {
 }
 
 export async function getDb(): Promise<Database> {
+  if (!isTauriContext()) {
+    throw new Error('This app requires a Tauri shell. Run "pnpm tauri dev" instead of "pnpm dev".')
+  }
   if (!db) {
     db = await Database.load('sqlite:refbible.db')
   }
@@ -40,8 +48,39 @@ export async function ensureSeeded(): Promise<void> {
   const rows = await conn.select<{ count: number }[]>('SELECT COUNT(*) as count FROM verses')
   if (rows[0].count === 0) {
     await seedAll(conn)
+  } else {
+    const nasbCount = await conn.select<{ count: number }[]>("SELECT COUNT(*) as count FROM content_text WHERE translation_code = 'NASB'")
+    if (nasbCount[0].count < 30000) {
+      await conn.execute("DELETE FROM content_text WHERE translation_code = 'NASB'")
+      await seedNasbOnly(conn)
+    }
   }
   seeded = true
+}
+
+async function seedNasbOnly(conn: Database): Promise<void> {
+  const resp = await fetch('/nasb.json')
+  const data: KjvData = await resp.json()
+
+  const allTexts: { id: string; text: string }[] = []
+
+  for (const book of data.books) {
+    const osis = toOsis(book.b)
+    for (const ch of book.ch) {
+      for (const v of ch.v) {
+        allTexts.push({ id: `${osis}.${ch.c}.${v.n}`, text: v.t })
+      }
+    }
+  }
+
+  const CHUNK = 200
+  for (let i = 0; i < allTexts.length; i += CHUNK) {
+    const chunk = allTexts.slice(i, i + CHUNK)
+    const binds: unknown[] = []
+    for (const r of chunk) binds.push(r.id, 'NASB', r.text)
+    const phs = chunk.map((_, j) => `($${j * 3 + 1}, $${j * 3 + 2}, $${j * 3 + 3})`).join(',')
+    await conn.execute(`INSERT OR IGNORE INTO content_text (verse_id, translation_code, text_data) VALUES ${phs}`, binds)
+  }
 }
 
 async function seedAll(conn: Database): Promise<void> {
@@ -85,67 +124,7 @@ async function seedAll(conn: Database): Promise<void> {
     )
   }
 
-  const nasb: [number, string][] = [
-    [1, 'In the beginning was the Word, and the Word was with God, and the Word was God.'],
-    [2, 'He was in the beginning with God.'],
-    [3, 'All things came into being through Him, and apart from Him not even one thing came into being that has come into being.'],
-    [4, 'In Him was life, and the life was the Light of mankind.'],
-    [5, 'And the Light shines in the darkness, and the darkness did not grasp it.'],
-    [6, 'A man came, one sent from God, whose name was John.'],
-    [7, 'He came as a witness, to testify about the Light, so that all might believe through him.'],
-    [8, 'He was not the Light, but he came to testify about the Light.'],
-    [9, 'This was the true Light which, coming into the world, enlightens every person.'],
-    [10, 'He was in the world, and the world came into being through Him, and the world did not know Him.'],
-    [11, 'He came to His own, and His own people did not accept Him.'],
-    [12, 'But as many as received Him, to them He gave the right to become children of God, to those who believe in His name,'],
-    [13, 'who were born, not of blood, nor of the will of the flesh, nor of the will of a husband, but of God.'],
-    [14, 'And the Word became flesh, and dwelt among us; and we saw His glory, glory as of the only Son from the Father, full of grace and truth.'],
-    [15, 'John testified about Him and called out, saying, "This was He of whom I said, \'He who is coming after me has proved to be superior to me, because He existed before me.\'"'],
-    [16, 'For of His fullness we have all received, and grace upon grace.'],
-    [17, 'For the Law was given through Moses; grace and truth were realized through Jesus Christ.'],
-    [18, 'No one has seen God at any time; God the only Son, who is in the arms of the Father, He has explained Him.'],
-    [19, 'This is the testimony of John, when the Jews sent priests and Levites to him from Jerusalem to ask him, "Who are you?"'],
-    [20, 'And he confessed and did not deny, but confessed, "I am not the Christ."'],
-    [21, 'And they asked him, "What then? Are you Elijah?" And he said, "I am not." "Are you the Prophet?" And he answered, "No."'],
-    [22, 'Then they said to him, "Who are you? So that we may give an answer to those who sent us. What do you say about yourself?"'],
-    [23, 'He said, "I am the voice of one calling out in the wilderness, \'Make the way of the Lord straight,\' as Isaiah the prophet said."'],
-    [24, 'Now the messengers who had been sent were from the Pharisees.'],
-    [25, 'And they asked him, and said to him, "Why then are you baptizing, if you are not the Christ, nor Elijah, nor the Prophet?"'],
-    [26, 'John answered them, saying, "I baptize in water, but among you stands Him whom you do not know.'],
-    [27, 'It is He who comes after me, of whom I am not worthy even to untie the strap of His sandal."'],
-    [28, 'These things took place in Bethany beyond the Jordan, where John was baptizing.'],
-    [29, 'The next day he saw Jesus coming to him and said, "Behold, the Lamb of God who takes away the sin of the world!'],
-    [30, 'This is He on behalf of whom I said, \'After me is coming a Man who has proved to be superior to me, because He existed before me.\''],
-    [31, 'And I did not recognize Him, but so that He would be revealed to Israel, I came baptizing in water."'],
-    [32, 'And John testified, saying, "I have seen the Spirit descending from heaven like a dove, and He remained upon Him.'],
-    [33, 'And I did not recognize Him, but He who sent me to baptize in water said to me, \'He upon whom you see the Spirit descending and remaining upon Him, this is the One who baptizes in the Holy Spirit.\''],
-    [34, 'And I have seen and have testified that this is the Son of God."'],
-    [35, 'Again the next day, John was standing with two of his disciples;'],
-    [36, 'and he looked at Jesus as He walked, and said, "Behold, the Lamb of God!"'],
-    [37, 'And the two disciples heard him speak, and they followed Jesus.'],
-    [38, 'And Jesus turned and saw them following, and said to them, "What are you seeking?" They said to Him, "Rabbi (which translated means Teacher), where are You staying?"'],
-    [39, 'He said to them, "Come, and you will see." So they came and saw where He was staying, and they stayed with Him that day, for it was about the tenth hour.'],
-    [40, 'One of the two who heard John speak and followed Him was Andrew, Simon Peter\'s brother.'],
-    [41, 'He first found his own brother Simon and said to him, "We have found the Messiah" (which translated means Christ).'],
-    [42, 'He brought him to Jesus. Jesus looked at him and said, "You are Simon the son of John; you shall be called Cephas" (which means Peter).'],
-    [43, 'The next day He intended to go to Galilee, and He found Philip. And Jesus said to him, "Follow Me."'],
-    [44, 'Now Philip was from Bethsaida, the city of Andrew and Peter.'],
-    [45, 'Philip found Nathanael and said to him, "We have found Him of whom Moses wrote in the Law, and the prophets wrote: Jesus the son of Joseph, from Nazareth."'],
-    [46, 'And Nathanael said to him, "Can anything good come from Nazareth?" Philip said to him, "Come and see."'],
-    [47, 'Jesus saw Nathanael coming to Him and said of him, "Truly, an Israelite indeed, in whom there is no deceit!"'],
-    [48, 'Nathanael said to Him, "How do You know me?" Jesus answered and said to him, "Before Philip called you, when you were under the fig tree, I saw you."'],
-    [49, 'Nathanael answered, "Rabbi, You are the Son of God; You are the King of Israel."'],
-    [50, 'Jesus answered and said to him, "Because I said to you that I saw you under the fig tree, do you believe? You will see greater things than these."'],
-    [51, 'And He said to him, "Truly, truly, I say to you, you will see heaven opened and the angels of God ascending and descending on the Son of Man."'],
-  ]
-
-  for (const [v, text] of nasb) {
-    const verseId = `JHN.1.${v}`
-    await conn.execute(
-      'INSERT OR IGNORE INTO content_text (verse_id, translation_code, text_data) VALUES ($1, $2, $3)',
-      [verseId, 'NASB', text],
-    )
-  }
+  await seedNasbOnly(conn)
 
   const xrefResp = await fetch('/crossrefs.json')
   const xrefs: { origin: string; target: string }[] = await xrefResp.json()
@@ -210,9 +189,43 @@ export async function getNotes(verseId: string): Promise<Note[]> {
   )
 }
 
-export async function saveNote(verseId: string, text: string): Promise<void> {
+export async function saveNote(verseId: string, text: string): Promise<Note> {
   const conn = await getDb()
+  const existing = await conn.select<Note[]>(
+    'SELECT id, verse_id, text_content, created_at FROM notes WHERE verse_id = $1 ORDER BY created_at DESC LIMIT 1',
+    [verseId],
+  )
+  if (existing.length > 0) {
+    await conn.execute('UPDATE notes SET text_content = $1, created_at = CURRENT_TIMESTAMP WHERE id = $2', [text, existing[0].id])
+    return { ...existing[0], text_content: text, created_at: new Date().toISOString() }
+  }
   await conn.execute('INSERT INTO notes (verse_id, text_content) VALUES ($1, $2)', [verseId, text])
+  const rows = await conn.select<Note[]>(
+    'SELECT id, verse_id, text_content, created_at FROM notes WHERE verse_id = $1 ORDER BY created_at DESC LIMIT 1',
+    [verseId],
+  )
+  return rows[0]
+}
+
+export async function deleteNote(verseId: string): Promise<void> {
+  const conn = await getDb()
+  await conn.execute('DELETE FROM notes WHERE verse_id = $1', [verseId])
+}
+
+export async function getAllNotes(): Promise<Note[]> {
+  const conn = await getDb()
+  return conn.select<Note[]>('SELECT id, verse_id, text_content, created_at FROM notes ORDER BY created_at DESC')
+}
+
+export async function getNotesForChapter(bookId: number, chapter: number): Promise<Set<string>> {
+  const conn = await getDb()
+  const rows = await conn.select<{ verse_id: string }[]>(
+    `SELECT DISTINCT n.verse_id FROM notes n
+     JOIN verses v ON v.id = n.verse_id
+     WHERE v.book_id = $1 AND v.chapter_num = $2`,
+    [bookId, chapter],
+  )
+  return new Set(rows.map((r) => r.verse_id))
 }
 
 export async function checkCache(verseId: string, mode: string): Promise<string | null> {
@@ -254,14 +267,58 @@ export interface SearchResult {
   text_data: string
 }
 
-export async function searchVerses(query: string): Promise<SearchResult[]> {
+export async function searchVerses(query: string, versions?: string[]): Promise<SearchResult[]> {
   const conn = await getDb()
+  const ref = parseReference(query)
+
+  function withVersionFilter(startParam: number): string {
+    if (!versions || versions.length === 0) return ''
+    return ` AND ct.translation_code IN (${versions.map((_, i) => `$${startParam + i}`).join(',')})`
+  }
+
+  if (ref) {
+    if (ref.verse) {
+      if (ref.verseEnd) {
+        const binds: unknown[] = [ref.bookId, ref.chapter, ref.verse, ref.verseEnd]
+        if (versions) binds.push(...versions)
+        return conn.select<SearchResult[]>(
+          `SELECT v.id as verse_id, v.book_id, v.chapter_num, v.verse_num, ct.translation_code, ct.text_data
+FROM content_text ct JOIN verses v ON v.id = ct.verse_id
+WHERE v.book_id = $1 AND v.chapter_num = $2 AND v.verse_num BETWEEN $3 AND $4${withVersionFilter( 5)}
+ORDER BY v.verse_num, ct.translation_code`,
+          binds,
+        )
+      }
+      const binds: unknown[] = [ref.bookId, ref.chapter, ref.verse]
+      if (versions) binds.push(...versions)
+      return conn.select<SearchResult[]>(
+        `SELECT v.id as verse_id, v.book_id, v.chapter_num, v.verse_num, ct.translation_code, ct.text_data
+FROM content_text ct JOIN verses v ON v.id = ct.verse_id
+WHERE v.book_id = $1 AND v.chapter_num = $2 AND v.verse_num = $3${withVersionFilter( 4)}
+ORDER BY ct.translation_code`,
+        binds,
+      )
+    }
+    const binds: unknown[] = [ref.bookId, ref.chapter]
+    if (versions) binds.push(...versions)
+    return conn.select<SearchResult[]>(
+      `SELECT v.id as verse_id, v.book_id, v.chapter_num, v.verse_num, ct.translation_code, ct.text_data
+FROM content_text ct JOIN verses v ON v.id = ct.verse_id
+WHERE v.book_id = $1 AND v.chapter_num = $2${withVersionFilter( 3)}
+ORDER BY v.verse_num, ct.translation_code`,
+      binds,
+    )
+  }
+
+  const binds: unknown[] = [`%${query}%`]
+  if (versions) binds.push(...versions)
+  const verParam = versions && versions.length > 0 ? 2 : 0
   return conn.select<SearchResult[]>(
     `SELECT v.id as verse_id, v.book_id, v.chapter_num, v.verse_num, ct.translation_code, ct.text_data
-     FROM content_text ct
-     JOIN verses v ON v.id = ct.verse_id
-     WHERE ct.text_data LIKE $1
-     ORDER BY v.book_id, v.chapter_num, v.verse_num`,
-    [`%${query}%`],
+FROM content_text ct JOIN verses v ON v.id = ct.verse_id
+WHERE ct.text_data LIKE $1${verParam > 0 ? ` AND ct.translation_code IN (${versions!.map((_, i) => `$${verParam + i}`).join(',')})` : ''}
+ORDER BY v.book_id, v.chapter_num, v.verse_num
+LIMIT 100`,
+    binds,
   )
 }

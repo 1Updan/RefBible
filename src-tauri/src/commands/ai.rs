@@ -2,10 +2,7 @@ use tauri_plugin_http::reqwest;
 
 #[tauri::command]
 pub async fn ai_query(api_key: String, prompt: String) -> Result<String, String> {
-    let url = format!(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={}",
-        api_key
-    );
+    let url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
     let body = serde_json::json!({
         "contents": [{
@@ -17,7 +14,8 @@ pub async fn ai_query(api_key: String, prompt: String) -> Result<String, String>
 
     let client = reqwest::Client::new();
     let resp = client
-        .post(&url)
+        .post(url)
+        .header("X-Goog-Api-Key", &api_key)
         .header("Content-Type", "application/json")
         .body(body_str)
         .send()

@@ -1,5 +1,8 @@
-import { ChevronLeft, ChevronRight, Bookmark, Sparkles, Settings, ArrowLeft } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { ChevronLeft, ChevronRight, ChevronDown, Bookmark, Sparkles, Settings, ArrowLeft, Check, Search, Crosshair } from 'lucide-react'
 import clsx from 'clsx'
+
+import { parseReference } from '@/lib/utils'
 
 interface ChapterHeaderProps {
   bookName: string
@@ -10,11 +13,14 @@ interface ChapterHeaderProps {
   onPrevChapter: () => void
   onNextChapter: () => void
   activePanel: string
-  onTogglePanel: (panel: 'bookmarks' | 'ai' | 'settings') => void
+  studyTab: string
+  onTogglePanel: (panel: 'bookmarks' | 'ai' | 'settings' | 'search' | 'crossrefs') => void
   isDesktop: boolean
   visibleVersions: string[]
   installedVersions: string[]
   onToggleVersion: (code: string) => void
+  onSearch: (query: string) => void
+  onNavigateToRef?: (bookId: number, chapter: number, range?: { verseStart: number; verseEnd: number }) => void
 }
 
 export function ChapterHeader({
@@ -26,12 +32,29 @@ export function ChapterHeader({
   onPrevChapter,
   onNextChapter,
   activePanel,
+  studyTab,
   onTogglePanel,
   isDesktop,
   visibleVersions,
   installedVersions,
   onToggleVersion,
+  onSearch,
+  onNavigateToRef,
 }: ChapterHeaderProps) {
+  const [open, setOpen] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
   return (
     <header className="flex items-center justify-between px-4 py-2 border-b border-border bg-bg shrink-0">
       <div className="flex items-center gap-2">
@@ -68,26 +91,81 @@ export function ChapterHeader({
         </button>
       </div>
 
-      <div className="flex items-center gap-1.5 overflow-x-auto max-w-[60%]">
-        {installedVersions.map((code) => {
-          const isOn = visibleVersions.includes(code)
-          return (
-            <button
-              key={code}
-              type="button"
-              onClick={() => onToggleVersion(code)}
-              className={clsx(
-                'px-2 py-1 text-[10px] font-semibold rounded-full border transition-all duration-150 cursor-pointer shrink-0',
-                isOn
-                  ? 'bg-accent text-white border-accent'
-                  : 'bg-transparent text-text-tertiary border-border hover:text-text-secondary hover:border-text-tertiary',
-              )}
-            >
-              {code}
-            </button>
-          )
-        })}
-        <span className="w-px h-5 bg-border mx-0.5" />
+      <div className="flex-1 max-w-md mx-4">
+        <div className="relative">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onFocus={() => onTogglePanel('search')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchInput.trim()) {
+                const ref = parseReference(searchInput.trim())
+                if (ref && ref.verse && ref.verseEnd && onNavigateToRef) {
+                  onNavigateToRef(ref.bookId, ref.chapter, { verseStart: ref.verse, verseEnd: ref.verseEnd })
+                  setSearchInput('')
+                  return
+                }
+                onSearch(searchInput.trim())
+              }
+            }}
+            placeholder="Search verses…"
+            className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-surface border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1.5" ref={dropdownRef}>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setOpen((p) => !p)}
+            className="flex items-center gap-1 px-2 py-1 text-[10px] font-semibold rounded-full border border-accent text-accent hover:bg-accent/10 transition-all duration-150 cursor-pointer shrink-0"
+          >
+            {visibleVersions[0]}{visibleVersions.length > 1 ? ` +${visibleVersions.length - 1}` : ''}
+            <ChevronDown size={12} className={clsx('transition-transform duration-150', open && 'rotate-180')} />
+          </button>
+
+          {open && (
+            <div className="absolute right-0 top-full mt-1 z-50 min-w-[180px] bg-surface-elevated rounded-xl shadow-xl border border-border py-1 animate-[scaleIn_100ms_ease-out] origin-top-right">
+              {installedVersions.map((code) => {
+                const isOn = visibleVersions.includes(code)
+                return (
+                  <button
+                    key={code}
+                    type="button"
+                    onClick={() => onToggleVersion(code)}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-text-primary hover:bg-surface outline-none transition-colors duration-100 cursor-pointer text-left"
+                  >
+                    <span className={clsx(
+                      'w-4 h-4 rounded border flex items-center justify-center transition-colors duration-100 shrink-0',
+                      isOn ? 'bg-accent border-accent' : 'border-border',
+                    )}>
+                      {isOn && <Check size={11} className="text-white" />}
+                    </span>
+                    {code}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        <span className="w-px h-5 bg-border mx-0.5 shrink-0" />
+        <button
+          type="button"
+          onClick={() => onTogglePanel('crossrefs')}
+          className={clsx(
+            'p-1.5 rounded-md transition-all duration-150 cursor-pointer',
+            activePanel === 'study' && studyTab === 'crossrefs'
+              ? 'bg-accent-light text-accent'
+              : 'text-text-tertiary hover:text-text-primary hover:bg-surface',
+          )}
+          aria-label="Cross References"
+        >
+          <Crosshair size={16} />
+        </button>
         <button
           type="button"
           onClick={() => onTogglePanel('bookmarks')}
@@ -106,7 +184,7 @@ export function ChapterHeader({
           onClick={() => onTogglePanel('ai')}
           className={clsx(
             'p-1.5 rounded-md transition-all duration-150 cursor-pointer',
-            activePanel === 'ai'
+            activePanel === 'study' && studyTab === 'ai'
               ? 'bg-accent-light text-accent'
               : 'text-text-tertiary hover:text-text-primary hover:bg-surface',
           )}

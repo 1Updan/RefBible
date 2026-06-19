@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Sun, Moon, BookMarked, Download, Trash2, CheckCircle, ChevronDown, ChevronRight, Globe } from 'lucide-react'
 import clsx from 'clsx'
-import type { Theme } from '@/contexts/ThemeContext'
+import type { Theme } from '@/contexts/theme'
 import { getInstalledTranslations, removeTranslation } from '@/lib/db'
 import { downloadAndInstall } from '@/lib/downloader'
 import { getVersionsByLanguage } from '@/lib/versions'
