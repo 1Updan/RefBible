@@ -1,0 +1,125 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-text-primary: #1c1c1e;
+  --color-text-secondary: #636366;
+  --color-text-tertiary: #aeaeb2;
+  --color-surface: #f5f5f7;
+  --color-surface-elevated: #ffffff;
+  --color-surface-hover: #e8e8ed;
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-light: #dbeafe;
+  --color-border: #d1d1d6;
+  --color-border-subtle: #e5e5ea;
+  --color-bg: #ffffff;
+  --color-badge-bg: #e8e8ed;
+  --color-badge-text: #636366;
+  --color-chip-bg: #e8e8ed;
+  --color-chip-hover: #d1d1d6;
+  --color-danger: #ef4444;
+  --color-success: #22c55e;
+  --color-scrim: rgba(0, 0, 0, 0.35);
+  --color-highlight: #dbeafe;
+  --color-tab-bar: rgba(255, 255, 255, 0.92);
+  --color-action-bar: #2563eb;
+
+  --font-serif: Georgia, "Palatino Linotype", "Book Antiqua", serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Consolas, monospace;
+}
+
+[data-theme="dark"] {
+  --color-text-primary: #e5e5e0;
+  --color-text-secondary: #98989d;
+  --color-text-tertiary: #636366;
+  --color-surface: #1c1c1e;
+  --color-surface-elevated: #2c2c2e;
+  --color-surface-hover: #3a3a3c;
+  --color-accent: #60a5fa;
+  --color-accent-hover: #93c5fd;
+  --color-accent-light: #1e3a5f;
+  --color-border: #38383a;
+  --color-border-subtle: #2c2c2e;
+  --color-bg: #000000;
+  --color-badge-bg: #2c2c2e;
+  --color-badge-text: #98989d;
+  --color-chip-bg: #2c2c2e;
+  --color-chip-hover: #3a3a3c;
+  --color-scrim: rgba(0, 0, 0, 0.6);
+  --color-highlight: #1e3a5f;
+  --color-tab-bar: rgba(28, 28, 30, 0.95);
+  --color-action-bar: #60a5fa;
+}
+
+[data-theme="sepia"] {
+  --color-text-primary: #3b2f1e;
+  --color-text-secondary: #6b5b42;
+  --color-text-tertiary: #9a8a72;
+  --color-surface: #ede3cc;
+  --color-surface-elevated: #f5ecd7;
+  --color-surface-hover: #e0d6bf;
+  --color-accent: #8b5e3c;
+  --color-accent-hover: #7a5234;
+  --color-accent-light: #ede3cc;
+  --color-border: #d4c9af;
+  --color-border-subtle: #e0d6bf;
+  --color-bg: #f5ecd7;
+  --color-badge-bg: #e0d6bf;
+  --color-badge-text: #6b5b42;
+  --color-chip-bg: #e0d6bf;
+  --color-chip-hover: #d4c9af;
+  --color-scrim: rgba(59, 47, 30, 0.4);
+  --color-highlight: #ede3cc;
+  --color-tab-bar: rgba(245, 236, 215, 0.95);
+  --color-action-bar: #8b5e3c;
+}
+
+*, *::before, *::after {
+  border-color: var(--color-border);
+}
+
+html {
+  color-scheme: light;
+}
+
+[data-theme="dark"] html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 200ms ease, color 200ms ease;
+  overflow: hidden;
+}
+
+#root {
+  min-height: 100svh;
+  min-height: 100dvh;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
