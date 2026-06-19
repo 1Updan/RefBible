@@ -14,7 +14,7 @@ import { SettingsPanel } from './components/panels/SettingsPanel'
 import { BookmarksPanel } from './components/panels/BookmarksPanel'
 import { SearchPanel } from './components/panels/SearchPanel'
 import { BottomSheet } from './components/sheets/BottomSheet'
-import { ensureSeeded, saveBookmark, removeBookmark } from './lib/db'
+import { ensureSeeded, saveBookmark, removeBookmark, getInstalledTranslations, saveNote, getNotes } from './lib/db'
 import { getBook } from '@/data/books'
 
 function useMediaQuery(query: string): boolean {
@@ -31,18 +31,38 @@ function useMediaQuery(query: string): boolean {
 function AppContent() {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const { theme, setTheme } = useTheme()
-  const { prefs, update } = useReadingPreferences()
+  const { prefs, update, toggleVersion } = useReadingPreferences()
   const { activePanel, setActivePanel, bookId, chapter, navigateTo, noteVerseId, closeNote, openNote, setStudyTab, goBack, canGoBack } = useNavigation()
   const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [bookmarks, setBookmarks] = useState<Set<string>>(new Set())
   const [bookmarkRefresh, setBookmarkRefresh] = useState(0)
+  const [installedVersions, setInstalledVersions] = useState<string[]>(['KJV', 'NASB'])
+  const [noteText, setNoteText] = useState('')
 
   useEffect(() => {
     ensureSeeded()
       .then(() => setReady(true))
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)))
   }, [])
+
+  useEffect(() => {
+    if (ready) {
+      getInstalledTranslations().then((codes) => {
+        setInstalledVersions(codes.length > 0 ? codes : ['KJV', 'NASB'])
+      })
+    }
+  }, [ready])
+
+  useEffect(() => {
+    if (noteVerseId) {
+      getNotes(noteVerseId).then((notes) => {
+        setNoteText(notes.length > 0 ? notes[0].text_content : '')
+      })
+    } else {
+      setNoteText('')
+    }
+  }, [noteVerseId])
 
   const handleToggleBookmark = useCallback(async (verseId: string) => {
     if (bookmarks.has(verseId)) {
@@ -56,13 +76,23 @@ function AppContent() {
   }, [bookmarks])
 
   const handleOpenNote = useCallback((verseId: string) => {
+    openNote(verseId)
     if (isDesktop) {
       setStudyTab('notes')
       setActivePanel('study')
-    } else {
-      openNote(verseId)
     }
   }, [isDesktop, setActivePanel, setStudyTab, openNote])
+
+  const handleSaveNote = useCallback(async () => {
+    if (noteVerseId && noteText.trim()) {
+      await saveNote(noteVerseId, noteText.trim())
+      closeNote()
+    }
+  }, [noteVerseId, noteText, closeNote])
+
+  const handleNavigateBookmark = useCallback((_: string, bookId: number, chapter: number) => {
+    navigateTo(bookId, chapter)
+  }, [navigateTo])
 
   if (error) {
     return (
@@ -119,16 +149,14 @@ function AppContent() {
         activePanel={activePanel}
         onTogglePanel={handlePanelToggle}
         isDesktop={isDesktop}
-        showKJV={prefs.showKJV}
-        showNASB={prefs.showNASB}
-        onToggleKJV={() => update({ showKJV: !prefs.showKJV || !prefs.showNASB })}
-        onToggleNASB={() => update({ showNASB: !prefs.showNASB || !prefs.showKJV })}
+        visibleVersions={prefs.visibleVersions}
+        installedVersions={installedVersions}
+        onToggleVersion={toggleVersion}
       />
       <ReadingView
         bookId={bookId}
         chapter={chapter}
-        showKJV={prefs.showKJV}
-        showNASB={prefs.showNASB}
+        visibleVersions={prefs.visibleVersions}
         fontSize={prefs.fontSize}
         bookmarks={bookmarks}
         isDesktop={isDesktop}
@@ -158,7 +186,7 @@ function AppContent() {
               <h2 className="text-sm font-semibold text-text-primary">Saved</h2>
             </div>
             <div className="flex-1 overflow-y-auto p-3">
-              <BookmarksPanel refreshKey={bookmarkRefresh} />
+              <BookmarksPanel refreshKey={bookmarkRefresh} onNavigate={handleNavigateBookmark} />
             </div>
           </div>
         )
@@ -202,7 +230,7 @@ function AppContent() {
     >
       {activePanel === 'study' && <StudyPanel />}
       {activePanel === 'search' && <SearchPanel onNavigate={(b, c) => navigateTo(b, c)} />}
-      {activePanel === 'bookmarks' && <BookmarksPanel refreshKey={bookmarkRefresh} />}
+      {activePanel === 'bookmarks' && <BookmarksPanel refreshKey={bookmarkRefresh} onNavigate={handleNavigateBookmark} />}
       {activePanel === 'settings' && (
         <SettingsPanel
           theme={theme}
@@ -219,12 +247,15 @@ function AppContent() {
       <div className="space-y-3">
         <p className="text-xs text-text-secondary font-mono">{noteVerseId}</p>
         <textarea
+          value={noteText}
+          onChange={(e) => setNoteText(e.target.value)}
           placeholder="Write your note…"
           rows={5}
           className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent resize-none transition-all duration-150"
         />
         <button
           type="button"
+          onClick={handleSaveNote}
           className="w-full px-3 py-2 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover transition-all duration-150 cursor-pointer"
         >
           Save Note

@@ -2,23 +2,28 @@ import { useCallback, useState } from 'react'
 
 interface Preferences {
   fontSize: number
-  showKJV: boolean
-  showNASB: boolean
+  visibleVersions: string[]
 }
 
 const STORAGE_KEY = 'refbible-prefs'
 
 function loadPrefs(): Preferences {
   if (typeof window === 'undefined') {
-    return { fontSize: 19, showKJV: true, showNASB: true }
+    return { fontSize: 19, visibleVersions: ['KJV', 'NASB'] }
   }
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw) as Preferences
+    if (raw) {
+      const parsed = JSON.parse(raw) as Record<string, unknown>
+      if (Array.isArray(parsed.visibleVersions) && parsed.visibleVersions.length > 0) {
+        return { fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 19, visibleVersions: parsed.visibleVersions as string[] }
+      }
+    }
   } catch {
     // ignore parse errors
   }
-  return { fontSize: 19, showKJV: true, showNASB: true }
+  localStorage.removeItem(STORAGE_KEY)
+  return { fontSize: 19, visibleVersions: ['KJV', 'NASB'] }
 }
 
 function savePrefs(prefs: Preferences) {
@@ -36,5 +41,20 @@ export function useReadingPreferences() {
     })
   }, [])
 
-  return { prefs, update }
+  const toggleVersion = useCallback((code: string) => {
+    setPrefs((prev) => {
+      const set = new Set(prev.visibleVersions)
+      if (set.has(code)) {
+        if (set.size <= 1) return prev
+        set.delete(code)
+      } else {
+        set.add(code)
+      }
+      const next = { ...prev, visibleVersions: [...set].sort() }
+      savePrefs(next)
+      return next
+    })
+  }, [])
+
+  return { prefs, update, toggleVersion }
 }

@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Bookmark, Trash2 } from 'lucide-react'
 import { getBookmarks, removeBookmark } from '@/lib/db'
+import { parseOsisId } from '@/lib/utils'
+import { getBook } from '@/data/books'
 import type { Bookmark as BookmarkType } from '@/types/db'
 
 interface BookmarksPanelProps {
   refreshKey: number
+  onNavigate: (verseId: string, bookId: number, chapter: number) => void
 }
 
-export function BookmarksPanel({ refreshKey }: BookmarksPanelProps) {
+export function BookmarksPanel({ refreshKey, onNavigate }: BookmarksPanelProps) {
   const [bookmarks, setBookmarks] = useState<BookmarkType[]>([])
 
   useEffect(() => {
@@ -26,22 +29,28 @@ export function BookmarksPanel({ refreshKey }: BookmarksPanelProps) {
           No bookmarks yet. Tap the bookmark icon on any verse.
         </p>
       )}
-      {bookmarks.map((b) => (
-        <div key={b.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-surface-hover transition-colors duration-150">
-          <div className="flex items-center gap-2">
-            <Bookmark size={12} className="text-accent" />
-            <span className="text-xs text-text-secondary font-mono">{b.verse_id}</span>
-          </div>
+      {bookmarks.map((b) => {
+        const parsed = parseOsisId(b.verse_id)
+        const book = parsed ? getBook(parsed.bookId) : null
+        return (
           <button
+            key={b.id}
             type="button"
-            onClick={() => handleRemove(b.verse_id)}
-            className="p-1 rounded-md text-text-tertiary hover:text-danger hover:bg-surface-hover transition-colors duration-150 cursor-pointer"
-            aria-label="Remove bookmark"
+            onClick={() => parsed && onNavigate(b.verse_id, parsed.bookId, parsed.chapter)}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-surface-hover transition-colors duration-150 cursor-pointer text-left"
           >
-            <Trash2 size={12} />
+            <div className="flex items-center gap-2 min-w-0">
+              <Bookmark size={12} className="text-accent shrink-0" />
+              <span className="text-xs text-text-secondary truncate">
+                {book ? `${book.name} ${parsed?.chapter}:${parsed?.verseNum}` : b.verse_id}
+              </span>
+            </div>
+            <div onClick={(e) => { e.stopPropagation(); handleRemove(b.verse_id) }}>
+              <Trash2 size={12} className="text-text-tertiary hover:text-danger transition-colors duration-150 cursor-pointer" />
+            </div>
           </button>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

@@ -12,10 +12,9 @@ interface ChapterHeaderProps {
   activePanel: string
   onTogglePanel: (panel: 'bookmarks' | 'ai' | 'settings') => void
   isDesktop: boolean
-  showKJV: boolean
-  showNASB: boolean
-  onToggleKJV: () => void
-  onToggleNASB: () => void
+  visibleVersions: string[]
+  installedVersions: string[]
+  onToggleVersion: (code: string) => void
 }
 
 export function ChapterHeader({
@@ -29,10 +28,9 @@ export function ChapterHeader({
   activePanel,
   onTogglePanel,
   isDesktop,
-  showKJV,
-  showNASB,
-  onToggleKJV,
-  onToggleNASB,
+  visibleVersions,
+  installedVersions,
+  onToggleVersion,
 }: ChapterHeaderProps) {
   return (
     <header className="flex items-center justify-between px-4 py-2 border-b border-border bg-bg shrink-0">
@@ -70,31 +68,25 @@ export function ChapterHeader({
         </button>
       </div>
 
-      <div className="flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={onToggleKJV}
-          className={clsx(
-            'px-2.5 py-1 text-xs font-semibold rounded-full border transition-all duration-150 cursor-pointer',
-            showKJV
-              ? 'bg-accent text-white border-accent'
-              : 'bg-transparent text-text-tertiary border-border hover:text-text-secondary hover:border-text-tertiary',
-          )}
-        >
-          KJV
-        </button>
-        <button
-          type="button"
-          onClick={onToggleNASB}
-          className={clsx(
-            'px-2.5 py-1 text-xs font-semibold rounded-full border transition-all duration-150 cursor-pointer',
-            showNASB
-              ? 'bg-accent text-white border-accent'
-              : 'bg-transparent text-text-tertiary border-border hover:text-text-secondary hover:border-text-tertiary',
-          )}
-        >
-          NASB
-        </button>
+      <div className="flex items-center gap-1.5 overflow-x-auto max-w-[60%]">
+        {installedVersions.map((code) => {
+          const isOn = visibleVersions.includes(code)
+          return (
+            <button
+              key={code}
+              type="button"
+              onClick={() => onToggleVersion(code)}
+              className={clsx(
+                'px-2 py-1 text-[10px] font-semibold rounded-full border transition-all duration-150 cursor-pointer shrink-0',
+                isOn
+                  ? 'bg-accent text-white border-accent'
+                  : 'bg-transparent text-text-tertiary border-border hover:text-text-secondary hover:border-text-tertiary',
+              )}
+            >
+              {code}
+            </button>
+          )
+        })}
         <span className="w-px h-5 bg-border mx-0.5" />
         <button
           type="button"

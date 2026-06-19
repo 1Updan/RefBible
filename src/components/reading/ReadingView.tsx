@@ -10,8 +10,7 @@ import type { Verse, ContentText, CrossReference } from '@/types/db'
 interface ReadingViewProps {
   bookId: number
   chapter: number
-  showKJV: boolean
-  showNASB: boolean
+  visibleVersions: string[]
   fontSize: number
   bookmarks: Set<string>
   isDesktop: boolean
@@ -22,8 +21,7 @@ interface ReadingViewProps {
 export function ReadingView({
   bookId,
   chapter,
-  showKJV,
-  showNASB,
+  visibleVersions,
   fontSize,
   bookmarks,
   isDesktop,
@@ -158,10 +156,10 @@ export function ReadingView({
                 verse={verse}
                 translations={d?.texts ?? []}
                 crossReferences={d?.xrefs ?? []}
-                showKJV={showKJV}
-                showNASB={showNASB}
+                visibleVersions={visibleVersions}
                 fontSize={fontSize}
                 isSelected={selectedIds.has(verse.id)}
+                isBookmarked={bookmarks.has(verse.id)}
                 isDesktop={isDesktop}
                 onToggleSelect={() => handleToggleSelect(verse.id)}
                 onNavigateToRef={handleNavigateToRef}

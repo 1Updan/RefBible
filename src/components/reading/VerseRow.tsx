@@ -1,4 +1,5 @@
 import { useRef, useCallback } from 'react'
+import { BookmarkCheck } from 'lucide-react'
 import { CrossReferenceChip } from './CrossReferenceChip'
 import { formatVerseId } from '@/lib/utils'
 import clsx from 'clsx'
@@ -8,10 +9,10 @@ interface VerseRowProps {
   verse: Verse
   translations: ContentText[]
   crossReferences: CrossReference[]
-  showKJV: boolean
-  showNASB: boolean
+  visibleVersions: string[]
   fontSize: number
   isSelected: boolean
+  isBookmarked: boolean
   isDesktop: boolean
   onToggleSelect: () => void
   onNavigateToRef: (verseId: string) => void
@@ -22,10 +23,10 @@ export function VerseRow({
   verse,
   translations,
   crossReferences,
-  showKJV,
-  showNASB,
+  visibleVersions,
   fontSize,
   isSelected,
+  isBookmarked,
   isDesktop,
   onToggleSelect,
   onNavigateToRef,
@@ -51,8 +52,11 @@ export function VerseRow({
     if (longPressRef.current) clearTimeout(longPressRef.current)
   }, [])
 
-  const kvj = translations.find((t) => t.translation_code === 'KJV')
-  const nasb = translations.find((t) => t.translation_code === 'NASB')
+  const showMoreThanOne = visibleVersions.length > 1
+
+  const versionTexts = visibleVersions
+    .map((code) => translations.find((t) => t.translation_code === code))
+    .filter(Boolean) as ContentText[]
 
   return (
     <div
@@ -80,32 +84,30 @@ export function VerseRow({
       </span>
 
       <div className="flex-1 min-w-0 space-y-1">
-        {showKJV && kvj && (
-          <div>
-            {showNASB && (
-              <span className="text-[10px] font-semibold text-accent uppercase tracking-wider mr-1.5 align-baseline">KJV</span>
-            )}
-            <p
-              className="inline text-text-primary leading-[1.65] tracking-[0.01em] font-serif"
-              style={{ fontSize: `${fontSize}px` }}
-            >
-              {kvj.text_data}
-            </p>
-          </div>
-        )}
-        {showNASB && nasb && (
-          <div>
-            {showKJV && (
-              <span className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider mr-1.5 align-baseline">NASB</span>
-            )}
-            <p
-              className="inline text-text-secondary leading-[1.55] tracking-[0.01em] font-serif"
-              style={{ fontSize: `${Math.max(fontSize - 2, 14)}px` }}
-            >
-              {nasb.text_data}
-            </p>
-          </div>
-        )}
+        {versionTexts.map((vt, i) => {
+          const size = i === 0 ? fontSize : Math.max(fontSize - 2, 14)
+          const colorClass = i === 0 ? 'text-text-primary' : 'text-text-secondary'
+          return (
+            <div key={vt.translation_code} className="flex items-start gap-1">
+              <div className="flex-1 min-w-0">
+                {showMoreThanOne && (
+                  <span className="text-[10px] font-semibold text-accent uppercase tracking-wider mr-1.5 align-baseline">
+                    {vt.translation_code}
+                  </span>
+                )}
+                <div
+                  className={clsx('inline font-serif leading-[1.65] tracking-[0.01em]', colorClass)}
+                  style={{ fontSize: `${size}px` }}
+                >
+                  {vt.text_data}
+                </div>
+              </div>
+              {i === 0 && isBookmarked && (
+                <BookmarkCheck size={14} className="text-accent shrink-0 mt-0.5" />
+              )}
+            </div>
+          )
+        })}
 
         {crossReferences.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">

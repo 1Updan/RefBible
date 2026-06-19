@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
-import { Crosshair, MessageSquareMore, Sparkles } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { Bookmark, Crosshair, MessageSquareMore, Sparkles, Trash2 } from 'lucide-react'
 import { useNavigation } from '@/hooks/useNavigation'
-import { getCrossReferences, getTranslations } from '@/lib/db'
-import { formatVerseId } from '@/lib/utils'
-import type { CrossReference } from '@/types/db'
+import { getCrossReferences, getTranslations, saveNote, getNotes, getBookmarks, removeBookmark } from '@/lib/db'
+import { formatVerseId, parseOsisId } from '@/lib/utils'
+import { getBook } from '@/data/books'
+import type { CrossReference, Bookmark as BookmarkType } from '@/types/db'
 import type { ActiveTab } from '@/contexts/NavigationContext'
 
 const TABS: { id: ActiveTab; label: string; icon: typeof Crosshair }[] = [
@@ -74,44 +75,114 @@ function CrossRefsTab() {
 }
 
 function NotesTab() {
-  const { noteVerseId, openNote } = useNavigation()
+  const { noteVerseId, closeNote, navigateTo } = useNavigation()
   const [text, setText] = useState('')
+  const [bookmarks, setBookmarks] = useState<BookmarkType[]>([])
+
+  useEffect(() => {
+    getBookmarks().then(setBookmarks)
+  }, [noteVerseId])
+
+  useEffect(() => {
+    if (noteVerseId) {
+      getNotes(noteVerseId).then((notes) => {
+        setText(notes.length > 0 ? notes[0].text_content : '')
+      })
+    } else {
+      setText('')
+    }
+  }, [noteVerseId])
+
+  const handleSave = useCallback(async () => {
+    if (noteVerseId && text.trim()) {
+      await saveNote(noteVerseId, text.trim())
+      closeNote()
+    }
+  }, [noteVerseId, text, closeNote])
+
+  const handleRemoveBookmark = useCallback(async (verseId: string) => {
+    await removeBookmark(verseId)
+    setBookmarks((prev) => prev.filter((b) => b.verse_id !== verseId))
+  }, [])
+
+  if (noteVerseId) {
+    return (
+      <div className="space-y-3">
+        <p className="text-xs text-text-secondary font-mono">{noteVerseId}</p>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Write your note…"
+          rows={5}
+          className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent resize-none transition-all duration-150"
+        />
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!text.trim()}
+            className="flex-1 px-3 py-1.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer"
+          >
+            Save Note
+          </button>
+          <button
+            type="button"
+            onClick={closeNote}
+            className="px-3 py-1.5 text-sm font-medium rounded-lg bg-surface-elevated border border-border text-text-secondary hover:text-text-primary transition-all duration-150 cursor-pointer"
+          >
+            Cancel
+          </button>
+        </div>
+        {bookmarks.length > 0 && (
+          <div className="pt-3 border-t border-border">
+            <h4 className="text-xs font-medium text-text-secondary mb-2">Bookmarked Verses</h4>
+            <BookmarkList bookmarks={bookmarks} onNavigate={navigateTo} onRemove={handleRemoveBookmark} />
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-3">
-      {noteVerseId ? (
-        <>
-          <p className="text-xs text-text-secondary font-mono">{noteVerseId}</p>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Write your note…"
-            rows={5}
-            className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent resize-none transition-all duration-150"
-          />
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => { /* TODO: save note */ }}
-              disabled={!text.trim()}
-              className="flex-1 px-3 py-1.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer"
-            >
-              Save Note
-            </button>
-            <button
-              type="button"
-              onClick={() => openNote('')}
-              className="px-3 py-1.5 text-sm font-medium rounded-lg bg-surface-elevated border border-border text-text-secondary hover:text-text-primary transition-all duration-150 cursor-pointer"
-            >
-              Cancel
-            </button>
-          </div>
-        </>
-      ) : (
-        <p className="text-xs text-text-tertiary px-1 py-4 text-center">
-          Tap the note icon on any verse to write a note
-        </p>
+      <p className="text-xs text-text-tertiary px-1">
+        Tap the note icon on any verse to write a note
+      </p>
+      {bookmarks.length > 0 && (
+        <div className="pt-1">
+          <h4 className="text-xs font-medium text-text-secondary mb-2 px-1">Bookmarked Verses</h4>
+          <BookmarkList bookmarks={bookmarks} onNavigate={navigateTo} onRemove={handleRemoveBookmark} />
+        </div>
       )}
+    </div>
+  )
+}
+
+function BookmarkList({ bookmarks, onNavigate, onRemove }: { bookmarks: BookmarkType[]; onNavigate: (bookId: number, chapter: number, verseId?: string) => void; onRemove: (verseId: string) => void }) {
+  return (
+    <div className="space-y-1">
+      {bookmarks.map((b) => {
+        const parsed = parseOsisId(b.verse_id)
+        const book = parsed ? getBook(parsed.bookId) : null
+        return (
+          <button
+            key={b.id}
+            type="button"
+            onClick={() => parsed && onNavigate(parsed.bookId, parsed.chapter)}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-surface-hover transition-colors duration-150 cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <Bookmark size={12} className="text-accent shrink-0" />
+              <span className="text-xs text-text-secondary truncate">
+                {book ? `${book.name} ${parsed?.chapter}:${parsed?.verseNum}` : b.verse_id}
+              </span>
+            </div>
+            <div onClick={(e) => { e.stopPropagation(); onRemove(b.verse_id) }}>
+              <Trash2 size={12} className="text-text-tertiary hover:text-danger transition-colors duration-150 cursor-pointer" />
+            </div>
+          </button>
+        )
+      })}
     </div>
   )
 }
