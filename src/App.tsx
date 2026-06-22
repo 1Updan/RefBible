@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { useTheme } from './hooks/useTheme'
 import { useReadingPreferences } from './hooks/useReadingPreferences'
@@ -17,6 +17,8 @@ import { BottomSheet } from './components/sheets/BottomSheet'
 import { ensureSeeded, saveBookmark, removeBookmark, getInstalledTranslations, saveNote, getNotes } from './lib/db'
 import { getBook } from '@/data/books'
 import { useNetworkState } from './hooks/useNetworkState'
+import { useSpeech } from './hooks/useSpeech'
+import { SpeechControlBar } from './components/reading/SpeechControlBar'
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
@@ -32,7 +34,7 @@ function useMediaQuery(query: string): boolean {
 function AppContent() {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const { theme, setTheme } = useTheme()
-  const { prefs, update, toggleVersion } = useReadingPreferences()
+  const { prefs, update, toggleVersion, toggleInterlinear } = useReadingPreferences()
   const { activePanel, setActivePanel, bookId, chapter, navigateTo, noteVerseId, closeNote, openNote, studyTab, setStudyTab, goBack, canGoBack, setPendingRange } = useNavigation()
   const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -41,7 +43,12 @@ function AppContent() {
   const [installedVersions, setInstalledVersions] = useState<string[]>(['KJV', 'NASB'])
   const [noteText, setNoteText] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [showNav, setShowNav] = useState(false)
   const isOnline = useNetworkState()
+  const { speak, pause, stop, speaking, paused, resume, isActive, availableVoices, selectedVoiceUri, setSelectedVoiceUri } = useSpeech()
+  const chapterTextRef = useRef<{ verses: string[] }>({ verses: [] })
+  const [speakFromVerse, setSpeakFromVerse] = useState<number | null>(null)
+  const [canSpeak, setCanSpeak] = useState(false)
 
   useEffect(() => {
     ensureSeeded()
@@ -96,6 +103,31 @@ function AppContent() {
     navigateTo(bookId, chapter)
   }, [navigateTo])
 
+  const handleSpeak = useCallback(() => {
+    if (isActive()) {
+      if (paused) {
+        resume()
+      } else {
+        pause()
+      }
+      return
+    }
+    const verses = chapterTextRef.current.verses
+    if (verses.length === 0) return
+    const from = speakFromVerse ?? 1
+    const text = verses.slice(from - 1).join(' ')
+    speak(text)
+  }, [isActive, paused, resume, pause, speak, speakFromVerse])
+
+  const handleChapterText = useCallback((text: string) => {
+    setCanSpeak(text.length > 0)
+  }, [])
+
+  const handleChapterVerses = useCallback((verses: string[]) => {
+    chapterTextRef.current.verses = verses
+    setSpeakFromVerse(null)
+  }, [])
+
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen p-4 bg-bg">
@@ -107,9 +139,9 @@ function AppContent() {
   if (!ready) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-bg">
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-3 max-w-[240px] text-center">
           <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-text-tertiary">Loading Scripture…</p>
+          <p className="text-xs text-text-tertiary">Loading…</p>
         </div>
       </div>
     )
@@ -178,6 +210,22 @@ function AppContent() {
         onToggleVersion={toggleVersion}
         onSearch={handleSearch}
         onNavigateToRef={(b, c, range) => { setPendingRange(range ?? null); navigateTo(b, c) }}
+        speaking={speaking}
+        canSpeak={canSpeak}
+        onSpeak={handleSpeak}
+        onStop={stop}
+      />
+      <SpeechControlBar
+        speaking={speaking}
+        paused={paused}
+        bookName={currentBook?.name ?? 'John'}
+        chapter={chapter}
+        onPlayPause={handleSpeak}
+        onStop={stop}
+        onPrevChapter={() => chapter > 1 && navigateTo(bookId, chapter - 1)}
+        onNextChapter={() => chapter < (currentBook?.chapters ?? 21) && navigateTo(bookId, chapter + 1)}
+        hasPrev={chapter > 1}
+        hasNext={chapter < (currentBook?.chapters ?? 21)}
       />
       <ReadingView
         bookId={bookId}
@@ -187,8 +235,14 @@ function AppContent() {
         bookmarks={bookmarks}
         isDesktop={isDesktop}
         isOnline={isOnline}
+        interlinearEnabled={prefs.interlinearEnabled}
+        interlinearLanguages={prefs.interlinearLanguages}
+        onToggleInterlinear={toggleInterlinear}
         onToggleBookmark={handleToggleBookmark}
         onOpenNote={handleOpenNote}
+        onChapterText={handleChapterText}
+        onChapterVerses={handleChapterVerses}
+        onSelectionVerse={setSpeakFromVerse}
       />
     </>
   )
@@ -204,6 +258,13 @@ function AppContent() {
             onChangeTheme={setTheme}
             fontSize={prefs.fontSize}
             onChangeFontSize={(px) => update({ fontSize: px })}
+            interlinearEnabled={prefs.interlinearEnabled}
+            interlinearLanguages={prefs.interlinearLanguages}
+            onToggleInterlinear={toggleInterlinear}
+            onSetInterlinearLanguages={(langs) => update({ interlinearLanguages: langs })}
+            voices={availableVoices}
+            selectedVoiceUri={selectedVoiceUri}
+            onChangeVoice={setSelectedVoiceUri}
           />
         )
       case 'bookmarks':
@@ -229,7 +290,7 @@ function AppContent() {
       activePanel={activePanel}
       onTabChange={(tab) => {
         if (tab === 'read') setActivePanel('none')
-        else if (tab === 'search') setActivePanel('search')
+        else if (tab === 'books') { setActivePanel('none'); setShowNav(true) }
         else if (tab === 'saved') setActivePanel('bookmarks')
         else if (tab === 'settings') setActivePanel('settings')
       }}
@@ -256,6 +317,13 @@ function AppContent() {
           onChangeTheme={setTheme}
           fontSize={prefs.fontSize}
           onChangeFontSize={(px) => update({ fontSize: px })}
+          interlinearEnabled={prefs.interlinearEnabled}
+          interlinearLanguages={prefs.interlinearLanguages}
+          onToggleInterlinear={toggleInterlinear}
+          onSetInterlinearLanguages={(langs) => update({ interlinearLanguages: langs })}
+          voices={availableVoices}
+          selectedVoiceUri={selectedVoiceUri}
+          onChangeVoice={setSelectedVoiceUri}
         />
       )}
     </BottomSheet>
@@ -302,6 +370,15 @@ function AppContent() {
       />
       {mobileSheet}
       {noteSheet}
+      <BottomSheet open={showNav} onClose={() => setShowNav(false)} title="Books">
+        <div className="pb-2">
+          <BookChapterNav
+            selectedBook={bookId}
+            selectedChapter={chapter}
+            onSelect={(b, c) => { navigateTo(b, c); setShowNav(false) }}
+          />
+        </div>
+      </BottomSheet>
     </>
   )
 }

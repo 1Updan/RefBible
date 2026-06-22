@@ -14,30 +14,34 @@ const NT_BOOKS = BOOKS.filter((b) => b.testament === 'NT')
 
 export function BookChapterNav({ selectedBook, selectedChapter, onSelect }: BookChapterNavProps) {
   const [expandedBook, setExpandedBook] = useState<number>(selectedBook)
-  const [showOT, setShowOT] = useState(() => {
-    const saved = localStorage.getItem('nav-show-ot')
+
+  const [showBibleOT, setShowBibleOT] = useState(() => {
+    const saved = localStorage.getItem('nav-show-bible-ot')
     return saved !== null ? saved === 'true' : true
   })
-  const [showNT, setShowNT] = useState(() => {
-    const saved = localStorage.getItem('nav-show-nt')
+  const [showBibleNT, setShowBibleNT] = useState(() => {
+    const saved = localStorage.getItem('nav-show-bible-nt')
     return saved !== null ? saved === 'true' : true
   })
 
-  useEffect(() => { localStorage.setItem('nav-show-ot', String(showOT)) }, [showOT])
-  useEffect(() => { localStorage.setItem('nav-show-nt', String(showNT)) }, [showNT])
+
+
+  useEffect(() => { localStorage.setItem('nav-show-bible-ot', String(showBibleOT)) }, [showBibleOT])
+  useEffect(() => { localStorage.setItem('nav-show-bible-nt', String(showBibleNT)) }, [showBibleNT])
+
 
   const handleBookClick = (bookId: number) => {
     setExpandedBook((prev) => (prev === bookId ? -1 : bookId))
   }
 
-  const renderSection = (title: string, books: typeof OT_BOOKS, expanded: boolean, onToggle: () => void) => (
-    <div className="mb-1">
+  const renderTestamentSection = (title: string, books: typeof OT_BOOKS, expanded: boolean, onToggle: () => void) => (
+    <div className="mb-0.5">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-accent uppercase tracking-widest hover:text-accent-hover transition-colors duration-150 cursor-pointer border-b border-border-subtle mb-1"
+        className="w-full flex items-center gap-1.5 px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors duration-150 cursor-pointer border-l-[3px] border-accent/30 bg-surface-hover/40 text-accent hover:text-accent-hover hover:border-accent/50"
       >
-        {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         {title}
       </button>
       {expanded && books.map((book) => {
@@ -48,7 +52,7 @@ export function BookChapterNav({ selectedBook, selectedChapter, onSelect }: Book
               type="button"
               onClick={() => handleBookClick(book.id)}
               className={clsx(
-                'w-full flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-150 cursor-pointer text-left',
+                'w-full flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-all duration-150 cursor-pointer text-left',
                 isOpen
                   ? 'bg-accent/10 text-accent'
                   : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary',
@@ -62,21 +66,24 @@ export function BookChapterNav({ selectedBook, selectedChapter, onSelect }: Book
             </button>
             {isOpen && (
               <div className="grid grid-cols-5 gap-1 px-3 pb-2 pt-1">
-                {Array.from({ length: book.chapters }, (_, i) => i + 1).map((ch) => (
-                  <button
-                    key={ch}
-                    type="button"
-                    onClick={() => onSelect(book.id, ch)}
-                    className={clsx(
-                      'text-xs rounded-lg px-1 py-1.5 font-medium transition-all duration-150 cursor-pointer',
-                      selectedBook === book.id && selectedChapter === ch
-                        ? 'bg-accent text-white shadow-sm'
-                        : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary',
-                    )}
-                  >
-                    {ch}
-                  </button>
-                ))}
+                {Array.from({ length: book.chapters }, (_, i) => i + 1).map((ch) => {
+                  const handleClick = () => onSelect(book.id, ch)
+                  return (
+                    <button
+                      key={ch}
+                      type="button"
+                      onClick={handleClick}
+                      className={clsx(
+                        'text-xs rounded-lg px-1 py-1.5 font-medium transition-all duration-150 cursor-pointer',
+                        selectedBook === book.id && selectedChapter === ch
+                          ? 'bg-accent text-white shadow-sm'
+                          : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary',
+                      )}
+                    >
+                      {ch}
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>
@@ -92,8 +99,8 @@ export function BookChapterNav({ selectedBook, selectedChapter, onSelect }: Book
         <span className="text-sm font-semibold text-text-primary">Library</span>
       </div>
       <div className="flex-1 overflow-y-auto py-2">
-        {renderSection('Old Testament', OT_BOOKS, showOT, () => setShowOT((p) => !p))}
-        {renderSection('New Testament', NT_BOOKS, showNT, () => setShowNT((p) => !p))}
+        {renderTestamentSection('Old Testament', OT_BOOKS, showBibleOT, () => setShowBibleOT((p) => !p))}
+        {renderTestamentSection('New Testament', NT_BOOKS, showBibleNT, () => setShowBibleNT((p) => !p))}
       </div>
     </nav>
   )

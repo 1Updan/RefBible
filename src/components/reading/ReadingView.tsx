@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { VerseRow } from './VerseRow'
 import { VerseActionBar } from './VerseActionBar'
-import { getCrossReferences, getTranslations, getVerses, getNotesForChapter } from '@/lib/db'
+import { getCrossReferences, getTranslations, getVerses, getNotesForChapter, getInterlinearWords } from '@/lib/db'
 import { useNavigation } from '@/hooks/useNavigation'
 import { getBook } from '@/data/books'
 import { parseOsisId } from '@/lib/utils'
-import type { Verse, ContentText, CrossReference } from '@/types/db'
+import type { Verse, ContentText, CrossReference, InterlinearWord } from '@/types/db'
 
 interface ReadingViewProps {
   bookId: number
@@ -15,8 +15,14 @@ interface ReadingViewProps {
   bookmarks: Set<string>
   isDesktop: boolean
   isOnline: boolean
+  interlinearEnabled: boolean
+  interlinearLanguages: readonly ('hebrew' | 'greek')[]
+  onToggleInterlinear: () => void
   onToggleBookmark: (verseId: string) => void
   onOpenNote: (verseId: string) => void
+  onChapterText?: (text: string) => void
+  onChapterVerses?: (verses: string[]) => void
+  onSelectionVerse?: (verseNum: number | null) => void
 }
 
 export function ReadingView({
@@ -27,17 +33,28 @@ export function ReadingView({
   bookmarks,
   isDesktop,
   isOnline,
+  interlinearEnabled,
+  interlinearLanguages,
+  onToggleInterlinear,
   onToggleBookmark,
   onOpenNote,
+  onChapterText,
+  onChapterVerses,
+  onSelectionVerse,
 }: ReadingViewProps) {
-  const { openCrossReferences, setCrossRefTarget, setStudyTab, setActivePanel, navigateTo, setAiTarget, pendingRange, setPendingRange, activePanel, studyTab } = useNavigation()
+  const { openCrossReferences, setCrossRefTarget, setStudyTab, setActivePanel, navigateTo, setAiTarget, pendingRange, setPendingRange, activePanel, studyTab, openWordStudy } = useNavigation()
+  const pendingRef = useRef(pendingRange)
+  useEffect(() => { pendingRef.current = pendingRange }, [pendingRange])
+  const prevChapterRef = useRef({ bookId, chapter })
   const [verses, setVerses] = useState<Verse[]>([])
-  const [data, setData] = useState<Map<string, { texts: ContentText[]; xrefs: CrossReference[] }>>(new Map())
+  const [data, setData] = useState<Map<string, { texts: ContentText[]; xrefs: CrossReference[]; interlinear: InterlinearWord[] }>>(new Map())
   const [loading, setLoading] = useState(true)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [selectionAnchor, setSelectionAnchor] = useState<string | null>(null)
   const [rangeMode, setRangeMode] = useState(false)
   const [verseNotes, setVerseNotes] = useState<Set<string>>(new Set())
+  const [highlightedVerseId, setHighlightedVerseId] = useState<string | null>(null)
+  const highlightRef = useRef<string | null>(null)
   const topRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -46,7 +63,10 @@ export function ReadingView({
       setSelectedIds(new Set())
       setSelectionAnchor(null)
       setRangeMode(false)
-      setLoading(true)
+      setHighlightedVerseId(null)
+      const chapterChanged = bookId !== prevChapterRef.current.bookId || chapter !== prevChapterRef.current.chapter
+      prevChapterRef.current = { bookId, chapter }
+      if (chapterChanged) setLoading(true)
       const [vs, noteIds] = await Promise.all([
         getVerses(bookId, chapter),
         getNotesForChapter(bookId, chapter),
@@ -54,30 +74,58 @@ export function ReadingView({
       if (cancelled) return
       setVerses(vs)
       setVerseNotes(noteIds)
-      const map = new Map<string, { texts: ContentText[]; xrefs: CrossReference[] }>()
+      const map = new Map<string, { texts: ContentText[]; xrefs: CrossReference[]; interlinear: InterlinearWord[] }>()
       const batch = vs.map(async (v) => {
-        const [texts, xrefs] = await Promise.all([
+        const [texts, xrefs, interlinear] = await Promise.all([
           getTranslations(v.id),
           getCrossReferences(v.id),
+          interlinearEnabled ? getInterlinearWords(v.id) : Promise.resolve([] as InterlinearWord[]),
         ])
-        map.set(v.id, { texts, xrefs })
+        map.set(v.id, { texts, xrefs, interlinear })
       })
       await Promise.all(batch)
       if (!cancelled) {
         setData(map)
-        setLoading(false)
-        if (pendingRange) {
+        if (onChapterText || onChapterVerses) {
+          const verseTexts: string[] = []
+          for (const v of vs) {
+            const texts = map.get(v.id)?.texts ?? []
+            for (const code of visibleVersions) {
+              const t = texts.find((t) => t.translation_code === code)
+              if (t) { verseTexts.push(t.text_data); break }
+            }
+          }
+          onChapterText?.(verseTexts.join(' '))
+          onChapterVerses?.(verseTexts)
+        }
+        const range = pendingRef.current
+        if (range) {
           const ids = vs
-            .filter((v) => v.verse_num >= pendingRange.verseStart && v.verse_num <= pendingRange.verseEnd)
+            .filter((v) => v.verse_num >= range.verseStart && v.verse_num <= range.verseEnd)
             .map((v) => v.id)
           setSelectedIds(new Set(ids))
           setPendingRange(null)
+        }
+        setLoading(false)
+        if (highlightRef.current && map.has(highlightRef.current)) {
+          setHighlightedVerseId(highlightRef.current)
+          highlightRef.current = null
         }
       }
     }
     load()
     return () => { cancelled = true }
-  }, [bookId, chapter, pendingRange, setPendingRange])
+  }, [bookId, chapter, interlinearEnabled, visibleVersions, onChapterText, onChapterVerses, setPendingRange])
+
+  useEffect(() => {
+    if (!onSelectionVerse) return
+    if (selectedIds.size === 0) {
+      onSelectionVerse(null)
+      return
+    }
+    const first = verses.find((v) => selectedIds.has(v.id))
+    onSelectionVerse(first ? first.verse_num : null)
+  }, [selectedIds, verses, onSelectionVerse])
 
   const handleToggleSelect = useCallback((verseId: string, shiftKey?: boolean) => {
     if ((shiftKey || rangeMode) && selectionAnchor) {
@@ -112,6 +160,16 @@ export function ReadingView({
     }
   }, [rangeMode, selectedIds])
 
+  useEffect(() => {
+    if (!highlightedVerseId) return
+    const el = document.getElementById(`verse-${highlightedVerseId}`)
+    if (el) {
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    }
+    const timer = setTimeout(() => setHighlightedVerseId(null), 2000)
+    return () => clearTimeout(timer)
+  }, [highlightedVerseId])
+
   const handleClearSelection = useCallback(() => {
     setSelectedIds(new Set())
     setRangeMode(false)
@@ -143,10 +201,22 @@ export function ReadingView({
 
   const handleNavigateToRef = useCallback((targetId: string) => {
     const parsed = parseOsisId(targetId)
-    if (parsed) {
+    if (!parsed) return
+    if (parsed.bookId === bookId && parsed.chapter === chapter) {
+      setHighlightedVerseId(targetId)
+      const el = document.getElementById(`verse-${targetId}`)
+      if (el) {
+        el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      }
+    } else {
+      highlightRef.current = targetId
       navigateTo(parsed.bookId, parsed.chapter, targetId, true)
     }
-  }, [navigateTo])
+  }, [navigateTo, bookId, chapter])
+
+  const handleSelectWord = useCallback((word: InterlinearWord, verseId: string, reference: string) => {
+    openWordStudy({ word, verseId, reference })
+  }, [openWordStudy])
 
   const handleOpenCrossRefs = useCallback((verseId: string) => {
     setSelectedIds(new Set([verseId]))
@@ -237,15 +307,20 @@ export function ReadingView({
                 verse={verse}
                 translations={d?.texts ?? []}
                 crossReferences={d?.xrefs ?? []}
+                interlinearWords={d?.interlinear}
                 visibleVersions={visibleVersions}
                 fontSize={fontSize}
                 isSelected={selectedIds.has(verse.id)}
                 isBookmarked={bookmarks.has(verse.id)}
                 hasNote={verseNotes.has(verse.id)}
                 isDesktop={isDesktop}
+                interlinearEnabled={interlinearEnabled}
+                interlinearLanguages={interlinearLanguages}
+                isHighlighted={highlightedVerseId === verse.id}
                 onToggleSelect={(e) => handleToggleSelect(verse.id, e.shiftKey)}
                 onNavigateToRef={handleNavigateToRef}
                 onOpenCrossRefs={handleOpenCrossRefs}
+                onSelectWord={handleSelectWord}
               />
             )
           })}
@@ -265,6 +340,8 @@ export function ReadingView({
           onClearSelection={handleClearSelection}
           onRangeSelect={handleRangeSelect}
           isRangeMode={rangeMode}
+          interlinearEnabled={interlinearEnabled}
+          onToggleInterlinear={onToggleInterlinear}
         />
       )}
     </div>

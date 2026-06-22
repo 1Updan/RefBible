@@ -1,38 +1,49 @@
 import { useRef, useCallback } from 'react'
 import { BookmarkCheck, MessageSquareMore } from 'lucide-react'
 import { CrossReferenceChip } from './CrossReferenceChip'
+import { InterlinearView } from './InterlinearView'
 import { formatVerseId } from '@/lib/utils'
 import clsx from 'clsx'
-import type { Verse, ContentText, CrossReference } from '@/types/db'
+import type { Verse, ContentText, CrossReference, InterlinearWord } from '@/types/db'
 
 interface VerseRowProps {
   verse: Verse
   translations: ContentText[]
   crossReferences: CrossReference[]
+  interlinearWords?: InterlinearWord[]
   visibleVersions: string[]
   fontSize: number
   isSelected: boolean
   isBookmarked: boolean
   hasNote: boolean
   isDesktop: boolean
+  interlinearEnabled: boolean
+  interlinearLanguages: readonly ('hebrew' | 'greek')[]
+  isHighlighted?: boolean
   onToggleSelect: (e: React.MouseEvent) => void
   onNavigateToRef: (verseId: string) => void
   onOpenCrossRefs: (verseId: string) => void
+  onSelectWord: (word: InterlinearWord, verseId: string, reference: string) => void
 }
 
 export function VerseRow({
   verse,
   translations,
   crossReferences,
+  interlinearWords,
   visibleVersions,
   fontSize,
   isSelected,
   isBookmarked,
   hasNote,
   isDesktop,
+  interlinearEnabled,
+  interlinearLanguages,
+  isHighlighted,
   onToggleSelect,
   onNavigateToRef,
   onOpenCrossRefs,
+  onSelectWord,
 }: VerseRowProps) {
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const longPressFired = useRef(false)
@@ -60,11 +71,20 @@ export function VerseRow({
     .map((code) => translations.find((t) => t.translation_code === code))
     .filter(Boolean) as ContentText[]
 
+  const getBookName = () => {
+    const parts = verse.id.split('.')
+    return parts[0] || ''
+  }
+
+  const reference = `${getBookName()} ${verse.chapter_num}:${verse.verse_num}`
+
   return (
     <div
+      id={`verse-${verse.id}`}
       className={clsx(
         'group flex gap-3 py-2.5 px-4 rounded-lg transition-colors duration-150',
         isSelected ? 'bg-accent/8 ring-1 ring-accent/30' : 'hover:bg-surface/50',
+        isHighlighted && 'animate-[highlightPulse_2s_ease-out]',
       )}
       onClick={isDesktop ? onToggleSelect : undefined}
       onTouchStart={isDesktop ? undefined : handleTouchStart}
@@ -86,33 +106,44 @@ export function VerseRow({
       </span>
 
       <div className="flex-1 min-w-0 space-y-1">
-        {versionTexts.map((vt, i) => {
-          const size = i === 0 ? fontSize : Math.max(fontSize - 2, 14)
-          const colorClass = i === 0 ? 'text-text-primary' : 'text-text-secondary'
-          return (
-            <div key={vt.translation_code} className="flex items-start gap-1">
-              <div className="flex-1 min-w-0">
-                {showMoreThanOne && (
-                  <span className="text-[10px] font-semibold text-accent uppercase tracking-wider mr-1.5 align-baseline">
-                    {vt.translation_code}
-                  </span>
+        {interlinearEnabled && interlinearWords && interlinearWords.length > 0 ? (
+          <InterlinearView
+            verseId={verse.id}
+            words={interlinearWords}
+            reference={reference}
+            fontSize={fontSize}
+            interlinearLanguages={interlinearLanguages}
+            onSelectWord={onSelectWord}
+          />
+        ) : (
+          versionTexts.map((vt, i) => {
+            const size = i === 0 ? fontSize : Math.max(fontSize - 2, 14)
+            const colorClass = i === 0 ? 'text-text-primary' : 'text-text-secondary'
+            return (
+              <div key={vt.translation_code} className="flex items-start gap-1">
+                <div className="flex-1 min-w-0">
+                  {showMoreThanOne && (
+                    <span className="text-[10px] font-semibold text-accent uppercase tracking-wider mr-1.5 align-baseline">
+                      {vt.translation_code}
+                    </span>
+                  )}
+                  <div
+                    className={clsx('block font-serif leading-[1.65] tracking-[0.01em] text-justify hyphens-auto', colorClass)}
+                    style={{ fontSize: `${size}px` }}
+                  >
+                    {vt.text_data}
+                  </div>
+                </div>
+                {i === 0 && (
+                  <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                    {isBookmarked && <BookmarkCheck size={14} className="text-accent" />}
+                    {hasNote && <MessageSquareMore size={14} className="text-text-tertiary" />}
+                  </div>
                 )}
-                <div
-                  className={clsx('inline font-serif leading-[1.65] tracking-[0.01em]', colorClass)}
-                  style={{ fontSize: `${size}px` }}
-                >
-                  {vt.text_data}
-                </div>
               </div>
-              {i === 0 && (
-                <div className="flex items-center gap-1 shrink-0 mt-0.5">
-                  {isBookmarked && <BookmarkCheck size={14} className="text-accent" />}
-                  {hasNote && <MessageSquareMore size={14} className="text-text-tertiary" />}
-                </div>
-              )}
-            </div>
-          )
-        })}
+            )
+          })
+        )}
 
         {crossReferences.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">

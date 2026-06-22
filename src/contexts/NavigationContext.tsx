@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { NavigationContext } from './navigation'
-import type { NavigationContextValue, CrossRefTarget, ActiveTab, AiTarget } from './navigation'
+import type { NavigationContextValue, CrossRefTarget, ActiveTab, AiTarget, WordTarget } from './navigation'
 
 interface NavEntry {
   bookId: number
@@ -12,6 +12,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   const [activePanel, setActivePanel] = useState<NavigationContextValue['activePanel']>('none')
   const [crossRefTarget, setCrossRefTarget] = useState<CrossRefTarget | null>(null)
   const [aiTarget, setAiTarget] = useState<AiTarget | null>(null)
+  const [wordTarget, setWordTarget] = useState<WordTarget | null>(null)
   const [studyTab, setStudyTab] = useState<ActiveTab>('crossrefs')
   const [[bookId, chapter], setNav] = useState<[number, number]>([43, 1])
   const [navStack, setNavStack] = useState<NavEntry[]>([])
@@ -62,6 +63,12 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     setActivePanel('study')
   }, [])
 
+  const openWordStudy = useCallback((target: WordTarget) => {
+    setWordTarget(target)
+    setStudyTab('word')
+    setActivePanel('study')
+  }, [])
+
   const openNote = useCallback((verseId: string) => {
     setNoteVerseId(verseId)
   }, [])
@@ -80,6 +87,9 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
         openCrossReferences,
         aiTarget,
         setAiTarget,
+        wordTarget,
+        setWordTarget,
+        openWordStudy,
         studyTab,
         setStudyTab,
         bookId,

@@ -40,3 +40,31 @@ export interface AiCache {
   cached_response: string
   timestamp: string
 }
+
+export interface InterlinearWord {
+  id: number
+  verse_id: string
+  word_index: number
+  language: 'hebrew' | 'greek'
+  original_text: string
+  transliteration: string | null
+  strongs_number: string | null
+  lemma: string | null
+  gloss: string | null
+  morphology: string | null
+}
+
+export interface StrongsEntry {
+  number: string
+  language: 'hebrew' | 'greek'
+  transliteration: string | null
+  definition: string | null
+  pronunciation: string | null
+  word_count: number | null
+}
+
+export interface InterlinearWordTarget {
+  word: InterlinearWord
+  verseId: string
+  reference: string
+}

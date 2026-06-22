@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node -e \"const{readdirSync,unlinkSync,statSync,existsSync}=require('fs'),{join}=require('path');(function rmjson(d){if(!existsSync(d))return;for(const e of readdirSync(d,{withFileTypes:true})){const f=join(d,e.name);if(e.isDirectory())rmjson(f);else if(e.isFile()&&(e.name.endsWith('.json')||e.name.endsWith('.gz'))){unlinkSync(f);console.log('rm '+f)}}})(join(__dirname,'dist'))\"",
     "lint": "eslint .",
     "preview": "vite preview"
   },

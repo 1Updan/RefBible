@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, Key, AlertCircle } from 'lucide-react'
+import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, Key, AlertCircle, BookText } from 'lucide-react'
 import { useNavigation } from '@/hooks/useNavigation'
 import { useNetworkState } from '@/hooks/useNetworkState'
-import { getCrossReferences, getTranslations, saveNote, getNotes, getAllNotes, deleteNote } from '@/lib/db'
+import { getCrossReferences, getTranslations, saveNote, getNotes, getAllNotes, deleteNote, getStrongsEntry } from '@/lib/db'
 import { formatVerseId, parseOsisId } from '@/lib/utils'
 import { invoke } from '@tauri-apps/api/core'
 import { getBook } from '@/data/books'
-import type { CrossReference, Note } from '@/types/db'
+import type { CrossReference, Note, StrongsEntry } from '@/types/db'
 import type { ActiveTab } from '@/contexts/navigation'
 
 const TABS: { id: ActiveTab; label: string; icon: typeof Crosshair }[] = [
   { id: 'crossrefs', label: 'Cross-Refs', icon: Crosshair },
   { id: 'notes', label: 'Notes', icon: MessageSquareMore },
   { id: 'ai', label: 'AI', icon: Sparkles },
+  { id: 'word', label: 'Word', icon: BookText },
 ]
 
 function CrossRefsTab() {
@@ -498,6 +499,107 @@ function AiTab() {
   )
 }
 
+function WordTab() {
+  const { wordTarget, setAiTarget, setStudyTab } = useNavigation()
+  const [strongs, setStrongs] = useState<StrongsEntry | null>(null)
+
+  useEffect(() => {
+    if (!wordTarget) return
+    getStrongsEntry(wordTarget.word.strongs_number ?? '').then((entry) => {
+      setStrongs(entry)
+    })
+  }, [wordTarget])
+
+  const handleAskAi = useCallback(() => {
+    if (!wordTarget) return
+    const w = wordTarget.word
+    const langLabel = w.language === 'hebrew' ? 'Hebrew' : 'Greek'
+    setAiTarget({
+      verseId: wordTarget.verseId,
+      bookId: 0,
+      chapter: 0,
+      verseNum: 0,
+      reference: wordTarget.reference,
+      text: `Analyze the ${langLabel} word "${w.original_text}" (Strong's ${w.strongs_number ?? 'N/A'}, lemma: ${w.lemma ?? 'N/A'}) in ${wordTarget.reference}. Provide lexical meaning, grammatical analysis, usage in context, and theological significance.`,
+    })
+    setStudyTab('ai')
+  }, [wordTarget, setAiTarget, setStudyTab])
+
+  if (!wordTarget) {
+    return <p className="text-xs text-text-tertiary px-1 py-4 text-center">Tap a word to see its details here.</p>
+  }
+
+  const w = wordTarget.word
+  const isHebrew = w.language === 'hebrew'
+  const fontStack = isHebrew ? 'font-hebrew' : 'font-greek'
+  const langLabel = isHebrew ? 'Hebrew' : 'Greek'
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col items-center py-4 px-3 rounded-xl bg-surface-elevated border border-border-subtle">
+        <span className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider mb-2">{langLabel}</span>
+        <span className={`${fontStack} text-2xl text-accent leading-tight`} dir={isHebrew ? 'rtl' : 'ltr'}>
+          {w.original_text}
+        </span>
+        {w.transliteration && (
+          <span className="text-sm text-text-tertiary italic mt-1">{w.transliteration}</span>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        {w.strongs_number && (
+          <DetailRow label="Strong's Number" value={w.strongs_number} />
+        )}
+        {w.lemma && (
+          <DetailRow label="Lemma" value={w.lemma} />
+        )}
+        {w.morphology && (
+          <DetailRow label="Morphology" value={w.morphology} />
+        )}
+        {w.gloss && (
+          <DetailRow label="Gloss" value={w.gloss} />
+        )}
+      </div>
+
+      {strongs && (
+        <div className="px-3 py-3 rounded-lg bg-surface-elevated border border-border-subtle space-y-1">
+          <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Strong's Definition</p>
+          {strongs.transliteration && (
+            <p className="text-xs text-text-secondary italic">{strongs.transliteration}</p>
+          )}
+          {strongs.pronunciation && (
+            <p className="text-xs text-text-tertiary">{strongs.pronunciation}</p>
+          )}
+          {strongs.definition && (
+            <p className="text-xs text-text-primary leading-relaxed">{strongs.definition}</p>
+          )}
+          {strongs.word_count != null && (
+            <p className="text-[10px] text-text-tertiary mt-1">Occurrences: {strongs.word_count}</p>
+          )}
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={handleAskAi}
+        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover transition-all duration-150 cursor-pointer"
+      >
+        <Sparkles size={14} />
+        Ask AI about this word
+      </button>
+    </div>
+  )
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-surface-elevated border border-border-subtle">
+      <span className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">{label}</span>
+      <span className="text-xs text-text-primary font-mono">{value}</span>
+    </div>
+  )
+}
+
 export function StudyPanel() {
   const { studyTab, setStudyTab } = useNavigation()
 
@@ -524,6 +626,7 @@ export function StudyPanel() {
         {studyTab === 'crossrefs' && <CrossRefsTab />}
         {studyTab === 'notes' && <NotesTab />}
         {studyTab === 'ai' && <AiTab />}
+        {studyTab === 'word' && <WordTab />}
       </div>
     </div>
   )

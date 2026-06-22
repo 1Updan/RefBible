@@ -1,4 +1,5 @@
 import { createContext } from 'react'
+import type { InterlinearWord } from '@/types/db'
 
 export interface CrossRefTarget {
   verseId: string
@@ -16,7 +17,13 @@ export interface AiTarget {
   text: string
 }
 
-export type ActiveTab = 'crossrefs' | 'notes' | 'ai'
+export type ActiveTab = 'crossrefs' | 'notes' | 'ai' | 'word'
+
+export interface WordTarget {
+  word: InterlinearWord
+  verseId: string
+  reference: string
+}
 
 export interface NavigationContextValue {
   activePanel: 'none' | 'settings' | 'study' | 'bookmarks' | 'search'
@@ -26,6 +33,9 @@ export interface NavigationContextValue {
   openCrossReferences: (target: CrossRefTarget) => void
   aiTarget: AiTarget | null
   setAiTarget: (target: AiTarget | null) => void
+  wordTarget: WordTarget | null
+  setWordTarget: (target: WordTarget | null) => void
+  openWordStudy: (target: WordTarget) => void
   studyTab: ActiveTab
   setStudyTab: (t: ActiveTab) => void
   bookId: number

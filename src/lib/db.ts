@@ -1,35 +1,11 @@
 import Database from '@tauri-apps/plugin-sql'
-import type { Verse, ContentText, CrossReference, Bookmark, Note } from '@/types/db'
-import { toOsis } from '@/data/osis'
+import type { Verse, ContentText, CrossReference, Bookmark, Note, InterlinearWord, StrongsEntry } from '@/types/db'
 import { parseReference } from './utils'
 
 let db: Database | null = null
-let seeded = false
 
 function isTauriContext(): boolean {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
-}
-
-interface KjvVerse {
-  n: number
-  t: string
-}
-
-interface KjvChapter {
-  c: number
-  v: KjvVerse[]
-}
-
-interface KjvBook {
-  b: string
-  i: number
-  n: string
-  t: string
-  ch: KjvChapter[]
-}
-
-interface KjvData {
-  books: KjvBook[]
 }
 
 export async function getDb(): Promise<Database> {
@@ -43,103 +19,9 @@ export async function getDb(): Promise<Database> {
 }
 
 export async function ensureSeeded(): Promise<void> {
-  if (seeded) return
-  const conn = await getDb()
-  const rows = await conn.select<{ count: number }[]>('SELECT COUNT(*) as count FROM verses')
-  if (rows[0].count === 0) {
-    await seedAll(conn)
-  } else {
-    const nasbCount = await conn.select<{ count: number }[]>("SELECT COUNT(*) as count FROM content_text WHERE translation_code = 'NASB'")
-    if (nasbCount[0].count < 30000) {
-      await conn.execute("DELETE FROM content_text WHERE translation_code = 'NASB'")
-      await seedNasbOnly(conn)
-    }
-  }
-  seeded = true
-}
-
-async function seedNasbOnly(conn: Database): Promise<void> {
-  const resp = await fetch('/nasb.json')
-  const data: KjvData = await resp.json()
-
-  const allTexts: { id: string; text: string }[] = []
-
-  for (const book of data.books) {
-    const osis = toOsis(book.b)
-    for (const ch of book.ch) {
-      for (const v of ch.v) {
-        allTexts.push({ id: `${osis}.${ch.c}.${v.n}`, text: v.t })
-      }
-    }
-  }
-
-  const CHUNK = 200
-  for (let i = 0; i < allTexts.length; i += CHUNK) {
-    const chunk = allTexts.slice(i, i + CHUNK)
-    const binds: unknown[] = []
-    for (const r of chunk) binds.push(r.id, 'NASB', r.text)
-    const phs = chunk.map((_, j) => `($${j * 3 + 1}, $${j * 3 + 2}, $${j * 3 + 3})`).join(',')
-    await conn.execute(`INSERT OR IGNORE INTO content_text (verse_id, translation_code, text_data) VALUES ${phs}`, binds)
-  }
-}
-
-async function seedAll(conn: Database): Promise<void> {
-  const resp = await fetch('/kjv.json')
-  const data: KjvData = await resp.json()
-
-  const allVerses: { id: string; bookId: number; ch: number; vn: number }[] = []
-  const allTexts: { id: string; code: string; text: string }[] = []
-
-  for (const book of data.books) {
-    const osis = toOsis(book.b)
-    for (const ch of book.ch) {
-      for (const v of ch.v) {
-        const verseId = `${osis}.${ch.c}.${v.n}`
-        allVerses.push({ id: verseId, bookId: book.i, ch: ch.c, vn: v.n })
-        allTexts.push({ id: verseId, code: 'KJV', text: v.t })
-      }
-    }
-  }
-
-  const CHUNK = 200
-  for (let i = 0; i < allVerses.length; i += CHUNK) {
-    const chunk = allVerses.slice(i, i + CHUNK)
-    const placeholders = chunk.map((_, j) => `($${j * 4 + 1}, $${j * 4 + 2}, $${j * 4 + 3}, $${j * 4 + 4})`).join(',')
-    const binds: unknown[] = []
-    for (const r of chunk) binds.push(r.id, r.bookId, r.ch, r.vn)
-    await conn.execute(
-      `INSERT OR IGNORE INTO verses (id, book_id, chapter_num, verse_num) VALUES ${placeholders}`,
-      binds,
-    )
-  }
-
-  for (let i = 0; i < allTexts.length; i += CHUNK) {
-    const chunk = allTexts.slice(i, i + CHUNK)
-    const placeholders = chunk.map((_, j) => `($${j * 3 + 1}, $${j * 3 + 2}, $${j * 3 + 3})`).join(',')
-    const binds: unknown[] = []
-    for (const r of chunk) binds.push(r.id, r.code, r.text)
-    await conn.execute(
-      `INSERT OR IGNORE INTO content_text (verse_id, translation_code, text_data) VALUES ${placeholders}`,
-      binds,
-    )
-  }
-
-  await seedNasbOnly(conn)
-
-  const xrefResp = await fetch('/crossrefs.json')
-  const xrefs: { origin: string; target: string }[] = await xrefResp.json()
-
-  const XREF_CHUNK = 500
-  for (let i = 0; i < xrefs.length; i += XREF_CHUNK) {
-    const chunk = xrefs.slice(i, i + XREF_CHUNK)
-    const placeholders = chunk.map((_, j) => `($${j * 2 + 1}, $${j * 2 + 2}, 0)`).join(',')
-    const binds: string[] = []
-    for (const r of chunk) binds.push(r.origin, r.target)
-    await conn.execute(
-      `INSERT OR IGNORE INTO cross_references (origin_verse_id, target_verse_id, thematic_weight) VALUES ${placeholders}`,
-      binds,
-    )
-  }
+  // Database is pre-seeded and bundled with the app.
+  // Rust backend copies it to app data dir on first launch.
+  await getDb()
 }
 
 export async function getVerses(bookId: number, chapter: number): Promise<Verse[]> {
@@ -321,4 +203,31 @@ ORDER BY v.book_id, v.chapter_num, v.verse_num
 LIMIT 100`,
     binds,
   )
+}
+
+export async function getInterlinearWords(verseId: string): Promise<InterlinearWord[]> {
+  const conn = await getDb()
+  return conn.select<InterlinearWord[]>(
+    'SELECT id, verse_id, word_index, language, original_text, transliteration, strongs_number, lemma, gloss, morphology FROM interlinear_words WHERE verse_id = $1 ORDER BY word_index',
+    [verseId],
+  )
+}
+
+export async function getStrongsEntry(number: string): Promise<StrongsEntry | null> {
+  const conn = await getDb()
+  const rows = await conn.select<StrongsEntry[]>(
+    'SELECT number, language, transliteration, definition, pronunciation, word_count FROM strongs_definitions WHERE number = $1',
+    [number],
+  )
+  return rows.length > 0 ? rows[0] : null
+}
+
+export function setOnSeedProgress(): void {
+  // No-op: database is pre-seeded
+}
+
+export async function resetInterlinearData(): Promise<void> {
+  const conn = await getDb()
+  await conn.execute('DELETE FROM interlinear_words')
+  await conn.execute('DELETE FROM strongs_definitions')
 }
