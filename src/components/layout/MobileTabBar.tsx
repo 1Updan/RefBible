@@ -1,13 +1,12 @@
-import { BookOpen, Bookmark, Settings, Book } from 'lucide-react'
+import { BookOpen, Bookmark, Settings } from 'lucide-react'
 
 interface MobileTabBarProps {
   activePanel: string
-  onTabChange: (tab: 'read' | 'books' | 'saved' | 'settings') => void
+  onTabChange: (tab: 'read' | 'saved' | 'settings') => void
 }
 
 const TABS = [
   { id: 'read' as const, label: 'Read', icon: BookOpen },
-  { id: 'books' as const, label: 'Books', icon: Book },
   { id: 'saved' as const, label: 'Saved', icon: Bookmark },
   { id: 'settings' as const, label: 'Settings', icon: Settings },
 ]

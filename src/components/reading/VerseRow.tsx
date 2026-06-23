@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react'
+import { useRef } from 'react'
 import { BookmarkCheck, MessageSquareMore } from 'lucide-react'
 import { CrossReferenceChip } from './CrossReferenceChip'
 import { InterlinearView } from './InterlinearView'
@@ -16,7 +16,6 @@ interface VerseRowProps {
   isSelected: boolean
   isBookmarked: boolean
   hasNote: boolean
-  isDesktop: boolean
   interlinearEnabled: boolean
   interlinearLanguages: readonly ('hebrew' | 'greek')[]
   isHighlighted?: boolean
@@ -36,7 +35,6 @@ export function VerseRow({
   isSelected,
   isBookmarked,
   hasNote,
-  isDesktop,
   interlinearEnabled,
   interlinearLanguages,
   isHighlighted,
@@ -45,25 +43,19 @@ export function VerseRow({
   onOpenCrossRefs,
   onSelectWord,
 }: VerseRowProps) {
-  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const longPressFired = useRef(false)
+  const guardRef = useRef(false)
 
-  const handleTouchStart = useCallback(() => {
-    longPressFired.current = false
-    longPressRef.current = setTimeout(() => {
-      longPressFired.current = true
-      onToggleSelect({ shiftKey: false } as React.MouseEvent)
-    }, 500)
-  }, [onToggleSelect])
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault()
+    guardRef.current = true
+    onToggleSelect(e)
+    setTimeout(() => { guardRef.current = false }, 300)
+  }
 
-  const handleTouchEnd = useCallback(() => {
-    if (longPressRef.current) clearTimeout(longPressRef.current)
-    if (!longPressFired.current) onToggleSelect({ shiftKey: false } as React.MouseEvent)
-  }, [onToggleSelect])
-
-  const handleTouchMove = useCallback(() => {
-    if (longPressRef.current) clearTimeout(longPressRef.current)
-  }, [])
+  const handleClick = (e: React.MouseEvent) => {
+    if (guardRef.current) return
+    onToggleSelect(e)
+  }
 
   const showMoreThanOne = visibleVersions.length > 1
 
@@ -82,14 +74,12 @@ export function VerseRow({
     <div
       id={`verse-${verse.id}`}
       className={clsx(
-        'group flex gap-3 py-2.5 px-4 rounded-lg transition-colors duration-150',
+        'group flex gap-3 py-2.5 px-4 rounded-lg transition-colors duration-150 touch-manipulation cursor-pointer',
         isSelected ? 'bg-accent/8 ring-1 ring-accent/30' : 'hover:bg-surface/50',
         isHighlighted && 'animate-[highlightPulse_2s_ease-out]',
       )}
-      onClick={isDesktop ? onToggleSelect : undefined}
-      onTouchStart={isDesktop ? undefined : handleTouchStart}
-      onTouchEnd={isDesktop ? undefined : handleTouchEnd}
-      onTouchMove={isDesktop ? undefined : handleTouchMove}
+      onClick={handleClick}
+      onContextMenu={handleContextMenu}
       role="button"
       tabIndex={0}
       aria-selected={isSelected}

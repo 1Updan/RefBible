@@ -2,28 +2,28 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-text-primary: #2d2a24;
-  --color-text-secondary: #716b63;
-  --color-text-tertiary: #a39d95;
-  --color-surface: #edeae3;
+  --color-text-primary: #1c1c1e;
+  --color-text-secondary: #5c5c5e;
+  --color-text-tertiary: #8e8e93;
+  --color-surface: #f0ede8;
   --color-surface-elevated: #ffffff;
-  --color-surface-hover: #e3dfd6;
-  --color-accent: #2c6e8a;
-  --color-accent-hover: #235a72;
-  --color-accent-light: #dee9ee;
-  --color-border: #d6d0c8;
-  --color-border-subtle: #e3dfd6;
+  --color-surface-hover: #e8e5df;
+  --color-accent: #1a6b8a;
+  --color-accent-hover: #155670;
+  --color-accent-light: #e1edf2;
+  --color-border: #d1cec7;
+  --color-border-subtle: #e0ddd6;
   --color-bg: #ffffff;
-  --color-badge-bg: #e3dfd6;
-  --color-badge-text: #716b63;
-  --color-chip-bg: #e3dfd6;
-  --color-chip-hover: #d6d0c8;
-  --color-danger: #ef4444;
-  --color-success: #22c55e;
+  --color-badge-bg: #e8e5df;
+  --color-badge-text: #5c5c5e;
+  --color-chip-bg: #e8e5df;
+  --color-chip-hover: #d1cec7;
+  --color-danger: #dc2626;
+  --color-success: #16a34a;
   --color-scrim: rgba(0, 0, 0, 0.35);
-  --color-highlight: #dee9ee;
+  --color-highlight: #e1edf2;
   --color-tab-bar: rgba(255, 255, 255, 0.92);
-  --color-action-bar: #2c6e8a;
+  --color-action-bar: #1a6b8a;
 
   --font-serif: Georgia, "Palatino Linotype", "Book Antiqua", serif;
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -33,47 +33,47 @@
 }
 
 [data-theme="dark"] {
-  --color-text-primary: #e8e4df;
-  --color-text-secondary: #9e9a95;
+  --color-text-primary: #e5e5e2;
+  --color-text-secondary: #9e9a94;
   --color-text-tertiary: #6b6865;
-  --color-surface: #1a1a1a;
-  --color-surface-elevated: #222222;
-  --color-surface-hover: #2a2a2a;
-  --color-accent: #4a90d9;
-  --color-accent-hover: #6ba8e0;
+  --color-surface: #1c1c1e;
+  --color-surface-elevated: #242428;
+  --color-surface-hover: #2c2c30;
+  --color-accent: #5a9fd4;
+  --color-accent-hover: #7ab4de;
   --color-accent-light: #1a2e47;
-  --color-border: #333333;
-  --color-border-subtle: #262626;
+  --color-border: #38383c;
+  --color-border-subtle: #2a2a2e;
   --color-bg: #000000;
-  --color-badge-bg: #222222;
-  --color-badge-text: #9e9a95;
-  --color-chip-bg: #222222;
-  --color-chip-hover: #2a2a2a;
+  --color-badge-bg: #242428;
+  --color-badge-text: #9e9a94;
+  --color-chip-bg: #242428;
+  --color-chip-hover: #2c2c30;
   --color-scrim: rgba(0, 0, 0, 0.7);
   --color-highlight: #1a2e47;
   --color-tab-bar: rgba(0, 0, 0, 0.95);
-  --color-action-bar: #4a90d9;
+  --color-action-bar: #5a9fd4;
 }
 
 [data-theme="sepia"] {
-  --color-text-primary: #3b2f1e;
+  --color-text-primary: #2d2418;
   --color-text-secondary: #6b5b42;
   --color-text-tertiary: #9a8a72;
-  --color-surface: #ede3cc;
+  --color-surface: #eadec6;
   --color-surface-elevated: #f5ecd7;
-  --color-surface-hover: #e0d6bf;
+  --color-surface-hover: #dfd2b8;
   --color-accent: #8b5e3c;
   --color-accent-hover: #7a5234;
   --color-accent-light: #ede3cc;
-  --color-border: #d4c9af;
-  --color-border-subtle: #e0d6bf;
+  --color-border: #cdc2a8;
+  --color-border-subtle: #dbd0b8;
   --color-bg: #f5ecd7;
-  --color-badge-bg: #e0d6bf;
+  --color-badge-bg: #dfd2b8;
   --color-badge-text: #6b5b42;
-  --color-chip-bg: #e0d6bf;
-  --color-chip-hover: #d4c9af;
-  --color-scrim: rgba(59, 47, 30, 0.4);
-  --color-highlight: #ede3cc;
+  --color-chip-bg: #dfd2b8;
+  --color-chip-hover: #cdc2a8;
+  --color-scrim: rgba(45, 36, 24, 0.4);
+  --color-highlight: #eadec6;
   --color-tab-bar: rgba(245, 236, 215, 0.95);
   --color-action-bar: #8b5e3c;
 }
@@ -112,6 +112,11 @@ body {
 
 @keyframes slideUp {
   from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 

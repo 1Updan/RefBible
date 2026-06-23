@@ -6,9 +6,11 @@ interface BottomSheetProps {
   onClose: () => void
   title: string
   children: ReactNode
+  position?: 'bottom' | 'top'
 }
 
-export function BottomSheet({ open, onClose, title, children }: BottomSheetProps) {
+export function BottomSheet({ open, onClose, title, children, position = 'bottom' }: BottomSheetProps) {
+  const hideHeader = position === 'top' && !title
   const [maxHeight, setMaxHeight] = useState('75vh')
   const sheetRef = useRef<HTMLDivElement>(null)
 
@@ -56,28 +58,32 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
 
   if (!open) return null
 
+  const isTop = position === 'top'
+
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end">
+    <div className={`fixed inset-0 z-50 flex flex-col ${isTop ? 'justify-start' : 'justify-end'}`}>
       <div className="absolute inset-0 bg-scrim animate-[fadeIn_200ms_ease]" onClick={onClose} role="presentation" />
       <div
         ref={sheetRef}
-        className="relative bg-surface-elevated rounded-t-2xl shadow-2xl flex flex-col overflow-hidden animate-[slideUp_200ms_ease-out]"
-        style={{ maxHeight }}
+        className={`relative bg-surface-elevated shadow-2xl flex flex-col overflow-hidden animate-[${isTop ? 'slideDown' : 'slideUp'}_200ms_ease-out] ${isTop ? 'rounded-b-2xl' : 'rounded-t-2xl'}`}
+        style={{ maxHeight: isTop ? '90vh' : maxHeight }}
         role="dialog"
         aria-modal="true"
         aria-label={title}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
-          <h2 className="text-sm font-semibold text-text-primary">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-surface text-text-tertiary hover:text-text-primary transition-colors duration-150 cursor-pointer"
-            aria-label="Close"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        {isTop && !hideHeader && (
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+            <h2 className="text-sm font-semibold text-text-primary">{title}</h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-md hover:bg-surface text-text-tertiary hover:text-text-primary transition-colors duration-150 cursor-pointer"
+              aria-label="Close"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto p-4">{children}</div>
       </div>
     </div>

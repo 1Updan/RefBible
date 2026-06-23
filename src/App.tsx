@@ -14,11 +14,13 @@ import { SettingsPanel } from './components/panels/SettingsPanel'
 import { BookmarksPanel } from './components/panels/BookmarksPanel'
 import { SearchPanel } from './components/panels/SearchPanel'
 import { BottomSheet } from './components/sheets/BottomSheet'
-import { ensureSeeded, saveBookmark, removeBookmark, getInstalledTranslations, saveNote, getNotes } from './lib/db'
-import { getBook } from '@/data/books'
+import { ensureSeeded, saveBookmark, removeBookmark, getInstalledTranslations, saveNote, getNotes, getVerses } from './lib/db'
+import { getBook, BOOKS } from '@/data/books'
+import type { Verse } from '@/types/db'
 import { useNetworkState } from './hooks/useNetworkState'
 import { useSpeech } from './hooks/useSpeech'
 import { SpeechControlBar } from './components/reading/SpeechControlBar'
+import { ChevronRight, ChevronDown, X } from 'lucide-react'
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
@@ -44,6 +46,8 @@ function AppContent() {
   const [noteText, setNoteText] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [showNav, setShowNav] = useState(false)
+const [navBookId, setNavBookId] = useState(bookId)
+const [navChapter, setNavChapter] = useState(chapter)
   const isOnline = useNetworkState()
   const { speak, pause, stop, speaking, paused, resume, isActive, availableVoices, selectedVoiceUri, setSelectedVoiceUri } = useSpeech()
   const chapterTextRef = useRef<{ verses: string[] }>({ verses: [] })
@@ -93,10 +97,17 @@ function AppContent() {
   }, [isDesktop, setActivePanel, setStudyTab, openNote])
 
   const handleSaveNote = useCallback(async () => {
-    if (noteVerseId && noteText.trim()) {
-      await saveNote(noteVerseId, noteText.trim())
-      closeNote()
+    if (!noteVerseId) return
+    const text = noteText.trim()
+    if (!text) return
+    try {
+      await saveNote(noteVerseId, text)
+    } catch (e) {
+      console.error('Failed to save note:', e)
+      return
     }
+    setNoteText('')
+    closeNote()
   }, [noteVerseId, noteText, closeNote])
 
   const handleNavigateBookmark = useCallback((_: string, bookId: number, chapter: number) => {
@@ -214,6 +225,7 @@ function AppContent() {
         canSpeak={canSpeak}
         onSpeak={handleSpeak}
         onStop={stop}
+        onOpenNav={!isDesktop ? () => { setNavBookId(bookId); setNavChapter(chapter); setShowNav(true) } : undefined}
       />
       <SpeechControlBar
         speaking={speaking}
@@ -243,6 +255,8 @@ function AppContent() {
         onChapterText={handleChapterText}
         onChapterVerses={handleChapterVerses}
         onSelectionVerse={setSpeakFromVerse}
+        onSwipePrev={!isDesktop ? () => chapter > 1 && navigateTo(bookId, chapter - 1) : undefined}
+        onSwipeNext={!isDesktop ? () => chapter < (currentBook?.chapters ?? 21) && navigateTo(bookId, chapter + 1) : undefined}
       />
     </>
   )
@@ -290,7 +304,6 @@ function AppContent() {
       activePanel={activePanel}
       onTabChange={(tab) => {
         if (tab === 'read') setActivePanel('none')
-        else if (tab === 'books') { setActivePanel('none'); setShowNav(true) }
         else if (tab === 'saved') setActivePanel('bookmarks')
         else if (tab === 'settings') setActivePanel('settings')
       }}
@@ -301,6 +314,7 @@ function AppContent() {
     <BottomSheet
       open={!!activePanel}
       onClose={() => setActivePanel('none')}
+      position="top"
       title={
         activePanel === 'study' ? 'Study' :
         activePanel === 'search' ? 'Search' :
@@ -330,7 +344,7 @@ function AppContent() {
   )
 
   const noteSheet = noteVerseId && (
-    <BottomSheet open={!!noteVerseId} onClose={closeNote} title="Add Note">
+    <BottomSheet open={!!noteVerseId} onClose={closeNote} title="Add Note" position="top">
       <div className="space-y-3">
         <p className="text-xs text-text-secondary font-mono">{noteVerseId}</p>
         <textarea
@@ -343,7 +357,7 @@ function AppContent() {
         <button
           type="button"
           onClick={handleSaveNote}
-          className="w-full px-3 py-2 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover transition-all duration-150 cursor-pointer"
+          className="w-full px-3 py-2.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover active:bg-accent-hover transition-all duration-150 cursor-pointer touch-manipulation"
         >
           Save Note
         </button>
@@ -370,16 +384,167 @@ function AppContent() {
       />
       {mobileSheet}
       {noteSheet}
-      <BottomSheet open={showNav} onClose={() => setShowNav(false)} title="Books">
-        <div className="pb-2">
-          <BookChapterNav
-            selectedBook={bookId}
-            selectedChapter={chapter}
-            onSelect={(b, c) => { navigateTo(b, c); setShowNav(false) }}
-          />
-        </div>
-      </BottomSheet>
+      <NavBottomSheet
+        open={showNav}
+        onClose={() => setShowNav(false)}
+        navBookId={navBookId}
+        navChapter={navChapter}
+        onSelectBook={(id) => { setNavBookId(id); setNavChapter(1) }}
+        onSelectChapter={(ch) => setNavChapter(ch)}
+        onSelectVerse={(b, c, _v) => { navigateTo(b, c); setShowNav(false) }}
+      />
     </>
+  )
+}
+
+function NavBottomSheet({
+  open, onClose, navBookId, navChapter, onSelectBook, onSelectChapter, onSelectVerse,
+}: {
+  open: boolean; onClose: () => void
+  navBookId: number; navChapter: number
+  onSelectBook: (id: number) => void; onSelectChapter: (ch: number) => void
+  onSelectVerse: (bookId: number, chapter: number, verseNum: number) => void
+}) {
+  const currentBook = BOOKS.find((b) => b.id === navBookId)
+  const [navVerses, setNavVerses] = useState<Verse[]>([])
+  const [otExpanded, setOtExpanded] = useState(true)
+  const [ntExpanded, setNtExpanded] = useState(true)
+
+  useEffect(() => {
+    if (open && currentBook) {
+      getVerses(navBookId, navChapter).then(setNavVerses)
+    }
+  }, [open, navBookId, navChapter, currentBook])
+
+  const OT_BOOKS = BOOKS.filter((b) => b.testament === 'OT')
+  const NT_BOOKS = BOOKS.filter((b) => b.testament === 'NT')
+
+  return (
+    <BottomSheet open={open} onClose={onClose} title="" position="top">
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-2 right-3 z-10 p-1 rounded-md hover:bg-surface text-text-tertiary hover:text-text-primary transition-colors duration-150 cursor-pointer"
+        aria-label="Close"
+      >
+        <X size={14} />
+      </button>
+      <div className="flex h-[50vh] overflow-hidden -mx-4 -mb-4 -mt-4">
+        <div className="w-[44%] min-w-0 shrink-0 border-r border-border flex flex-col">
+          <div className="px-2.5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-text-secondary bg-surface-hover/40 border-b border-border shrink-0">
+            Books
+          </div>
+          <div className="flex-1 overflow-y-auto divide-y divide-border-subtle/50">
+            <div>
+              <button
+                type="button"
+                onClick={() => setOtExpanded((p) => !p)}
+                className="w-full flex items-center gap-1.5 px-2.5 py-2 text-[10px] font-bold uppercase tracking-widest text-accent border-b border-border bg-surface-hover/30 cursor-pointer"
+              >
+                {otExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                Old Testament
+              </button>
+              {otExpanded && OT_BOOKS.map((b) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => onSelectBook(b.id)}
+                  className={`w-full text-left px-3 py-2 text-xs font-medium transition-all duration-100 cursor-pointer border-l-2 ${
+                    navBookId === b.id
+                      ? 'bg-accent/[0.12] text-accent font-semibold border-l-accent'
+                      : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary border-l-transparent hover:border-l-border'
+                  }`}
+                >
+                  {b.name}
+                </button>
+              ))}
+            </div>
+            <div>
+              <button
+                type="button"
+                onClick={() => setNtExpanded((p) => !p)}
+                className="w-full flex items-center gap-1.5 px-2.5 py-2 text-[10px] font-bold uppercase tracking-widest text-accent border-b border-border bg-surface-hover/30 cursor-pointer"
+              >
+                {ntExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                New Testament
+              </button>
+              {ntExpanded && NT_BOOKS.map((b) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => onSelectBook(b.id)}
+                  className={`w-full text-left px-3 py-2 text-xs font-medium transition-all duration-100 cursor-pointer border-l-2 ${
+                    navBookId === b.id
+                      ? 'bg-accent/[0.12] text-accent font-semibold border-l-accent'
+                      : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary border-l-transparent hover:border-l-border'
+                  }`}
+                >
+                  {b.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="w-[28%] min-w-0 shrink-0 border-r border-border flex flex-col">
+          <div className="px-2.5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-accent bg-accent/8 border-b border-accent/20 shrink-0">
+            Chapters
+          </div>
+          <div className="flex-1 overflow-y-auto p-2 bg-accent/[0.02]">
+            {currentBook && (
+              <>
+                <p className="text-[11px] font-semibold text-accent/80 px-1 mb-2">
+                  {currentBook.name}
+                </p>
+                <div className="space-y-0.5">
+                  {Array.from({ length: currentBook.chapters }, (_, i) => i + 1).map((ch) => (
+                    <button
+                      key={ch}
+                      type="button"
+                      onClick={() => onSelectChapter(ch)}
+                      className={`w-full text-center px-3 py-2 text-xs font-medium rounded-md transition-all duration-150 cursor-pointer ${
+                        navChapter === ch
+                          ? 'bg-accent text-white shadow-sm'
+                          : 'text-text-secondary border border-transparent hover:border-accent/15 hover:bg-accent/[0.04] hover:text-accent active:bg-accent/8'
+                      }`}
+                    >
+                      {ch}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="w-[28%] min-w-0 shrink-0 flex flex-col">
+          <div className="px-2.5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-accent bg-accent/8 border-b border-accent/20 shrink-0">
+            Verses
+          </div>
+          <div className="flex-1 overflow-y-auto p-2 bg-accent/[0.02]">
+            {currentBook && (
+              <>
+                <p className="text-[11px] font-semibold text-accent/80 px-1 mb-2">
+                  {currentBook.name} {navChapter}
+                </p>
+                <div className="space-y-0.5">
+                  {navVerses.map((v) => (
+                    <button
+                      key={v.id}
+                      type="button"
+                      onClick={() => onSelectVerse(v.book_id, v.chapter_num, v.verse_num)}
+                      className="w-full text-center px-2.5 py-2 rounded-md text-xs text-text-secondary border border-transparent hover:border-accent/15 hover:bg-accent/[0.04] hover:text-accent active:bg-accent/8 transition-all duration-100 cursor-pointer"
+                    >
+                      <span className="font-semibold text-accent mr-1.5 tabular-nums">{v.verse_num}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </BottomSheet>
   )
 }
 

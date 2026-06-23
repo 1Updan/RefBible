@@ -96,9 +96,6 @@ export function SettingsPanel({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3 border-b border-border shrink-0">
-        <h2 className="text-sm font-semibold text-text-primary">Settings</h2>
-      </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         <section>
           <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2.5">Color Mode</h3>

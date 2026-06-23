@@ -23,6 +23,8 @@ interface ReadingViewProps {
   onChapterText?: (text: string) => void
   onChapterVerses?: (verses: string[]) => void
   onSelectionVerse?: (verseNum: number | null) => void
+  onSwipePrev?: () => void
+  onSwipeNext?: () => void
 }
 
 export function ReadingView({
@@ -41,6 +43,8 @@ export function ReadingView({
   onChapterText,
   onChapterVerses,
   onSelectionVerse,
+  onSwipePrev,
+  onSwipeNext,
 }: ReadingViewProps) {
   const { openCrossReferences, setCrossRefTarget, setStudyTab, setActivePanel, navigateTo, setAiTarget, pendingRange, setPendingRange, activePanel, studyTab, openWordStudy } = useNavigation()
   const pendingRef = useRef(pendingRange)
@@ -55,12 +59,28 @@ export function ReadingView({
   const [verseNotes, setVerseNotes] = useState<Set<string>>(new Set())
   const [highlightedVerseId, setHighlightedVerseId] = useState<string | null>(null)
   const highlightRef = useRef<string | null>(null)
+  const historyHighlightedRef = useRef<Set<string>>(new Set())
   const topRef = useRef<HTMLDivElement>(null)
+  const touchStartX = useRef(0)
+  const touchStartY = useRef(0)
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }, [])
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!onSwipePrev && !onSwipeNext) return
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    const dy = e.changedTouches[0].clientY - touchStartY.current
+    if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) * 1.5) return
+    if (dx > 0) onSwipePrev?.()
+    else onSwipeNext?.()
+  }, [onSwipePrev, onSwipeNext])
 
   useEffect(() => {
     let cancelled = false
     async function load() {
-      setSelectedIds(new Set())
       setSelectionAnchor(null)
       setRangeMode(false)
       setHighlightedVerseId(null)
@@ -98,19 +118,28 @@ export function ReadingView({
           onChapterText?.(verseTexts.join(' '))
           onChapterVerses?.(verseTexts)
         }
+        const newSelected = new Set<string>()
+        for (const v of vs) {
+          if (historyHighlightedRef.current.has(v.id)) {
+            newSelected.add(v.id)
+          }
+        }
         const range = pendingRef.current
         if (range) {
-          const ids = vs
-            .filter((v) => v.verse_num >= range.verseStart && v.verse_num <= range.verseEnd)
-            .map((v) => v.id)
-          setSelectedIds(new Set(ids))
+          for (const v of vs) {
+            if (v.verse_num >= range.verseStart && v.verse_num <= range.verseEnd) {
+              newSelected.add(v.id)
+            }
+          }
           setPendingRange(null)
         }
         setLoading(false)
         if (highlightRef.current && map.has(highlightRef.current)) {
           setHighlightedVerseId(highlightRef.current)
+          newSelected.add(highlightRef.current)
           highlightRef.current = null
         }
+        setSelectedIds(newSelected)
       }
     }
     load()
@@ -172,6 +201,7 @@ export function ReadingView({
 
   const handleClearSelection = useCallback(() => {
     setSelectedIds(new Set())
+    historyHighlightedRef.current = new Set()
     setRangeMode(false)
   }, [])
 
@@ -200,9 +230,15 @@ export function ReadingView({
   }, [selectedIds, activePanel, studyTab, verses, bookId, chapter, setCrossRefTarget])
 
   const handleNavigateToRef = useCallback((targetId: string) => {
+    historyHighlightedRef.current.add(targetId)
     const parsed = parseOsisId(targetId)
     if (!parsed) return
     if (parsed.bookId === bookId && parsed.chapter === chapter) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev)
+        next.add(targetId)
+        return next
+      })
       setHighlightedVerseId(targetId)
       const el = document.getElementById(`verse-${targetId}`)
       if (el) {
@@ -297,7 +333,7 @@ export function ReadingView({
 
   return (
     <div className="relative flex flex-col flex-1 min-h-0">
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden" ref={topRef}>
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden touch-pan-y" ref={topRef} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         <div className="max-w-6xl ml-auto mr-4 py-3 space-y-0.5">
           {verses.map((verse) => {
             const d = data.get(verse.id)
@@ -313,7 +349,6 @@ export function ReadingView({
                 isSelected={selectedIds.has(verse.id)}
                 isBookmarked={bookmarks.has(verse.id)}
                 hasNote={verseNotes.has(verse.id)}
-                isDesktop={isDesktop}
                 interlinearEnabled={interlinearEnabled}
                 interlinearLanguages={interlinearLanguages}
                 isHighlighted={highlightedVerseId === verse.id}
