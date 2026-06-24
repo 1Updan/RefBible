@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, Key, AlertCircle, BookText } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, Key, AlertCircle, BookText, Volume2, VolumeX } from 'lucide-react'
 import { useNavigation } from '@/hooks/useNavigation'
 import { useNetworkState } from '@/hooks/useNetworkState'
 import { getCrossReferences, getTranslations, saveNote, getNotes, getAllNotes, deleteNote, getStrongsEntry } from '@/lib/db'
 import { formatVerseId, parseOsisId } from '@/lib/utils'
 import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
 import { getBook } from '@/data/books'
 import type { CrossReference, Note, StrongsEntry } from '@/types/db'
 import type { ActiveTab } from '@/contexts/navigation'
@@ -204,7 +205,7 @@ function NotesTab() {
   )
 }
 
-type AiMode = 'passage' | 'contextual' | 'historical' | 'structural' | 'lexical' | 'intertextual' | 'denominational' | 'theological' | 'applicational' | 'custom'
+type AiMode = 'context' | 'words' | 'theology' | 'application' | 'story' | 'custom'
 
 interface AiModeDef {
   id: AiMode
@@ -216,67 +217,39 @@ interface AiModeDef {
 
 const AI_MODES: AiModeDef[] = [
   {
-    id: 'passage',
-    label: 'Pure Passage',
-    description: 'Text-only meaning, no outside data',
+    id: 'context',
+    label: 'Context & Background',
+    description: 'Context, history, cross-references',
     icon: Crosshair,
-    systemPrompt: `You are an advanced AI engine for Bible study. Analyze the provided text strictly by what is written. Do not pull in external historical, cultural, or philosophical data. Focus only on the immediate, explicit meaning of the words as they appear on the page.`,
+    systemPrompt: `You are an expert in biblical exegesis. Analyze the passage thoroughly across four layers: (1) Immediate context — how the surrounding verses frame its meaning, the narrative or argumentative flow leading into and out of the text. (2) Book-level context — the author's purpose, the book's overarching themes, and how this passage contributes to them. (3) Historical and cultural setting — authorship, audience, date, societal norms, political and religious landscape, geographical details. (4) Intertextual connections — specific cross-references (cite verse numbers), quotations of or allusions to other Old or New Testament passages, and how the passage fits into the sweep of redemptive history from Genesis to Revelation. For each layer, explain why it matters for interpreting the passage. Be specific: name historical figures, quote relevant cross-references, and trace thematic developments across Testaments.`,
   },
   {
-    id: 'contextual',
-    label: 'Contextual & Background',
-    description: 'Immediate context, book theme, narrative flow',
+    id: 'words',
+    label: 'Words & Structure',
+    description: 'Genre, outline, original language',
     icon: Crosshair,
-    systemPrompt: `You are an advanced AI engine for Bible study. Analyze the passage in light of its context. Examine how it fits within the verses immediately before and after it. Analyze it in light of the entire book's overarching theme and purpose. Track how the argument or story develops leading up to and following the selected text.`,
+    systemPrompt: `You are an expert in biblical literary analysis and biblical languages. Analyze the passage in two complementary dimensions. First, literary analysis: identify the genre (narrative, poetry, prophecy, epistle, wisdom, apocalyptic) and explain how genre shapes interpretation. Break the passage into a logical outline showing how each part contributes to the whole. Detect and explain literary devices — chiasms, parallelisms, inclusio, metaphors, similes, hyperbole, irony, merisms, and wordplay — describing their rhetorical effect. Second, lexical analysis: identify the key Greek, Hebrew, or Aramaic words behind the English translation. For each, provide the lemma, Strong's number, semantic range, grammatical features (tense, voice, mood for verbs; case, number, gender for nouns), and how the word functions in this specific context. Show how the word is used elsewhere in Scripture. Always tie word-level and literary insights back to the meaning and impact of the passage as a whole.`,
   },
   {
-    id: 'historical',
-    label: 'Historical & Cultural',
-    description: 'Ancient customs, authorship, setting',
+    id: 'theology',
+    label: 'Theology & Doctrine',
+    description: 'Doctrines, biblical themes, church tradition',
     icon: Crosshair,
-    systemPrompt: `You are an advanced AI engine for Bible study. Analyze the historical and cultural setting of the passage. Explain societal norms, laws, traditions, and cultural practices of the time. Identify who wrote the text, who they were writing to, and why. Outline political events, geographical locations, and the chronological timeline surrounding the text.`,
+    systemPrompt: `You are an expert in biblical and systematic theology. Identify and explain the major doctrinal themes present in the passage — the nature and character of God, Christology, the work of the Holy Spirit, sin and salvation, humanity and the image of God, covenant, kingdom of God, grace, faith, judgment, and eschatology. Connect each theme to the broader biblical narrative, showing how this passage develops, affirms, or challenges what Scripture teaches on the subject. Then discuss how the passage has been understood throughout church history — cite key theologians (e.g., Augustine, Aquinas, Luther, Calvin, Wesley), ecumenical creeds, and confessional statements where relevant. Highlight areas of both interpretive consensus and significant divergence among traditions, explaining what theologically is at stake in each view. Conclude by summarizing the passage's most significant theological contribution.`,
   },
   {
-    id: 'structural',
-    label: 'Structural & Literary',
-    description: 'Genre, outline, literary devices',
+    id: 'application',
+    label: 'Modern Application',
+    description: 'Ethics, contemporary living',
     icon: Crosshair,
-    systemPrompt: `You are an advanced AI engine for Bible study. Analyze the literary features of the passage. Identify its genre (poetry, prophecy, epistle, narrative, wisdom). Break the passage into a logical outline or structural map. Detect rhetorical and poetic tools such as chiasms, parallelisms, metaphors, and wordplay.`,
+    systemPrompt: `You are an expert in biblical ethics and practical theology. Extract the ethical principles, commands, values, and virtues taught or implied in the passage. Carefully distinguish between cultural-specific instructions (bound to the original context and not directly transferable) and transcultural principles (applicable today), explaining your reasoning for each classification. For each transcultural principle, provide concrete, actionable guidance for contemporary life across multiple spheres — personal character and spirituality, relationships and family, work and vocation, church and community, and engagement with the broader culture. Include reflection questions that move the reader from understanding to personal transformation. Be specific and practical rather than abstract — give examples of what faithful application looks like in real-world situations today.`,
   },
   {
-    id: 'lexical',
-    label: 'Lexical Analysis',
-    description: 'Original languages, word studies, etymology',
+    id: 'story',
+    label: 'Story Mode',
+    description: 'Immersive biblical storytelling',
     icon: Crosshair,
-    systemPrompt: `You are an advanced AI engine for Bible study. Analyze the original Greek, Hebrew, or Aramaic words behind the English translation. Trace the etymology and underlying definitions of key terms. Examine how specific words are used across different parts of Scripture to find deeper nuances.`,
-  },
-  {
-    id: 'intertextual',
-    label: 'Intertextual Analysis',
-    description: 'Cross-references, quotations, redemptive history',
-    icon: Crosshair,
-    systemPrompt: `You are an advanced AI engine for Bible study. Analyze how the passage connects to the rest of Scripture. Locate and explain direct links to other verses. Identify where the passage quotes other scriptures or alludes to older biblical themes. Trace how the specific concepts develop from Genesis to Revelation.`,
-  },
-  {
-    id: 'denominational',
-    label: 'Comparative Denominational',
-    description: 'Reformed, Catholic, Orthodox, Arminian views',
-    icon: Crosshair,
-    systemPrompt: `You are an advanced AI engine for Bible study. Compare interpretations from different Christian traditions (Reformed, Catholic, Orthodox, Arminian, Pentecostal). Clearly outline where these traditions disagree on the interpretation of the text. Highlight points of agreement among the various traditions.`,
-  },
-  {
-    id: 'theological',
-    label: 'Theological & Topical',
-    description: 'Doctrines, biblical themes, topical synthesis',
-    icon: Crosshair,
-    systemPrompt: `You are an advanced AI engine for Bible study. Identify major doctrinal themes present in the text (nature of God, salvation, humanity). Trace core motifs like covenant, kingdom, grace, or justice. Connect the passage to broader biblical teachings on specific subjects.`,
-  },
-  {
-    id: 'applicational',
-    label: 'Behavioral & Application',
-    description: 'Ethics, modern application, reflection',
-    icon: Crosshair,
-    systemPrompt: `You are an advanced AI engine for Bible study. Extract the ethical commands, principles, and values taught in the passage. Translate ancient principles into actionable guidance for contemporary daily living. Provide prompts that help the user think about personal transformation and character growth.`,
+    systemPrompt: `You are a gifted biblical storyteller. Present the passage as a vivid, engaging narrative. Begin by setting the scene — include relevant geographical, cultural, and historical details so the world of the text feels immediate and real. Introduce the key characters with their backgrounds and motivations. Identify the dramatic tension or conflict that drives the narrative forward. Walk through the narrative arc — setup, rising action, climax, resolution — while remaining 100% faithful to Scripture; never contradict or embellish beyond what is written. Weave explanatory details (customs, geography, political dynamics, theological background) naturally into the story so they enrich rather than interrupt. Use sensory language and vivid description to make the scene come alive. End by connecting the passage to its role in the larger biblical story and suggesting what it reveals about God's character and purposes.`,
   },
   {
     id: 'custom',
@@ -297,6 +270,38 @@ function AiTab() {
   const [response, setResponse] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [aiSpeaking, setAiSpeaking] = useState(false)
+  const [streaming, setStreaming] = useState(false)
+  const responseRef = useRef('')
+  const sentenceBufferRef = useRef('')
+  const unlistenRef = useRef<(() => void)[]>([])
+
+  const cleanup = useCallback(() => {
+    for (const u of unlistenRef.current) u()
+    unlistenRef.current = []
+  }, [])
+
+  useEffect(() => {
+    return cleanup
+  }, [cleanup])
+
+  const speakSentence = useCallback((sentence: string) => {
+    const utterance = new SpeechSynthesisUtterance(sentence)
+    utterance.rate = 0.9
+    utterance.onend = () => {
+      if (speechSynthesis.speaking === false) {
+        setAiSpeaking(false)
+      }
+    }
+    utterance.onerror = () => setAiSpeaking(false)
+    speechSynthesis.speak(utterance)
+    setAiSpeaking(true)
+  }, [])
+
+  const stopAiSpeech = useCallback(() => {
+    speechSynthesis.cancel()
+    setAiSpeaking(false)
+  }, [])
 
   const handleSave = () => {
     localStorage.setItem('refbible-ai-key', apiKey)
@@ -311,24 +316,54 @@ function AiTab() {
 
   const handleRun = async () => {
     if (!aiTarget || !apiKey) return
-    const mode = AI_MODES.find((m) => m.id === (selectedMode ?? 'text-analysis'))
+    const mode = AI_MODES.find((m) => m.id === (selectedMode ?? 'context'))
     if (!mode) return
     setLoading(true)
+    setStreaming(true)
     setError(null)
     setResponse('')
+    responseRef.current = ''
+    sentenceBufferRef.current = ''
+    stopAiSpeech()
+    cleanup()
+
+    const systemPrompt = mode.systemPrompt
+    const combinedPrompt = customPrompt.trim()
+      ? `${systemPrompt}\n\nExtra instructions from user:\n${customPrompt}\n\nVerse: ${aiTarget.reference}\n\n${aiTarget.text}`
+      : `${systemPrompt}\n\nVerse: ${aiTarget.reference}\n\n${aiTarget.text}`
+
     try {
-      const systemPrompt = mode.systemPrompt
-      const combinedPrompt = customPrompt.trim()
-        ? `${systemPrompt}\n\nExtra instructions from user:\n${customPrompt}\n\nVerse: ${aiTarget.reference}\n\n${aiTarget.text}`
-        : `${systemPrompt}\n\nVerse: ${aiTarget.reference}\n\n${aiTarget.text}`
-      const raw = await invoke<string>('ai_query', { apiKey, prompt: combinedPrompt })
-      const parsed = JSON.parse(raw)
-      const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text ?? 'No response text found.'
-      setResponse(text)
+      const unlistenToken = await listen<string>('ai:token', (event) => {
+        const token = event.payload
+        responseRef.current += token
+        setResponse(responseRef.current)
+
+        sentenceBufferRef.current += token
+        let match
+        const sentenceEnd = /[.!?](?:\s|$)/
+        while ((match = sentenceEnd.exec(sentenceBufferRef.current)) !== null) {
+          const completedSentence = sentenceBufferRef.current.slice(0, match.index + 1)
+          sentenceBufferRef.current = sentenceBufferRef.current.slice(match.index + 1).trimStart()
+          speakSentence(completedSentence)
+        }
+      })
+      unlistenRef.current.push(unlistenToken)
+
+      const unlistenDone = await listen('ai:done', () => {
+        if (sentenceBufferRef.current.trim()) {
+          speakSentence(sentenceBufferRef.current.trim())
+          sentenceBufferRef.current = ''
+        }
+        setLoading(false)
+        setStreaming(false)
+      })
+      unlistenRef.current.push(unlistenDone)
+
+      void invoke('ai_query_stream', { apiKey, prompt: combinedPrompt })
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
-    } finally {
       setLoading(false)
+      setStreaming(false)
     }
   }
 
@@ -343,24 +378,45 @@ function AiTab() {
   }
 
   if (!saved) {
+    const selectedModeLabel = selectedMode ? AI_MODES.find((m) => m.id === selectedMode)?.label : null
     return (
       <div className="space-y-4">
         <div className="space-y-2">
           <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
             <Sparkles size={13} />
-            What AI Can Do
+            Pick an Analysis Mode
           </h3>
-          <div className="space-y-1.5">
+            <div className="flex flex-col gap-1.5">
             {AI_MODES.filter((m) => m.id !== 'custom').map((mode) => (
-              <div key={mode.id} className="px-3 py-2 rounded-lg bg-surface-elevated border border-border-subtle">
-                <p className="text-xs font-semibold text-text-primary">{mode.label}</p>
-                <p className="text-[11px] text-text-tertiary mt-0.5">{mode.description}</p>
-              </div>
+              <button
+                key={mode.id}
+                type="button"
+                onClick={() => setSelectedMode(mode.id)}
+                className={`text-left px-2.5 py-2 rounded-lg border text-xs transition-all duration-150 cursor-pointer ${
+                  selectedMode === mode.id
+                    ? 'bg-accent text-white border-accent'
+                    : 'bg-surface-elevated text-text-secondary border-border-subtle hover:border-accent/30 hover:text-text-primary'
+                }`}
+              >
+                <p className="font-semibold">{mode.label}</p>
+                <p className={`mt-0.5 leading-tight ${selectedMode === mode.id ? 'text-white/80' : 'text-text-tertiary'}`}>
+                  {mode.description}
+                </p>
+              </button>
             ))}
           </div>
-          <p className="text-xs text-text-tertiary mt-2">
-            AI works on any verse you select. Enter your API key to get started.
-          </p>
+          {selectedMode ? (
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-accent/10 border border-accent/20">
+              <Sparkles size={14} className="shrink-0 mt-0.5 text-accent" />
+              <p className="text-xs text-text-primary leading-relaxed">
+                You picked <strong className="text-accent">{selectedModeLabel}</strong>. Enter your API key below and click <strong>Activate AI</strong> to start analyzing verses.
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs text-text-tertiary mt-1">
+              Choose a mode above, then enter your API key to get started.
+            </p>
+          )}
         </div>
 
         <hr className="border-border" />
@@ -428,7 +484,7 @@ function AiTab() {
 
           <div className="space-y-1">
             <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Analysis Mode</p>
-            <div className="grid grid-cols-2 gap-1.5">
+          <div className="flex flex-col gap-1.5">
               {AI_MODES.map((mode) => (
                 <button
                   key={mode.id}
@@ -471,7 +527,7 @@ function AiTab() {
             {loading ? (
               <>
                 <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Analyzing…
+                {streaming ? 'Receiving response…' : 'Analyzing…'}
               </>
             ) : (
               <>
@@ -489,8 +545,34 @@ function AiTab() {
 
           {response && (
             <div className="px-3 py-3 rounded-lg bg-surface-elevated border border-border-subtle">
-              <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">Result</p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Result</p>
+                <div className="flex items-center gap-1">
+                  {aiSpeaking ? (
+                    <button
+                      type="button"
+                      onClick={stopAiSpeech}
+                      className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg bg-danger/10 text-danger hover:bg-danger/20 transition-all duration-150 cursor-pointer"
+                    >
+                      <VolumeX size={12} />
+                      Stop
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => speakSentence(responseRef.current)}
+                      className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg bg-accent/10 text-accent hover:bg-accent/20 transition-all duration-150 cursor-pointer"
+                    >
+                      <Volume2 size={12} />
+                      Listen
+                    </button>
+                  )}
+                </div>
+              </div>
               <div className="text-xs text-text-primary leading-relaxed whitespace-pre-wrap">{response}</div>
+              {streaming && (
+                <span className="inline-block w-2 h-4 ml-0.5 bg-accent animate-pulse rounded-sm" />
+              )}
             </div>
           )}
         </div>

@@ -52,9 +52,16 @@ pub fn run() {
             sql: include_str!("../migrations/002_interlinear.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 3,
+            description: "verse highlights/color tags",
+            sql: include_str!("../migrations/003_highlights.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_http::init())
         .plugin(
             tauri_plugin_sql::Builder::default()
@@ -72,7 +79,7 @@ pub fn run() {
             ensure_db(app);
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![commands::ai::ai_query])
+        .invoke_handler(tauri::generate_handler![commands::ai::ai_query, commands::ai::ai_query_stream])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Bookmark, BookmarkCheck, Crosshair, MessageSquareMore, Sparkles, X, List, XCircle, GripVertical, BookText } from 'lucide-react'
+import { Bookmark, BookmarkCheck, Crosshair, MessageSquareMore, Sparkles, X, List, XCircle, GripVertical, BookText, Share2, Highlighter, Eraser } from 'lucide-react'
+import { HIGHLIGHT_COLORS } from '@/lib/highlights'
+import type { HighlightColorId } from '@/lib/highlights'
 import clsx from 'clsx'
 
 interface VerseActionBarProps {
@@ -16,6 +18,12 @@ interface VerseActionBarProps {
   onClearSelection: () => void
   onRangeSelect?: () => void
   isRangeMode?: boolean
+  onShare?: () => void
+  highlightActive?: boolean
+  activeHighlightColor?: HighlightColorId | null
+  onToggleHighlight?: () => void
+  onHighlightColorSelect?: (color: HighlightColorId | null) => void
+  onEraseSelection?: () => void
 }
 
 export function VerseActionBar({
@@ -32,26 +40,40 @@ export function VerseActionBar({
   onClearSelection,
   onRangeSelect,
   isRangeMode,
+  onShare,
+  highlightActive,
+  activeHighlightColor,
+  onToggleHighlight,
+  onHighlightColorSelect,
+  onEraseSelection,
 }: VerseActionBarProps) {
   if (isDesktop) {
-    return <DesktopActionBar
-      selectedCount={selectedCount}
-      allBookmarked={allBookmarked}
-      isOnline={isOnline}
-      interlinearEnabled={interlinearEnabled}
-      onToggleInterlinear={onToggleInterlinear}
-      onToggleBookmark={onToggleBookmark}
-      onAddNote={onAddNote}
-      onCrossReferences={onCrossReferences}
-      onAiCommentary={onAiCommentary}
-      onClearSelection={onClearSelection}
-      onRangeSelect={onRangeSelect}
-      isRangeMode={isRangeMode}
-    />
+    return (
+      <DesktopActionBar
+        selectedCount={selectedCount}
+        allBookmarked={allBookmarked}
+        isOnline={isOnline}
+        interlinearEnabled={interlinearEnabled}
+        onToggleInterlinear={onToggleInterlinear}
+        onToggleBookmark={onToggleBookmark}
+        onAddNote={onAddNote}
+        onCrossReferences={onCrossReferences}
+        onAiCommentary={onAiCommentary}
+        onClearSelection={onClearSelection}
+        onRangeSelect={onRangeSelect}
+        isRangeMode={isRangeMode}
+        onShare={onShare}
+        highlightActive={highlightActive}
+        activeHighlightColor={activeHighlightColor}
+        onToggleHighlight={onToggleHighlight}
+        onHighlightColorSelect={onHighlightColorSelect}
+        onEraseSelection={onEraseSelection}
+      />
+    )
   }
 
   return (
-    <div className="fixed bottom-16 left-0 right-0 z-40 flex justify-center px-4 animate-[slideUp_150ms_ease-out] pointer-events-none">
+    <div className="fixed bottom-16 left-0 right-0 z-40 flex flex-col items-center px-4 animate-[slideUp_150ms_ease-out] pointer-events-none">
       <div className="w-fit max-w-full flex items-center gap-1 px-2.5 py-1 bg-action-bar shadow-2xl rounded-2xl overflow-hidden pointer-events-auto">
         <span className="text-xs text-white/80 font-medium shrink-0 pl-0.5">
           {selectedCount}
@@ -90,6 +112,31 @@ export function VerseActionBar({
           <MessageSquareMore size={15} />
           <span className="text-[9px] leading-none">Note</span>
         </button>
+        {onShare && (
+          <button
+            type="button"
+            onClick={onShare}
+            className="flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg text-white/80 hover:text-white transition-all duration-150 cursor-pointer"
+          >
+            <Share2 size={15} />
+            <span className="text-[9px] leading-none">Share</span>
+          </button>
+        )}
+        {onToggleHighlight && (
+          <button
+            type="button"
+            onClick={onToggleHighlight}
+            className={clsx(
+              'flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg transition-all duration-150 cursor-pointer',
+              highlightActive
+                ? 'text-accent bg-white/15'
+                : 'text-white/80 hover:text-white',
+            )}
+          >
+            <Highlighter size={15} />
+            <span className="text-[9px] leading-none">HL</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={onCrossReferences}
@@ -128,6 +175,34 @@ export function VerseActionBar({
           <span className="text-[9px] leading-none">Done</span>
         </button>
       </div>
+
+      {highlightActive && onHighlightColorSelect && (
+        <div className="mt-1.5 flex items-center gap-1.5 px-3 py-1.5 bg-action-bar shadow-xl rounded-full pointer-events-auto animate-[fadeIn_100ms_ease-out]">
+          {HIGHLIGHT_COLORS.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => onHighlightColorSelect(activeHighlightColor === c.id ? null : c.id)}
+              className={clsx(
+                'w-6 h-6 rounded-full transition-all duration-100 cursor-pointer ring-1 ring-white/20 hover:scale-110',
+                activeHighlightColor === c.id ? 'ring-2 ring-white scale-110' : '',
+              )}
+              style={{ backgroundColor: c.bg }}
+              aria-label={c.label}
+            />
+          ))}
+          <span className="w-px h-4 bg-white/20 shrink-0" />
+          <button
+            type="button"
+            onClick={onEraseSelection}
+            className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-100 cursor-pointer ring-1 ring-white/20 hover:scale-110 bg-white/10"
+            aria-label="Remove highlights"
+            title="Remove highlights"
+          >
+            <Eraser size={12} className="text-white/70" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -145,6 +220,12 @@ function DesktopActionBar({
   onClearSelection,
   onRangeSelect,
   isRangeMode,
+  onShare,
+  highlightActive,
+  activeHighlightColor,
+  onToggleHighlight,
+  onHighlightColorSelect,
+  onEraseSelection,
 }: {
   selectedCount: number
   allBookmarked: boolean
@@ -158,6 +239,12 @@ function DesktopActionBar({
   onClearSelection: () => void
   onRangeSelect?: () => void
   isRangeMode?: boolean
+  onShare?: () => void
+  highlightActive?: boolean
+  activeHighlightColor?: HighlightColorId | null
+  onToggleHighlight?: () => void
+  onHighlightColorSelect?: (color: HighlightColorId | null) => void
+  onEraseSelection?: () => void
 }) {
   const [offset, setOffset] = useState<{ x: number; y: number }>(() => {
     try {
@@ -217,7 +304,6 @@ function DesktopActionBar({
     localStorage.setItem('refbible-action-bar-offset', JSON.stringify(offset))
   }, [offset])
 
-  // Clamp on mount and resize — useLayoutEffect avoids an off-screen flash before paint
   useLayoutEffect(() => {
     const onResize = () => setOffset((prev) => clampOffset(prev.x, prev.y))
     window.addEventListener('resize', onResize)
@@ -226,42 +312,84 @@ function DesktopActionBar({
   }, [clampOffset])
 
   return (
-    <div
-      ref={barRef}
-      className="fixed bottom-6 left-1/2 z-40 flex items-center gap-px rounded-xl bg-action-bar shadow-2xl px-1 py-1.5 animate-[fadeIn_150ms_ease-out] select-none touch-none"
-      style={{ transform: `translate(calc(-50% + ${offset.x}px), ${offset.y}px)` }}
-    >
-      <span
-        ref={handleRef}
-        className="flex items-center gap-0.5 text-[11px] text-white/80 font-medium px-1 py-1 whitespace-nowrap rounded-lg cursor-grab active:cursor-grabbing hover:bg-white/10 transition-colors"
-        onPointerDown={handlePointerDown}
+    <div className="flex flex-col items-center">
+      <div
+        ref={barRef}
+        className="fixed bottom-6 left-1/2 z-40 flex items-center gap-px rounded-xl bg-action-bar shadow-2xl px-1 py-1.5 animate-[fadeIn_150ms_ease-out] select-none touch-none"
+        style={{ transform: `translate(calc(-50% + ${offset.x}px), ${offset.y}px)` }}
       >
-        <GripVertical size={11} className="text-white/50 shrink-0" />
-        {selectedCount}
-      </span>
-      <span className="w-px h-4 bg-white/20" />
-      <ActionButton icon={allBookmarked ? <BookmarkCheck size={13} /> : <Bookmark size={13} />} label={allBookmarked ? 'Unbookmark' : 'Bookmark'} onClick={onToggleBookmark} />
-      {onRangeSelect && selectedCount === 1 && (
-        <ActionButton
-          icon={isRangeMode ? <XCircle size={13} /> : <List size={13} />}
-          label={isRangeMode ? 'Cancel' : 'Range'}
-          onClick={onRangeSelect}
-          highlighted={isRangeMode}
-        />
+        <span
+          ref={handleRef}
+          className="flex items-center gap-0.5 text-[11px] text-white/80 font-medium px-1 py-1 whitespace-nowrap rounded-lg cursor-grab active:cursor-grabbing hover:bg-white/10 transition-colors"
+          onPointerDown={handlePointerDown}
+        >
+          <GripVertical size={11} className="text-white/50 shrink-0" />
+          {selectedCount}
+        </span>
+        <span className="w-px h-4 bg-white/20" />
+        <ActionButton icon={allBookmarked ? <BookmarkCheck size={13} /> : <Bookmark size={13} />} label={allBookmarked ? 'Unbookmark' : 'Bookmark'} onClick={onToggleBookmark} />
+        {onRangeSelect && selectedCount === 1 && (
+          <ActionButton
+            icon={isRangeMode ? <XCircle size={13} /> : <List size={13} />}
+            label={isRangeMode ? 'Cancel' : 'Range'}
+            onClick={onRangeSelect}
+            highlighted={isRangeMode}
+          />
+        )}
+        <ActionButton icon={<MessageSquareMore size={13} />} label="Note" onClick={onAddNote} />
+        {onShare && <ActionButton icon={<Share2 size={13} />} label="Share" onClick={onShare} />}
+        {onToggleHighlight && (
+          <ActionButton
+            icon={<Highlighter size={13} />}
+            label={highlightActive ? 'HL On' : 'HL'}
+            onClick={onToggleHighlight}
+            highlighted={highlightActive}
+          />
+        )}
+        <ActionButton icon={<Crosshair size={13} />} label="Refs" onClick={onCrossReferences} />
+        <ActionButton icon={<Sparkles size={13} />} label="AI" onClick={onAiCommentary} disabled={!isOnline} />
+        <ActionButton icon={<BookText size={13} />} label="IL" onClick={onToggleInterlinear} highlighted={interlinearEnabled} />
+        <span className="w-px h-4 bg-white/20" />
+        <button
+          type="button"
+          onClick={onClearSelection}
+          className="p-0.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all duration-150 cursor-pointer"
+          aria-label="Clear selection"
+        >
+          <X size={13} />
+        </button>
+      </div>
+
+      {highlightActive && onHighlightColorSelect && (
+        <div
+          className="fixed bottom-[88px] left-1/2 z-40 flex items-center gap-1.5 px-2.5 py-1.5 bg-action-bar shadow-xl rounded-full animate-[fadeIn_100ms_ease-out]"
+          style={{ transform: 'translateX(-50%)' }}
+        >
+          {HIGHLIGHT_COLORS.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => onHighlightColorSelect(activeHighlightColor === c.id ? null : c.id)}
+              className={clsx(
+                'w-5 h-5 rounded-full transition-all duration-100 cursor-pointer ring-1 ring-white/20 hover:scale-110',
+                activeHighlightColor === c.id ? 'ring-2 ring-white scale-110' : '',
+              )}
+              style={{ backgroundColor: c.bg }}
+              aria-label={c.label}
+            />
+          ))}
+          <span className="w-px h-4 bg-white/20 shrink-0" />
+          <button
+            type="button"
+            onClick={onEraseSelection}
+            className="w-5 h-5 rounded-full flex items-center justify-center transition-all duration-100 cursor-pointer ring-1 ring-white/20 hover:scale-110 bg-white/10"
+            aria-label="Remove highlights"
+            title="Remove highlights"
+          >
+            <Eraser size={10} className="text-white/70" />
+          </button>
+        </div>
       )}
-      <ActionButton icon={<MessageSquareMore size={13} />} label="Note" onClick={onAddNote} />
-      <ActionButton icon={<Crosshair size={13} />} label="Refs" onClick={onCrossReferences} />
-      <ActionButton icon={<Sparkles size={13} />} label="AI" onClick={onAiCommentary} disabled={!isOnline} />
-      <ActionButton icon={<BookText size={13} />} label="IL" onClick={onToggleInterlinear} highlighted={interlinearEnabled} />
-      <span className="w-px h-4 bg-white/20" />
-      <button
-        type="button"
-        onClick={onClearSelection}
-        className="p-0.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all duration-150 cursor-pointer"
-        aria-label="Clear selection"
-      >
-        <X size={13} />
-      </button>
     </div>
   )
 }

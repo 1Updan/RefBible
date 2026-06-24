@@ -1,5 +1,5 @@
 import Database from '@tauri-apps/plugin-sql'
-import type { Verse, ContentText, CrossReference, Bookmark, Note, InterlinearWord, StrongsEntry } from '@/types/db'
+import type { Verse, ContentText, CrossReference, Bookmark, Note, InterlinearWord, StrongsEntry, Highlight } from '@/types/db'
 import { parseReference } from './utils'
 
 let db: Database | null = null
@@ -220,6 +220,53 @@ export async function getStrongsEntry(number: string): Promise<StrongsEntry | nu
     [number],
   )
   return rows.length > 0 ? rows[0] : null
+}
+
+export async function getHighlights(): Promise<Map<string, string[]>> {
+  const conn = await getDb()
+  const rows = await conn.select<Highlight[]>(
+    'SELECT id, verse_id, color, created_at FROM highlights ORDER BY created_at',
+  )
+  const map = new Map<string, string[]>()
+  for (const r of rows) {
+    const colors = map.get(r.verse_id) ?? []
+    colors.push(r.color)
+    map.set(r.verse_id, colors)
+  }
+  return map
+}
+
+export async function getHighlightsForChapter(bookId: number, chapter: number): Promise<Map<string, string[]>> {
+  const conn = await getDb()
+  const rows = await conn.select<{ verse_id: string; color: string }[]>(
+    `SELECT h.verse_id, h.color FROM highlights h
+     JOIN verses v ON v.id = h.verse_id
+     WHERE v.book_id = $1 AND v.chapter_num = $2`,
+    [bookId, chapter],
+  )
+  const map = new Map<string, string[]>()
+  for (const r of rows) {
+    const colors = map.get(r.verse_id) ?? []
+    colors.push(r.color)
+    map.set(r.verse_id, colors)
+  }
+  return map
+}
+
+export async function toggleHighlight(verseId: string, color: string): Promise<void> {
+  const conn = await getDb()
+  await conn.execute(
+    'INSERT OR IGNORE INTO highlights (verse_id, color) VALUES ($1, $2)',
+    [verseId, color],
+  )
+}
+
+export async function removeHighlight(verseId: string, color: string): Promise<void> {
+  const conn = await getDb()
+  await conn.execute(
+    'DELETE FROM highlights WHERE verse_id = $1 AND color = $2',
+    [verseId, color],
+  )
 }
 
 export function setOnSeedProgress(): void {

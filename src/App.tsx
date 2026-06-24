@@ -14,13 +14,17 @@ import { SettingsPanel } from './components/panels/SettingsPanel'
 import { BookmarksPanel } from './components/panels/BookmarksPanel'
 import { SearchPanel } from './components/panels/SearchPanel'
 import { BottomSheet } from './components/sheets/BottomSheet'
-import { ensureSeeded, saveBookmark, removeBookmark, getInstalledTranslations, saveNote, getNotes, getVerses } from './lib/db'
+import { ensureSeeded, saveBookmark, removeBookmark, getInstalledTranslations, saveNote, getNotes, getVerses, getHighlightsForChapter, toggleHighlight, removeHighlight } from './lib/db'
 import { getBook, BOOKS } from '@/data/books'
 import type { Verse } from '@/types/db'
+import type { HighlightColorId } from './lib/highlights'
 import { useNetworkState } from './hooks/useNetworkState'
 import { useSpeech } from './hooks/useSpeech'
 import { SpeechControlBar } from './components/reading/SpeechControlBar'
 import { ChevronRight, ChevronDown, X } from 'lucide-react'
+import { isPermissionGranted, requestPermission, sendNotification, onNotificationReceived } from '@tauri-apps/plugin-notification'
+import { getTodaysVerse, shouldSendNotificationToday, markNotificationSent, getPendingVotdNavigation, clearPendingVotdNavigation, setPendingVotdNavigation } from './lib/verseOfTheDay'
+import { parseOsisId } from './lib/utils'
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
@@ -42,12 +46,15 @@ function AppContent() {
   const [error, setError] = useState<string | null>(null)
   const [bookmarks, setBookmarks] = useState<Set<string>>(new Set())
   const [bookmarkRefresh, setBookmarkRefresh] = useState(0)
+  const [highlightColors, setHighlightColors] = useState<Map<string, string[]>>(new Map())
+  const [activeHighlightColor, setActiveHighlightColor] = useState<HighlightColorId | null>(null)
   const [installedVersions, setInstalledVersions] = useState<string[]>(['KJV', 'NASB'])
   const [noteText, setNoteText] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [showNav, setShowNav] = useState(false)
 const [navBookId, setNavBookId] = useState(bookId)
 const [navChapter, setNavChapter] = useState(chapter)
+  const [votdNavigateTo, setVotdNavigateTo] = useState<string | undefined>(undefined)
   const isOnline = useNetworkState()
   const { speak, pause, stop, speaking, paused, resume, isActive, availableVoices, selectedVoiceUri, setSelectedVoiceUri } = useSpeech()
   const chapterTextRef = useRef<{ verses: string[] }>({ verses: [] })
@@ -61,12 +68,53 @@ const [navChapter, setNavChapter] = useState(chapter)
   }, [])
 
   useEffect(() => {
-    if (ready) {
-      getInstalledTranslations().then((codes) => {
-        setInstalledVersions(codes.length > 0 ? codes : ['KJV', 'NASB'])
+    if (!ready) return
+
+    getInstalledTranslations().then((codes) => {
+      setInstalledVersions(codes.length > 0 ? codes : ['KJV', 'NASB'])
+    })
+
+    const pendingOsis = getPendingVotdNavigation()
+    if (pendingOsis) {
+      const parsed = parseOsisId(pendingOsis)
+      if (parsed) {
+        navigateTo(parsed.bookId, parsed.chapter)
+        queueMicrotask(() => setVotdNavigateTo(pendingOsis))
+      }
+      clearPendingVotdNavigation()
+    }
+
+    const unlistenPromise = onNotificationReceived(() => {
+      const votd = getTodaysVerse()
+      const parsed = parseOsisId(votd.osisId)
+      if (parsed) {
+        navigateTo(parsed.bookId, parsed.chapter)
+        setVotdNavigateTo(votd.osisId)
+      }
+    })
+
+    if (shouldSendNotificationToday()) {
+      const votd = getTodaysVerse()
+      setPendingVotdNavigation(votd.osisId)
+
+      isPermissionGranted().then((granted) => {
+        if (!granted) {
+          return requestPermission().then((perm) => perm === 'granted')
+        }
+        return granted
+      }).then((canNotify) => {
+        if (canNotify) {
+          sendNotification({
+            title: `Verse of the Day — ${votd.reference}`,
+            body: votd.text,
+          })
+          markNotificationSent()
+        }
       })
     }
-  }, [ready])
+
+    return () => { unlistenPromise.then((l) => l.unregister()) }
+  }, [ready, navigateTo])
 
   useEffect(() => {
     if (noteVerseId) {
@@ -76,6 +124,48 @@ const [navChapter, setNavChapter] = useState(chapter)
     }
     return () => { setNoteText('') }
   }, [noteVerseId])
+
+  useEffect(() => {
+    if (!ready) return
+    getHighlightsForChapter(bookId, chapter).then(setHighlightColors)
+  }, [ready, bookId, chapter])
+
+  const handleHighlightVerse = useCallback(async (verseId: string, colorOverride?: HighlightColorId) => {
+    const color = colorOverride ?? activeHighlightColor
+    if (!color) return
+    const colors = highlightColors.get(verseId) ?? []
+    if (colors.includes(color)) {
+      await removeHighlight(verseId, color)
+      setHighlightColors((prev) => {
+        const next = new Map(prev)
+        const c = (next.get(verseId) ?? []).filter((x) => x !== color)
+        if (c.length > 0) next.set(verseId, c)
+        else next.delete(verseId)
+        return next
+      })
+    } else {
+      await toggleHighlight(verseId, color)
+      setHighlightColors((prev) => {
+        const next = new Map(prev)
+        const c = next.get(verseId) ?? []
+        next.set(verseId, [...c, color])
+        return next
+      })
+    }
+  }, [activeHighlightColor, highlightColors])
+
+  const handleRemoveHighlight = useCallback(async (verseId: string) => {
+    const colors = highlightColors.get(verseId)
+    if (!colors || colors.length === 0) return
+    for (const color of colors) {
+      await removeHighlight(verseId, color)
+    }
+    setHighlightColors((prev) => {
+      const next = new Map(prev)
+      next.delete(verseId)
+      return next
+    })
+  }, [highlightColors])
 
   const handleToggleBookmark = useCallback(async (verseId: string) => {
     if (bookmarks.has(verseId)) {
@@ -257,6 +347,12 @@ const [navChapter, setNavChapter] = useState(chapter)
         onSelectionVerse={setSpeakFromVerse}
         onSwipePrev={!isDesktop ? () => chapter > 1 && navigateTo(bookId, chapter - 1) : undefined}
         onSwipeNext={!isDesktop ? () => chapter < (currentBook?.chapters ?? 21) && navigateTo(bookId, chapter + 1) : undefined}
+        votdVerseId={votdNavigateTo}
+        highlightColors={highlightColors}
+        activeHighlightColor={activeHighlightColor}
+        onHighlightVerse={handleHighlightVerse}
+        onRemoveHighlight={handleRemoveHighlight}
+        onHighlightColorChange={setActiveHighlightColor}
       />
     </>
   )
@@ -279,6 +375,11 @@ const [navChapter, setNavChapter] = useState(chapter)
             voices={availableVoices}
             selectedVoiceUri={selectedVoiceUri}
             onChangeVoice={setSelectedVoiceUri}
+            onVotdNavigate={() => {
+              const votd = getTodaysVerse()
+              navigateTo(votd.bookId, votd.chapter)
+              setVotdNavigateTo(votd.osisId)
+            }}
           />
         )
       case 'bookmarks':
@@ -338,6 +439,11 @@ const [navChapter, setNavChapter] = useState(chapter)
           voices={availableVoices}
           selectedVoiceUri={selectedVoiceUri}
           onChangeVoice={setSelectedVoiceUri}
+          onVotdNavigate={() => {
+            const votd = getTodaysVerse()
+            navigateTo(votd.bookId, votd.chapter)
+            setVotdNavigateTo(votd.osisId)
+          }}
         />
       )}
     </BottomSheet>
@@ -391,7 +497,7 @@ const [navChapter, setNavChapter] = useState(chapter)
         navChapter={navChapter}
         onSelectBook={(id) => { setNavBookId(id); setNavChapter(1) }}
         onSelectChapter={(ch) => setNavChapter(ch)}
-        onSelectVerse={(b, c, _v) => { navigateTo(b, c); setShowNav(false) }}
+        onSelectVerse={(b, c) => { navigateTo(b, c); setShowNav(false) }}
       />
     </>
   )
@@ -407,8 +513,8 @@ function NavBottomSheet({
 }) {
   const currentBook = BOOKS.find((b) => b.id === navBookId)
   const [navVerses, setNavVerses] = useState<Verse[]>([])
-  const [otExpanded, setOtExpanded] = useState(true)
-  const [ntExpanded, setNtExpanded] = useState(true)
+  const [otExpanded, setOtExpanded] = useState(() => localStorage.getItem('refbible:nav-ot') !== 'false')
+  const [ntExpanded, setNtExpanded] = useState(() => localStorage.getItem('refbible:nav-nt') !== 'false')
 
   useEffect(() => {
     if (open && currentBook) {
@@ -431,14 +537,11 @@ function NavBottomSheet({
       </button>
       <div className="flex h-[50vh] overflow-hidden -mx-4 -mb-4 -mt-4">
         <div className="w-[44%] min-w-0 shrink-0 border-r border-border flex flex-col">
-          <div className="px-2.5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-text-secondary bg-surface-hover/40 border-b border-border shrink-0">
-            Books
-          </div>
           <div className="flex-1 overflow-y-auto divide-y divide-border-subtle/50">
             <div>
               <button
                 type="button"
-                onClick={() => setOtExpanded((p) => !p)}
+                onClick={() => { setOtExpanded((p) => { const n = !p; localStorage.setItem('refbible:nav-ot', String(n)); return n }) }}
                 className="w-full flex items-center gap-1.5 px-2.5 py-2 text-[10px] font-bold uppercase tracking-widest text-accent border-b border-border bg-surface-hover/30 cursor-pointer"
               >
                 {otExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
@@ -462,7 +565,7 @@ function NavBottomSheet({
             <div>
               <button
                 type="button"
-                onClick={() => setNtExpanded((p) => !p)}
+                onClick={() => { setNtExpanded((p) => { const n = !p; localStorage.setItem('refbible:nav-nt', String(n)); return n }) }}
                 className="w-full flex items-center gap-1.5 px-2.5 py-2 text-[10px] font-bold uppercase tracking-widest text-accent border-b border-border bg-surface-hover/30 cursor-pointer"
               >
                 {ntExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
@@ -487,16 +590,9 @@ function NavBottomSheet({
         </div>
 
         <div className="w-[28%] min-w-0 shrink-0 border-r border-border flex flex-col">
-          <div className="px-2.5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-accent bg-accent/8 border-b border-accent/20 shrink-0">
-            Chapters
-          </div>
           <div className="flex-1 overflow-y-auto p-2 bg-accent/[0.02]">
             {currentBook && (
-              <>
-                <p className="text-[11px] font-semibold text-accent/80 px-1 mb-2">
-                  {currentBook.name}
-                </p>
-                <div className="space-y-0.5">
+              <div className="space-y-0.5">
                   {Array.from({ length: currentBook.chapters }, (_, i) => i + 1).map((ch) => (
                     <button
                       key={ch}
@@ -512,22 +608,14 @@ function NavBottomSheet({
                     </button>
                   ))}
                 </div>
-              </>
             )}
           </div>
         </div>
 
         <div className="w-[28%] min-w-0 shrink-0 flex flex-col">
-          <div className="px-2.5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-accent bg-accent/8 border-b border-accent/20 shrink-0">
-            Verses
-          </div>
           <div className="flex-1 overflow-y-auto p-2 bg-accent/[0.02]">
             {currentBook && (
-              <>
-                <p className="text-[11px] font-semibold text-accent/80 px-1 mb-2">
-                  {currentBook.name} {navChapter}
-                </p>
-                <div className="space-y-0.5">
+              <div className="space-y-0.5">
                   {navVerses.map((v) => (
                     <button
                       key={v.id}
@@ -535,11 +623,10 @@ function NavBottomSheet({
                       onClick={() => onSelectVerse(v.book_id, v.chapter_num, v.verse_num)}
                       className="w-full text-center px-2.5 py-2 rounded-md text-xs text-text-secondary border border-transparent hover:border-accent/15 hover:bg-accent/[0.04] hover:text-accent active:bg-accent/8 transition-all duration-100 cursor-pointer"
                     >
-                      <span className="font-semibold text-accent mr-1.5 tabular-nums">{v.verse_num}</span>
+                      {v.verse_num}
                     </button>
                   ))}
                 </div>
-              </>
             )}
           </div>
         </div>

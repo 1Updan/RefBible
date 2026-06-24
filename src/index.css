@@ -92,6 +92,7 @@ html {
 
 body {
   margin: 0;
+  padding-top: env(safe-area-inset-top, 0px);
   font-family: var(--font-sans);
   color: var(--color-text-primary);
   background: var(--color-bg);
@@ -134,4 +135,12 @@ body {
   0% { background-color: var(--color-accent); box-shadow: 0 0 0 2px var(--color-accent); }
   30% { background-color: color-mix(in srgb, var(--color-accent) 30%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 50%, transparent); }
   100% { background-color: transparent; box-shadow: 0 0 0 0 transparent; }
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }

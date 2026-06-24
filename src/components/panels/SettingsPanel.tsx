@@ -7,6 +7,7 @@ import { downloadAndInstall } from '@/lib/downloader'
 import { getVersionsByLanguage } from '@/lib/versions'
 import type { VersionMeta } from '@/lib/versions'
 import type { SpeechVoice } from '@/hooks/useSpeech'
+import { getTodaysVerse } from '@/lib/verseOfTheDay'
 
 interface SettingsPanelProps {
   theme: Theme
@@ -20,6 +21,7 @@ interface SettingsPanelProps {
   voices: SpeechVoice[]
   selectedVoiceUri: string
   onChangeVoice: (uri: string) => void
+  onVotdNavigate: () => void
 }
 
 const THEMES: { value: Theme; label: string; icon: typeof Sun }[] = [
@@ -27,6 +29,25 @@ const THEMES: { value: Theme; label: string; icon: typeof Sun }[] = [
   { value: 'sepia', label: 'Sepia', icon: BookMarked },
   { value: 'dark', label: 'Dark', icon: Moon },
 ]
+
+function useSectionState(key: string, defaultOpen = false): [boolean, () => void] {
+  const [open, setOpen] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`refbible:section:${key}`)
+      return saved !== null ? JSON.parse(saved) : defaultOpen
+    } catch {
+      return defaultOpen
+    }
+  })
+  const toggle = () => {
+    setOpen((v: boolean) => {
+      const next = !v
+      localStorage.setItem(`refbible:section:${key}`, JSON.stringify(next))
+      return next
+    })
+  }
+  return [open, toggle]
+}
 
 export function SettingsPanel({
   theme,
@@ -40,16 +61,19 @@ export function SettingsPanel({
   voices,
   selectedVoiceUri,
   onChangeVoice,
+  onVotdNavigate,
 }: SettingsPanelProps) {
+  const [openTranslations, toggleTranslations] = useSectionState('translations')
+  const [openAudio, toggleAudio] = useSectionState('audio')
   const [installed, setInstalled] = useState<Set<string>>(new Set())
   const [downloading, setDownloading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [expandedLangs, setExpandedLangs] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem('refbible:expanded-langs')
-      return saved ? new Set(JSON.parse(saved)) : new Set(['English'])
+      return saved ? new Set(JSON.parse(saved)) : new Set()
     } catch {
-      return new Set(['English'])
+      return new Set()
     }
   })
   useEffect(() => {
@@ -141,12 +165,21 @@ export function SettingsPanel({
         </section>
 
         <section>
+          <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2.5">Verse of the Day</h3>
+          <div
+            onClick={onVotdNavigate}
+            className="px-3 py-2.5 rounded-xl cursor-pointer bg-accent/10 hover:bg-accent/15 transition-colors duration-150 border border-accent/20"
+          >
+            <div className="font-semibold text-accent text-xs">{getTodaysVerse().reference}</div>
+            <p className="text-text-secondary text-xs mt-1 leading-relaxed line-clamp-2">{getTodaysVerse().text}</p>
+          </div>
+        </section>
+
+        <section>
           <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
             <BookText size={13} />
             Interlinear Bible
           </h3>
-
-          <div className="space-y-3">
             <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-surface-elevated border border-border-subtle">
               <span className="text-sm text-text-primary">Show Interlinear</span>
               <button
@@ -197,12 +230,19 @@ export function SettingsPanel({
               </label>
             </div>
 
-          </div>
         </section>
 
         <section>
-          <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2.5">Translations</h3>
+          <button
+            type="button"
+            onClick={toggleTranslations}
+            className="w-full flex items-center gap-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2.5 cursor-pointer"
+          >
+            {openTranslations ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            Translations
+          </button>
 
+          {openTranslations && (<>
           {error && (
             <p className="text-xs text-danger mb-3 px-1">{error}</p>
           )}
@@ -239,14 +279,21 @@ export function SettingsPanel({
               )
             })}
           </div>
+          </>)}
         </section>
 
         <section>
-          <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={toggleAudio}
+            className="w-full flex items-center gap-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2.5 cursor-pointer"
+          >
+            {openAudio ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             <Volume2 size={13} />
             Audio
-          </h3>
+          </button>
 
+          {openAudio && (<>
           <div className="space-y-1.5">
             {voices.length === 0 ? (
               <p className="text-xs text-text-tertiary px-1">No voices available. Install a text-to-speech voice in your system settings.</p>
@@ -272,6 +319,7 @@ export function SettingsPanel({
               ))
             )}
           </div>
+          </>)}
         </section>
       </div>
     </div>

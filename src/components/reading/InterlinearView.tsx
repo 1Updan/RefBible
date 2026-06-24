@@ -66,6 +66,11 @@ function renderWordRow(
               {w.gloss}
             </span>
           )}
+          {w.strongs_number && (
+            <span className="text-accent/50 font-mono leading-tight mt-0.5" style={{ fontSize: `${Math.max(fontSize - 7, 9)}px` }}>
+              {w.strongs_number}
+            </span>
+          )}
           {w.morphology && (
             <span className="text-accent/60 font-mono leading-tight mt-0.5" style={{ fontSize: `${Math.max(fontSize - 7, 9)}px` }}>
               {w.morphology}

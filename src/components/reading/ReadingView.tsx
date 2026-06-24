@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { VerseRow } from './VerseRow'
 import { VerseActionBar } from './VerseActionBar'
+import { ShareSheet } from './ShareSheet'
+import type { HighlightColorId } from '@/lib/highlights'
 import { getCrossReferences, getTranslations, getVerses, getNotesForChapter, getInterlinearWords } from '@/lib/db'
 import { useNavigation } from '@/hooks/useNavigation'
 import { getBook } from '@/data/books'
@@ -25,6 +27,12 @@ interface ReadingViewProps {
   onSelectionVerse?: (verseNum: number | null) => void
   onSwipePrev?: () => void
   onSwipeNext?: () => void
+  votdVerseId?: string
+  highlightColors?: Map<string, string[]>
+  activeHighlightColor?: HighlightColorId | null
+  onHighlightVerse?: (verseId: string, color?: HighlightColorId) => void
+  onRemoveHighlight?: (verseId: string) => void
+  onHighlightColorChange?: (color: HighlightColorId | null) => void
 }
 
 export function ReadingView({
@@ -45,6 +53,12 @@ export function ReadingView({
   onSelectionVerse,
   onSwipePrev,
   onSwipeNext,
+  votdVerseId,
+  highlightColors,
+  activeHighlightColor,
+  onHighlightVerse,
+  onRemoveHighlight,
+  onHighlightColorChange,
 }: ReadingViewProps) {
   const { openCrossReferences, setCrossRefTarget, setStudyTab, setActivePanel, navigateTo, setAiTarget, pendingRange, setPendingRange, activePanel, studyTab, openWordStudy } = useNavigation()
   const pendingRef = useRef(pendingRange)
@@ -60,6 +74,7 @@ export function ReadingView({
   const [highlightedVerseId, setHighlightedVerseId] = useState<string | null>(null)
   const highlightRef = useRef<string | null>(null)
   const historyHighlightedRef = useRef<Set<string>>(new Set())
+  const consumedVotdRef = useRef<string | null>(null)
   const topRef = useRef<HTMLDivElement>(null)
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
@@ -139,12 +154,19 @@ export function ReadingView({
           newSelected.add(highlightRef.current)
           highlightRef.current = null
         }
+        if (votdVerseId && map.has(votdVerseId)) {
+          newSelected.add(votdVerseId)
+          if (votdVerseId !== consumedVotdRef.current) {
+            consumedVotdRef.current = votdVerseId
+          }
+          setHighlightedVerseId(votdVerseId)
+        }
         setSelectedIds(newSelected)
       }
     }
     load()
     return () => { cancelled = true }
-  }, [bookId, chapter, interlinearEnabled, visibleVersions, onChapterText, onChapterVerses, setPendingRange])
+  }, [bookId, chapter, interlinearEnabled, visibleVersions, onChapterText, onChapterVerses, setPendingRange, votdVerseId])
 
   useEffect(() => {
     if (!onSelectionVerse) return
@@ -190,6 +212,19 @@ export function ReadingView({
   }, [rangeMode, selectedIds])
 
   useEffect(() => {
+    if (!votdVerseId || votdVerseId === consumedVotdRef.current) return
+    const parsed = parseOsisId(votdVerseId)
+    if (!parsed) return
+    if (parsed.bookId === bookId && parsed.chapter === chapter) {
+      consumedVotdRef.current = votdVerseId
+      queueMicrotask(() => {
+        setHighlightedVerseId(votdVerseId)
+        setSelectedIds(new Set([votdVerseId]))
+      })
+    }
+  }, [votdVerseId, bookId, chapter])
+
+  useEffect(() => {
     if (!highlightedVerseId) return
     const el = document.getElementById(`verse-${highlightedVerseId}`)
     if (el) {
@@ -229,7 +264,8 @@ export function ReadingView({
     }
   }, [selectedIds, activePanel, studyTab, verses, bookId, chapter, setCrossRefTarget])
 
-  const handleNavigateToRef = useCallback((targetId: string) => {
+  const handleNavigateToRef = useCallback((sourceId: string, targetId: string) => {
+    historyHighlightedRef.current.add(sourceId)
     historyHighlightedRef.current.add(targetId)
     const parsed = parseOsisId(targetId)
     if (!parsed) return
@@ -320,6 +356,67 @@ export function ReadingView({
     }
   }, [selectedList, verses, data, bookId, chapter, setStudyTab, setActivePanel, setAiTarget])
 
+  const [shareVerse, setShareVerse] = useState<{ reference: string; text: string; versionLabel: string; highlightColors?: string[] } | null>(null)
+  const [highlightActive, setHighlightActive] = useState(false)
+
+  const handleToggleHighlight = useCallback(() => {
+    setHighlightActive((prev) => {
+      if (prev) onHighlightColorChange?.(null)
+      return !prev
+    })
+  }, [onHighlightColorChange])
+
+  const handleHighlightColorSelect = useCallback((color: HighlightColorId | null) => {
+    if (color && onHighlightVerse) {
+      for (const verseId of selectedIds) {
+        onHighlightVerse(verseId, color)
+      }
+    }
+    setHighlightActive(false)
+    onHighlightColorChange?.(null)
+  }, [selectedIds, onHighlightVerse, onHighlightColorChange])
+
+  const handleEraseSelection = useCallback(() => {
+    if (onRemoveHighlight) {
+      for (const verseId of selectedIds) {
+        onRemoveHighlight(verseId)
+      }
+    }
+    setHighlightActive(false)
+  }, [selectedIds, onRemoveHighlight])
+
+  const handleShare = useCallback(() => {
+    if (selectedList.length < 1 || selectedList.length > 5) return
+    const book = getBook(bookId)
+    const versionLabel = 'King James Bible'
+    const parts: string[] = []
+
+    for (const verseId of selectedList) {
+      const d = data.get(verseId)
+      const v = verses.find((x) => x.id === verseId)
+      if (!d || !v) continue
+      const firstText = d.texts.find((t) => t.translation_code === 'KJV') ?? d.texts[0]
+      if (!firstText) continue
+      parts.push(`${v.verse_num}. ${firstText.text_data}`)
+    }
+
+    if (parts.length === 0) return
+
+    const firstVerse = verses.find((x) => x.id === selectedList[0])
+    const lastVerse = verses.find((x) => x.id === selectedList[selectedList.length - 1])
+    const ref = selectedList.length === 1
+      ? `${book?.name ?? 'John'} ${firstVerse?.chapter_num}:${firstVerse?.verse_num}`
+      : `${book?.name ?? 'John'} ${firstVerse?.chapter_num}:${firstVerse?.verse_num}-${lastVerse?.verse_num}`
+
+    const firstId = selectedList[0]
+    setShareVerse({
+      reference: ref,
+      text: parts.join('\n'),
+      versionLabel,
+      highlightColors: highlightColors?.get(firstId),
+    })
+  }, [selectedList, verses, data, bookId, highlightColors])
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -352,10 +449,13 @@ export function ReadingView({
                 interlinearEnabled={interlinearEnabled}
                 interlinearLanguages={interlinearLanguages}
                 isHighlighted={highlightedVerseId === verse.id}
+                highlightColors={highlightColors?.get(verse.id)}
+                activeHighlightColor={activeHighlightColor}
                 onToggleSelect={(e) => handleToggleSelect(verse.id, e.shiftKey)}
-                onNavigateToRef={handleNavigateToRef}
+                onNavigateToRef={(targetId) => handleNavigateToRef(verse.id, targetId)}
                 onOpenCrossRefs={handleOpenCrossRefs}
                 onSelectWord={handleSelectWord}
+                onHighlightVerse={onHighlightVerse}
               />
             )
           })}
@@ -377,6 +477,22 @@ export function ReadingView({
           isRangeMode={rangeMode}
           interlinearEnabled={interlinearEnabled}
           onToggleInterlinear={onToggleInterlinear}
+          onShare={handleShare}
+          highlightActive={highlightActive}
+          activeHighlightColor={activeHighlightColor}
+          onToggleHighlight={handleToggleHighlight}
+          onHighlightColorSelect={handleHighlightColorSelect}
+          onEraseSelection={handleEraseSelection}
+        />
+      )}
+
+      {shareVerse && (
+        <ShareSheet
+          reference={shareVerse.reference}
+          verseText={shareVerse.text}
+          versionLabel={shareVerse.versionLabel}
+          highlightColors={shareVerse.highlightColors}
+          onClose={() => setShareVerse(null)}
         />
       )}
     </div>

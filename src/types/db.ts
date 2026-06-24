@@ -68,3 +68,10 @@ export interface InterlinearWordTarget {
   verseId: string
   reference: string
 }
+
+export interface Highlight {
+  id: number
+  verse_id: string
+  color: string
+  created_at: string
+}

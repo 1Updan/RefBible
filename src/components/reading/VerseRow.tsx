@@ -1,10 +1,12 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { BookmarkCheck, MessageSquareMore } from 'lucide-react'
 import { CrossReferenceChip } from './CrossReferenceChip'
 import { InterlinearView } from './InterlinearView'
 import { formatVerseId } from '@/lib/utils'
+import { HIGHLIGHT_COLORS } from '@/lib/highlights'
 import clsx from 'clsx'
 import type { Verse, ContentText, CrossReference, InterlinearWord } from '@/types/db'
+import type { HighlightColorId } from '@/lib/highlights'
 
 interface VerseRowProps {
   verse: Verse
@@ -19,10 +21,13 @@ interface VerseRowProps {
   interlinearEnabled: boolean
   interlinearLanguages: readonly ('hebrew' | 'greek')[]
   isHighlighted?: boolean
+  highlightColors?: string[]
+  activeHighlightColor?: HighlightColorId | null
   onToggleSelect: (e: React.MouseEvent) => void
   onNavigateToRef: (verseId: string) => void
   onOpenCrossRefs: (verseId: string) => void
   onSelectWord: (word: InterlinearWord, verseId: string, reference: string) => void
+  onHighlightVerse?: (verseId: string, color?: HighlightColorId) => void
 }
 
 export function VerseRow({
@@ -38,23 +43,34 @@ export function VerseRow({
   interlinearEnabled,
   interlinearLanguages,
   isHighlighted,
+  highlightColors,
+  activeHighlightColor,
   onToggleSelect,
   onNavigateToRef,
   onOpenCrossRefs,
   onSelectWord,
+  onHighlightVerse,
 }: VerseRowProps) {
   const guardRef = useRef(false)
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault()
     guardRef.current = true
-    onToggleSelect(e)
+    if (activeHighlightColor && onHighlightVerse) {
+      onHighlightVerse(verse.id)
+    } else {
+      onToggleSelect(e)
+    }
     setTimeout(() => { guardRef.current = false }, 300)
   }
 
   const handleClick = (e: React.MouseEvent) => {
     if (guardRef.current) return
-    onToggleSelect(e)
+    if (activeHighlightColor && onHighlightVerse) {
+      onHighlightVerse(verse.id)
+    } else {
+      onToggleSelect(e)
+    }
   }
 
   const showMoreThanOne = visibleVersions.length > 1
@@ -70,6 +86,12 @@ export function VerseRow({
 
   const reference = `${getBookName()} ${verse.chapter_num}:${verse.verse_num}`
 
+  const highlightBg = useMemo(() => {
+    if (!highlightColors || highlightColors.length === 0) return undefined
+    const c = HIGHLIGHT_COLORS.find((h) => h.id === highlightColors[0])
+    return c ? c.bg + '33' : undefined
+  }, [highlightColors])
+
   return (
     <div
       id={`verse-${verse.id}`}
@@ -78,6 +100,7 @@ export function VerseRow({
         isSelected ? 'bg-accent/8 ring-1 ring-accent/30' : 'hover:bg-surface/50',
         isHighlighted && 'animate-[highlightPulse_2s_ease-out]',
       )}
+      style={highlightBg ? { backgroundColor: highlightBg } : undefined}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
       role="button"
