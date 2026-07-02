@@ -43,12 +43,6 @@ export function getVersion(code: string): VersionMeta | undefined {
   return VERSIONS.find((v) => v.code === code)
 }
 
-export function getDownloadableVersions(): VersionMeta[] {
-  return VERSIONS.filter((v) => !v.builtIn)
-}
-
-export const LANGUAGE_NAMES = [...new Set(VERSIONS.map((v) => v.languageName))].sort()
-
 export function getVersionsByLanguage(): Map<string, VersionMeta[]> {
   const map = new Map<string, VersionMeta[]>()
   for (const v of VERSIONS) {

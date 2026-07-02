@@ -149,7 +149,7 @@ export function ShareSheet({ reference, verseText, versionLabel, highlightColors
       </div>
 
       <div className="bg-surface-elevated rounded-t-2xl px-4 pt-5 pb-8">
-        <div className="flex justify-start gap-3 overflow-x-auto px-2 pb-2 snap-x snap-mandatory -mx-2 scrollbar-none">
+        <div className="flex justify-center gap-3 overflow-x-auto px-2 pb-2 snap-x snap-mandatory -mx-2 scrollbar-none">
           {SHARE_OPTIONS.map((s) => (
             <button
               key={s.id}

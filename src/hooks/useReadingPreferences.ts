@@ -71,13 +71,5 @@ export function useReadingPreferences() {
     })
   }, [])
 
-  const setInterlinearLanguages = useCallback((langs: ('hebrew' | 'greek')[]) => {
-    setPrefs((prev) => {
-      const next = { ...prev, interlinearLanguages: langs }
-      savePrefs(next)
-      return next
-    })
-  }, [])
-
-  return { prefs, update, toggleVersion, toggleInterlinear, setInterlinearLanguages }
+  return { prefs, update, toggleVersion, toggleInterlinear }
 }

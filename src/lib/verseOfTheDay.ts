@@ -189,10 +189,6 @@ export function getTodaysVerse(): VerseOfTheDay {
   return VERSES[index]
 }
 
-export function getVerseOsisId(votd: VerseOfTheDay): string {
-  return votd.osisId
-}
-
 export function shouldSendNotificationToday(): boolean {
   const today = new Date().toDateString()
   const last = localStorage.getItem('votd-notification-date')

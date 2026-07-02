@@ -51,20 +51,20 @@ export function DesktopShell({ nav, reading, sidebar, onCloseSidebar }: DesktopS
   if (sidebar) gridCols.push(`${sidebarWidth}px`)
 
   return (
-    <div
-      ref={containerRef}
-      className="h-[100dvh] grid overflow-hidden bg-bg relative"
-      style={{ gridTemplateColumns: gridCols.join(' ') }}
+      <div
+        ref={containerRef}
+        className="h-full grid overflow-hidden bg-bg relative"
+        style={{ gridTemplateColumns: gridCols.join(' ') }}
     >
       {navOpen && (
         <aside className="border-r border-border bg-surface overflow-hidden flex flex-col relative">
           <button
             type="button"
             onClick={() => setNavOpen(false)}
-            className="absolute top-3 right-2 z-30 p-1 rounded-md bg-surface border border-border text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-all duration-150 cursor-pointer shadow-sm"
+            className="absolute top-2.5 right-2 z-30 p-1 rounded-md bg-surface border border-border text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-all duration-150 cursor-pointer shadow-sm"
             aria-label="Collapse nav sidebar"
           >
-            <PanelLeftClose size={16} />
+            <PanelLeftClose size={14} />
           </button>
           {nav}
         </aside>

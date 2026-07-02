@@ -6,8 +6,8 @@
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "node scripts/build-seeded-db.js && pnpm dev",
-    "beforeBuildCommand": "node scripts/build-seeded-db.js && pnpm build && node -e \"const fs=require('fs'),p='dist';require('fs').readdirSync(p,{recursive:true,withFileTypes:true}).filter(d=>d.isFile()&&(d.name.endsWith('.json')||d.name.endsWith('.gz'))).forEach(f=>{const fp=require('path').join(f.path,f.name);console.log('clean: '+fp);require('fs').unlinkSync(fp)})\""
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "pnpm build"
   },
   "app": {
     "windows": [
@@ -16,7 +16,8 @@
         "width": 1200,
         "height": 800,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "decorations": true
       }
     ],
     "security": {

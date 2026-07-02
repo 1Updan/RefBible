@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, Fragment } from 'react'
 import { Search, X } from 'lucide-react'
 import { searchVerses } from '@/lib/db'
 import type { SearchResult } from '@/lib/db'
 import { getBook } from '@/data/books'
-import { highlightText, parseReference } from '@/lib/utils'
+import { parseReference } from '@/lib/utils'
 
 interface SearchPanelProps {
   onNavigate?: (bookId: number, chapter: number, range?: { verseStart: number; verseEnd: number }) => void
@@ -51,6 +51,18 @@ export function SearchPanel({ onNavigate, initialQuery, visibleVersions }: Searc
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [])
+
+  function renderHighlightedText(text: string, query: string): React.ReactNode {
+    if (!query.trim()) return text
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const regex = new RegExp(`(${escaped})`, 'gi')
+    const parts = text.split(regex)
+    return parts.map((part, i) =>
+      i % 2 === 1
+        ? <mark key={i} className="bg-accent/30 text-text-primary rounded-sm px-0.5">{part}</mark>
+        : <Fragment key={i}>{part}</Fragment>
+    )
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -106,7 +118,7 @@ export function SearchPanel({ onNavigate, initialQuery, visibleVersions }: Searc
                         {r.translation_code}
                       </span>
                     </div>
-                    <p className="text-xs text-text-secondary leading-relaxed line-clamp-2" dangerouslySetInnerHTML={{ __html: highlightText(r.text_data, query) }} />
+                    <p className="text-xs text-text-secondary leading-relaxed line-clamp-2">{renderHighlightedText(r.text_data, query)}</p>
                   </button>
                 )
               })}

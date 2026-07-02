@@ -269,12 +269,4 @@ export async function removeHighlight(verseId: string, color: string): Promise<v
   )
 }
 
-export function setOnSeedProgress(): void {
-  // No-op: database is pre-seeded
-}
 
-export async function resetInterlinearData(): Promise<void> {
-  const conn = await getDb()
-  await conn.execute('DELETE FROM interlinear_words')
-  await conn.execute('DELETE FROM strongs_definitions')
-}

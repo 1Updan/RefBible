@@ -108,7 +108,4 @@ export async function downloadAndInstall(code: string): Promise<void> {
   }
 }
 
-export async function uninstallVersion(code: string): Promise<void> {
-  const conn = await getDb()
-  await conn.execute('DELETE FROM content_text WHERE translation_code = $1', [code])
-}
+

@@ -20,21 +20,36 @@ fn ensure_db(app: &tauri::App) {
 
     fs::create_dir_all(&app_dir).expect("failed to create app data dir");
 
-    let resource_path = app.path()
-        .resource_dir()
-        .expect("failed to get resource dir")
-        .join("refbible.db.gz");
-
-    let mut gz = GzDecoder::new(fs::File::open(&resource_path)
-        .expect("failed to open bundled refbible.db.gz"));
-
-    let mut buf = Vec::new();
-    gz.read_to_end(&mut buf).expect("failed to decompress bundled DB");
+    let buf = read_bundled_db_gz(app);
 
     fs::write(&db_path, &buf).expect("failed to write decompressed DB");
     fs::write(&marker, b"1").expect("failed to write marker file");
 
     log::info!("Seeded database at {:?}", db_path);
+}
+
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+fn read_bundled_db_gz(app: &tauri::App) -> Vec<u8> {
+    let resource_path = app.path()
+        .resource_dir()
+        .expect("failed to get resource dir")
+        .join("refbible.db.gz");
+
+    let file = fs::File::open(&resource_path)
+        .expect("failed to open bundled refbible.db.gz");
+    let mut gz = GzDecoder::new(file);
+    let mut buf = Vec::new();
+    gz.read_to_end(&mut buf).expect("failed to decompress bundled DB");
+    buf
+}
+
+#[cfg(any(target_os = "android", target_os = "ios"))]
+fn read_bundled_db_gz(_app: &tauri::App) -> Vec<u8> {
+    let data: &[u8] = include_bytes!("../bundled/refbible.db.gz");
+    let mut gz = GzDecoder::new(data);
+    let mut buf = Vec::new();
+    gz.read_to_end(&mut buf).expect("failed to decompress bundled DB");
+    buf
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -79,7 +94,7 @@ pub fn run() {
             ensure_db(app);
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![commands::ai::ai_query, commands::ai::ai_query_stream])
+        .invoke_handler(tauri::generate_handler![commands::ai::ai_query_stream])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

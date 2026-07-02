@@ -63,12 +63,6 @@ export interface StrongsEntry {
   word_count: number | null
 }
 
-export interface InterlinearWordTarget {
-  word: InterlinearWord
-  verseId: string
-  reference: string
-}
-
 export interface Highlight {
   id: number
   verse_id: string
