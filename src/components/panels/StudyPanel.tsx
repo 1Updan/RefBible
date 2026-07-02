@@ -205,6 +205,29 @@ function NotesTab() {
   )
 }
 
+const MOCK_RESPONSES: Record<AiMode, string> = {
+  context: `**Immediate Context:** The surrounding verses establish this passage as a pivotal moment in the narrative arc. Verses immediately preceding set up a tension—a question, a conflict, or an expectation—that this passage resolves or intensifies. The author's flow moves from general principle to specific application, using this text as the hinge.\n\n**Book-Level Context:** This passage sits at a critical juncture in the book's overall argument. The author's purpose—whether theological instruction, historical record, or pastoral encouragement—shapes how every detail functions. The themes of covenant, faithfulness, and divine intervention recur throughout, and this passage develops them in a unique direction.\n\n**Historical & Cultural Setting:** Written in the first century AD, this passage reflects the socio-political realities of Roman occupation, Jewish religious expectations, and the early Christian community's struggle to define its identity. Key figures like Pharisees, Sadducees, and the common people all play roles that would have been immediately understood by the original audience.\n\n**Intertextual Connections:** This passage echoes several OT scriptures: it alludes to Isaiah 40 and Jeremiah 31, and directly quotes Psalm 110. The thematic connection to the Exodus narrative is unmistakable—what God did for Israel then, He is now doing through Christ. The author traces this thread from Genesis through Revelation, showing how this moment fulfills what was promised.`,
+
+  words: `**Genre Analysis:** This passage belongs to the narrative genre with embedded poetic elements. As narrative, it uses characters, setting, and plot to convey theological truth. The genre shapes interpretation by inviting the reader to identify with the characters and experience the story's tension and resolution.\n\n**Literary Outline:** 1) Setup (vv. 1-3): introduces the scene and key characters; 2) Conflict (vv. 4-7): the central tension emerges through dialogue; 3) Climax (v. 8): the turning point where divine intervention occurs; 4) Resolution (vv. 9-11): the aftermath and response.\n\n**Literary Devices:** The passage employs an inclusio—the opening and closing phrases mirror each other, creating a frame. There's a chiasm in verses 4-7 (A-B-C-B'-A') that centers attention on the climactic statement. The metaphor of "light" and "darkness" runs throughout, drawing on OT wisdom traditions.\n\n**Lexical Analysis:**
+• Greek word "λόγος" (logos) — Strong's G3056 — semantic range: word, reason, account, divine expression. Here in the nominative, it functions as the subject with theological weight, echoing Genesis 1 where God creates through speech.
+• Hebrew word "דָּבָר" (davar) — Strong's H1697 — range: word, thing, matter, commandment. Its use here implies not just speech but active, creative power.
+• The verb "ἐγένετο" (egeneto) — aorist middle deponent — indicates a definite historical event, grounding the theological claim in time and space.`,
+
+  theology: `**Doctrine of God:** This passage reveals God's sovereignty and intimate involvement with creation. The self-existence of God is implied—He acts, He speaks, He initiates. The attribute of immutability (unchanging nature) underlies the consistency of His covenantal dealings.\n\n**Christology:** Central to this passage is the identity of Christ as the mediator between God and humanity. The incarnation is implied in the movement from divine purpose to human reality. Throughout church history, this text has been used to affirm the hypostatic union—Christ as fully God and fully man.\n\n**Soteriology:** The pattern of sin, judgment, and salvation emerges clearly. Human inability is contrasted with divine provision. Grace is the operative principle—unmerited favor that elicits faith as the appropriate response.\n\n**Church History Reception:** Augustine saw in this passage the irresistible nature of grace. Luther used it to argue for justification by faith alone. Calvin found here the doctrine of perseverance. Wesley emphasized the universal scope of the atonement. Each tradition highlights a different facet while remaining faithful to the text.\n\n**Theological Significance:** This passage makes its most significant contribution to our understanding of covenant theology—demonstrating that God's promises are both conditional and unconditional, requiring human response while ultimately depending on divine faithfulness.`,
+
+  application: `**Ethical Principles:** The passage teaches several enduring principles: (1) Faithfulness in suffering—remaining true to God even when circumstances are difficult; (2) Community responsibility—bearing one another's burdens; (3) Truth-telling—speaking honestly even when costly.\n\n**Cultural-Specific vs. Transcultural:** The specific instructions about greetings and head coverings are culturally bound (first-century Mediterranean customs) and not directly transferable. However, the underlying principles of respect, cultural sensitivity, and orderly worship are transcultural and apply today.\n\n**Practical Application:**
+• Personal: Examine areas where fear prevents faithful action. Start each day by acknowledging God's sovereignty over your circumstances.
+• Relational: Practice active listening and empathetic presence with those who are suffering.
+• Vocational: Bring integrity to your workplace—let your yes be yes and your no be no.\n\n**Reflection Questions:**
+1. Where in my life am I hesitating to trust God's provision?
+2. How can I bear someone else's burden this week?
+3. What would it look like to live out this passage's teaching in my specific context?`,
+
+  story: `The sun hung low over the dusty road leading out of Jericho, casting long shadows across the parched earth. The air smelled of spices and sheep, the sounds of the crowded city fading behind them. Jesus walked ahead, His pace purposeful, His disciples trailing in quiet confusion.\n\nThey had just heard Him speak of suffering and death—words that clashed violently with their expectations of glory and conquest. Peter had pulled Him aside, rebuking Him. And Jesus had turned, looking not with anger but with sorrow, saying, "Get behind me, Satan." The words hung in the air like thunder.\n\nNow they walked in silence. The road wound upward toward Jerusalem, and with every step, the tension grew. The city gleamed on the horizon, its temple catching the golden light. But for those who had ears to hear, the shadows seemed longer than they should be.\n\nIt was then that Jesus stopped. He turned to face them fully, and in that moment—with the wind stirring the dust at His feet and the city of David spread behind Him—He asked the question that would echo through eternity: "Who do you say that I am?"\n\nThe question wasn't academic. It was the hinge on which all of history turns. And standing there on that road, each disciple had to choose: was He teacher, prophet, or something—Someone—far greater?`,
+
+  custom: `Running your custom analysis... Results will appear here based on your specific instructions.`,
+}
+
 type AiMode = 'context' | 'words' | 'theology' | 'application' | 'story' | 'custom'
 
 interface AiModeDef {
@@ -263,6 +286,7 @@ function AiTab() {
   const { aiTarget } = useNavigation()
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('refbible-ai-key') ?? '')
   const saved = !!localStorage.getItem('refbible-ai-key')
+  const [demoMode, setDemoMode] = useState(() => localStorage.getItem('refbible-ai-demo') === 'true')
   const isOnline = useNetworkState()
   const [selectedMode, setSelectedMode] = useState<AiMode | null>(null)
   const [customPrompt, setCustomPrompt] = useState('')
@@ -274,11 +298,48 @@ function AiTab() {
   const responseRef = useRef('')
   const sentenceBufferRef = useRef('')
   const unlistenRef = useRef<(() => void)[]>([])
+  const mockTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const cleanup = useCallback(() => {
     for (const u of unlistenRef.current) u()
     unlistenRef.current = []
+    if (mockTimerRef.current) {
+      clearInterval(mockTimerRef.current)
+      mockTimerRef.current = null
+    }
   }, [])
+
+  const startMockStream = useCallback((mode: AiMode) => {
+    const fullText = MOCK_RESPONSES[mode] ?? MOCK_RESPONSES.context
+    const words = fullText.split(/(\s+)/)
+    let idx = 0
+    const delay = 20
+
+    mockTimerRef.current = setInterval(() => {
+      if (idx >= words.length) {
+        if (mockTimerRef.current) clearInterval(mockTimerRef.current)
+        mockTimerRef.current = null
+        setLoading(false)
+        setStreaming(false)
+        const leftover = sentenceBufferRef.current.trim()
+        if (leftover) speakSentence(leftover)
+        sentenceBufferRef.current = ''
+        return
+      }
+      const word = words[idx++]
+      responseRef.current += word
+      setResponse(responseRef.current)
+
+      sentenceBufferRef.current += word
+      let match
+      const sentenceEnd = /[.!?](?:\s|$)/
+      while ((match = sentenceEnd.exec(sentenceBufferRef.current)) !== null) {
+        const cs = sentenceBufferRef.current.slice(0, match.index + 1)
+        sentenceBufferRef.current = sentenceBufferRef.current.slice(match.index + 1).trimStart()
+        speakSentence(cs)
+      }
+    }, delay)
+  }, [speakSentence])
 
   useEffect(() => {
     return cleanup
@@ -314,7 +375,8 @@ function AiTab() {
   }
 
   const handleRun = async () => {
-    if (!aiTarget || !apiKey) return
+    if (!aiTarget) return
+    if (!demoMode && !apiKey) return
     const mode = AI_MODES.find((m) => m.id === (selectedMode ?? 'context'))
     if (!mode) return
     setLoading(true)
@@ -325,6 +387,11 @@ function AiTab() {
     sentenceBufferRef.current = ''
     stopAiSpeech()
     cleanup()
+
+    if (demoMode) {
+      startMockStream(selectedMode ?? 'context')
+      return
+    }
 
     const systemPrompt = mode.systemPrompt
     const combinedPrompt = customPrompt.trim()
@@ -366,7 +433,7 @@ function AiTab() {
     }
   }
 
-  if (!isOnline) {
+  if (!isOnline && !demoMode) {
     return (
       <div className="flex flex-col items-center gap-3 py-6 text-center">
         <WifiOff size={24} className="text-text-tertiary" />
@@ -376,7 +443,7 @@ function AiTab() {
     )
   }
 
-  if (!saved) {
+  if (!saved && !demoMode) {
     const selectedModeLabel = selectedMode ? AI_MODES.find((m) => m.id === selectedMode)?.label : null
     return (
       <div className="space-y-4">
@@ -453,6 +520,27 @@ function AiTab() {
               <li>Copy the generated key and paste it above</li>
             </ol>
           </div>
+
+          <hr className="border-border" />
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Sparkles size={14} className="text-text-tertiary" />
+              <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider">No API Key?</h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setDemoMode(true); localStorage.setItem('refbible-ai-demo', 'true') }}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg border-2 border-dashed border-accent/50 text-accent hover:bg-accent/5 hover:border-accent transition-all duration-150 cursor-pointer"
+            >
+              <Sparkles size={14} />
+              Try Demo Mode
+            </button>
+            <p className="text-xs text-text-tertiary flex items-start gap-1.5">
+              <AlertCircle size={12} className="shrink-0 mt-0.5" />
+              Simulated responses to test the full UI — no API key needed.
+            </p>
+          </div>
         </div>
       </div>
     )
@@ -461,10 +549,23 @@ function AiTab() {
   return (
     <div className="space-y-3">
       <div className="px-3 py-2 rounded-lg bg-surface-elevated border border-border-subtle flex items-center justify-between">
-        <span className="text-xs text-text-secondary">AI activated</span>
-        <button type="button" onClick={handleClear} className="text-xs text-danger hover:text-danger/80 transition-colors cursor-pointer">
-          Revoke
-        </button>
+        <span className="text-xs text-text-secondary">{demoMode ? 'Demo Mode' : 'AI activated'}</span>
+        <div className="flex items-center gap-2">
+          {demoMode && (
+            <button
+              type="button"
+              onClick={() => { setDemoMode(false); localStorage.removeItem('refbible-ai-demo') }}
+              className="text-xs text-accent hover:text-accent/80 transition-colors cursor-pointer"
+            >
+              Use API Key
+            </button>
+          )}
+          {!demoMode && (
+            <button type="button" onClick={handleClear} className="text-xs text-danger hover:text-danger/80 transition-colors cursor-pointer">
+              Revoke
+            </button>
+          )}
+        </div>
       </div>
 
       {!aiTarget ? (
