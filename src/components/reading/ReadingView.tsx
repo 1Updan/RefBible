@@ -124,44 +124,55 @@ export function ReadingView({
         if (onChapterText || onChapterVerses) {
           const verseTexts: string[] = []
           for (const v of vs) {
-            const texts = map.get(v.id)?.texts ?? []
-            for (const code of visibleVersions) {
-              const t = texts.find((t) => t.translation_code === code)
-              if (t) { verseTexts.push(t.text_data); break }
+            if (interlinearEnabled) {
+              const interlinear = map.get(v.id)?.interlinear ?? []
+              const translit = interlinear.map((w) => w.transliteration).filter(Boolean).join(' ')
+              verseTexts.push(translit)
+            } else {
+              const texts = map.get(v.id)?.texts ?? []
+              for (const code of visibleVersions) {
+                const t = texts.find((t) => t.translation_code === code)
+                if (t) { verseTexts.push(t.text_data); break }
+              }
             }
           }
           onChapterText?.(verseTexts.join(' '))
           onChapterVerses?.(verseTexts)
         }
-        const newSelected = new Set<string>()
+        let historyHighlight: string | null = null
         for (const v of vs) {
           if (historyHighlightedRef.current.has(v.id)) {
-            newSelected.add(v.id)
+            historyHighlight = v.id
+            historyHighlightedRef.current.delete(v.id)
           }
         }
         const range = pendingRef.current
         if (range) {
+          const newSelected = new Set<string>()
           for (const v of vs) {
             if (v.verse_num >= range.verseStart && v.verse_num <= range.verseEnd) {
               newSelected.add(v.id)
             }
           }
           setPendingRange(null)
+          setSelectedIds(newSelected)
+        } else {
+          setSelectedIds(new Set())
         }
         setLoading(false)
+        if (historyHighlight) {
+          setHighlightedVerseId(historyHighlight)
+        }
         if (highlightRef.current && map.has(highlightRef.current)) {
           setHighlightedVerseId(highlightRef.current)
-          newSelected.add(highlightRef.current)
           highlightRef.current = null
         }
         if (votdVerseId && map.has(votdVerseId)) {
-          newSelected.add(votdVerseId)
           if (votdVerseId !== consumedVotdRef.current) {
             consumedVotdRef.current = votdVerseId
           }
           setHighlightedVerseId(votdVerseId)
         }
-        setSelectedIds(newSelected)
       }
     }
     load()
@@ -270,11 +281,6 @@ export function ReadingView({
     const parsed = parseOsisId(targetId)
     if (!parsed) return
     if (parsed.bookId === bookId && parsed.chapter === chapter) {
-      setSelectedIds((prev) => {
-        const next = new Set(prev)
-        next.add(targetId)
-        return next
-      })
       setHighlightedVerseId(targetId)
       const el = document.getElementById(`verse-${targetId}`)
       if (el) {

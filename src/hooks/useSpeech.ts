@@ -23,7 +23,6 @@ export function useSpeech() {
     const load = () => {
       const raw = speechSynthesis.getVoices()
       const filtered = raw
-        .filter((v) => v.lang.startsWith('en'))
         .map((v) => ({ name: v.name, uri: v.voiceURI, lang: v.lang }))
       setAvailableVoices(filtered)
       if (!filtered.some((v) => v.uri === selectedVoiceUri)) {
@@ -53,7 +52,7 @@ export function useSpeech() {
     const utterance = new SpeechSynthesisUtterance(text)
     const voice = getVoice()
     if (voice) utterance.voice = voice
-    utterance.rate = 0.9
+    utterance.rate = 0.65
     utterance.pitch = 1
 
     utterance.onstart = () => { speakingRef.current = true; setSpeaking(true) }

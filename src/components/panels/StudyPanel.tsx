@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, Key, AlertCircle, BookText, Volume2, VolumeX } from 'lucide-react'
+import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, AlertCircle, BookText, Volume2, VolumeX } from 'lucide-react'
 import { useNavigation } from '@/hooks/useNavigation'
 import { useNetworkState } from '@/hooks/useNetworkState'
-import { getCrossReferences, getTranslations, saveNote, getNotes, getAllNotes, deleteNote, getStrongsEntry } from '@/lib/db'
+import { getCrossReferences, getTranslations, saveNote, getNotes, getAllNotes, deleteNote, getStrongsEntry, getInterlinearWords } from '@/lib/db'
 import { formatVerseId, parseOsisId } from '@/lib/utils'
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { getBook } from '@/data/books'
-import type { CrossReference, Note, StrongsEntry } from '@/types/db'
+import type { CrossReference, Note, StrongsEntry, InterlinearWord } from '@/types/db'
 import type { ActiveTab } from '@/contexts/navigation'
 
 const TABS: { id: ActiveTab; label: string; icon: typeof Crosshair }[] = [
@@ -205,33 +205,8 @@ function NotesTab() {
   )
 }
 
-type AiMode = 'context' | 'words' | 'theology' | 'application' | 'story' | 'custom'
-
-const MOCK_RESPONSES: Record<AiMode, string> = {
-  context: `**Immediate Context:** The surrounding verses establish this passage as a pivotal moment in the narrative arc. Verses immediately preceding set up a tension—a question, a conflict, or an expectation—that this passage resolves or intensifies. The author's flow moves from general principle to specific application, using this text as the hinge.\n\n**Book-Level Context:** This passage sits at a critical juncture in the book's overall argument. The author's purpose—whether theological instruction, historical record, or pastoral encouragement—shapes how every detail functions. The themes of covenant, faithfulness, and divine intervention recur throughout, and this passage develops them in a unique direction.\n\n**Historical & Cultural Setting:** Written in the first century AD, this passage reflects the socio-political realities of Roman occupation, Jewish religious expectations, and the early Christian community's struggle to define its identity. Key figures like Pharisees, Sadducees, and the common people all play roles that would have been immediately understood by the original audience.\n\n**Intertextual Connections:** This passage echoes several OT scriptures: it alludes to Isaiah 40 and Jeremiah 31, and directly quotes Psalm 110. The thematic connection to the Exodus narrative is unmistakable—what God did for Israel then, He is now doing through Christ. The author traces this thread from Genesis through Revelation, showing how this moment fulfills what was promised.`,
-
-  words: `**Genre Analysis:** This passage belongs to the narrative genre with embedded poetic elements. As narrative, it uses characters, setting, and plot to convey theological truth. The genre shapes interpretation by inviting the reader to identify with the characters and experience the story's tension and resolution.\n\n**Literary Outline:** 1) Setup (vv. 1-3): introduces the scene and key characters; 2) Conflict (vv. 4-7): the central tension emerges through dialogue; 3) Climax (v. 8): the turning point where divine intervention occurs; 4) Resolution (vv. 9-11): the aftermath and response.\n\n**Literary Devices:** The passage employs an inclusio—the opening and closing phrases mirror each other, creating a frame. There's a chiasm in verses 4-7 (A-B-C-B'-A') that centers attention on the climactic statement. The metaphor of "light" and "darkness" runs throughout, drawing on OT wisdom traditions.\n\n**Lexical Analysis:**
-• Greek word "λόγος" (logos) — Strong's G3056 — semantic range: word, reason, account, divine expression. Here in the nominative, it functions as the subject with theological weight, echoing Genesis 1 where God creates through speech.
-• Hebrew word "דָּבָר" (davar) — Strong's H1697 — range: word, thing, matter, commandment. Its use here implies not just speech but active, creative power.
-• The verb "ἐγένετο" (egeneto) — aorist middle deponent — indicates a definite historical event, grounding the theological claim in time and space.`,
-
-  theology: `**Doctrine of God:** This passage reveals God's sovereignty and intimate involvement with creation. The self-existence of God is implied—He acts, He speaks, He initiates. The attribute of immutability (unchanging nature) underlies the consistency of His covenantal dealings.\n\n**Christology:** Central to this passage is the identity of Christ as the mediator between God and humanity. The incarnation is implied in the movement from divine purpose to human reality. Throughout church history, this text has been used to affirm the hypostatic union—Christ as fully God and fully man.\n\n**Soteriology:** The pattern of sin, judgment, and salvation emerges clearly. Human inability is contrasted with divine provision. Grace is the operative principle—unmerited favor that elicits faith as the appropriate response.\n\n**Church History Reception:** Augustine saw in this passage the irresistible nature of grace. Luther used it to argue for justification by faith alone. Calvin found here the doctrine of perseverance. Wesley emphasized the universal scope of the atonement. Each tradition highlights a different facet while remaining faithful to the text.\n\n**Theological Significance:** This passage makes its most significant contribution to our understanding of covenant theology—demonstrating that God's promises are both conditional and unconditional, requiring human response while ultimately depending on divine faithfulness.`,
-
-  application: `**Ethical Principles:** The passage teaches several enduring principles: (1) Faithfulness in suffering—remaining true to God even when circumstances are difficult; (2) Community responsibility—bearing one another's burdens; (3) Truth-telling—speaking honestly even when costly.\n\n**Cultural-Specific vs. Transcultural:** The specific instructions about greetings and head coverings are culturally bound (first-century Mediterranean customs) and not directly transferable. However, the underlying principles of respect, cultural sensitivity, and orderly worship are transcultural and apply today.\n\n**Practical Application:**
-• Personal: Examine areas where fear prevents faithful action. Start each day by acknowledging God's sovereignty over your circumstances.
-• Relational: Practice active listening and empathetic presence with those who are suffering.
-• Vocational: Bring integrity to your workplace—let your yes be yes and your no be no.\n\n**Reflection Questions:**
-1. Where in my life am I hesitating to trust God's provision?
-2. How can I bear someone else's burden this week?
-3. What would it look like to live out this passage's teaching in my specific context?`,
-
-  story: `The sun hung low over the dusty road leading out of Jericho, casting long shadows across the parched earth. The air smelled of spices and sheep, the sounds of the crowded city fading behind them. Jesus walked ahead, His pace purposeful, His disciples trailing in quiet confusion.\n\nThey had just heard Him speak of suffering and death—words that clashed violently with their expectations of glory and conquest. Peter had pulled Him aside, rebuking Him. And Jesus had turned, looking not with anger but with sorrow, saying, "Get behind me, Satan." The words hung in the air like thunder.\n\nNow they walked in silence. The road wound upward toward Jerusalem, and with every step, the tension grew. The city gleamed on the horizon, its temple catching the golden light. But for those who had ears to hear, the shadows seemed longer than they should be.\n\nIt was then that Jesus stopped. He turned to face them fully, and in that moment—with the wind stirring the dust at His feet and the city of David spread behind Him—He asked the question that would echo through eternity: "Who do you say that I am?"\n\nThe question wasn't academic. It was the hinge on which all of history turns. And standing there on that road, each disciple had to choose: was He teacher, prophet, or something—Someone—far greater?`,
-
-  custom: `Running your custom analysis... Results will appear here based on your specific instructions.`,
-}
-
 interface AiModeDef {
-  id: AiMode
+  id: string
   label: string
   description: string
   systemPrompt: string
@@ -282,13 +257,26 @@ const AI_MODES: AiModeDef[] = [
   },
 ]
 
+const AI_PROVIDERS = [
+  { id: 'gemini', name: 'Google Gemini', endpoint: '', model: 'gemini-2.0-flash' },
+  { id: 'openai', name: 'OpenAI', endpoint: 'https://api.openai.com/v1', model: 'gpt-4o' },
+  { id: 'openrouter', name: 'OpenRouter', endpoint: 'https://openrouter.ai/api/v1', model: 'openai/gpt-4o' },
+  { id: 'groq', name: 'Groq', endpoint: 'https://api.groq.com/openai/v1', model: 'llama-3.3-70b-versatile' },
+  { id: 'anthropic', name: 'Anthropic', endpoint: 'https://api.anthropic.com/v1', model: 'claude-sonnet-4-20250514' },
+  { id: 'deepseek', name: 'DeepSeek', endpoint: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
+  { id: 'together', name: 'Together AI', endpoint: 'https://api.together.xyz/v1', model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo' },
+  { id: 'custom', name: 'Custom', endpoint: '', model: '' },
+]
+
 function AiTab() {
   const { aiTarget } = useNavigation()
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('refbible-ai-key') ?? '')
-  const saved = !!localStorage.getItem('refbible-ai-key')
-  const [demoMode, setDemoMode] = useState(() => localStorage.getItem('refbible-ai-demo') === 'true')
   const isOnline = useNetworkState()
-  const [selectedMode, setSelectedMode] = useState<AiMode | null>(null)
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('refbible-ai-key') ?? '')
+  const [provider, setProvider] = useState(() => localStorage.getItem('refbible-ai-provider') ?? 'gemini')
+  const [endpoint, setEndpoint] = useState(() => localStorage.getItem('refbible-ai-endpoint') ?? '')
+  const [model, setModel] = useState(() => localStorage.getItem('refbible-ai-model') ?? '')
+  const saved = !!localStorage.getItem('refbible-ai-key')
+  const [selectedMode, setSelectedMode] = useState<string | null>(null)
   const [customPrompt, setCustomPrompt] = useState('')
   const [response, setResponse] = useState('')
   const [loading, setLoading] = useState(false)
@@ -298,56 +286,10 @@ function AiTab() {
   const responseRef = useRef('')
   const sentenceBufferRef = useRef('')
   const unlistenRef = useRef<(() => void)[]>([])
-  const mockTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  const cleanup = useCallback(() => {
-    for (const u of unlistenRef.current) u()
-    unlistenRef.current = []
-    if (mockTimerRef.current) {
-      clearInterval(mockTimerRef.current)
-      mockTimerRef.current = null
-    }
-  }, [])
-
-  const startMockStream = useCallback((mode: AiMode) => {
-    const fullText = MOCK_RESPONSES[mode] ?? MOCK_RESPONSES.context
-    const words = fullText.split(/(\s+)/)
-    let idx = 0
-    const delay = 20
-
-    mockTimerRef.current = setInterval(() => {
-      if (idx >= words.length) {
-        if (mockTimerRef.current) clearInterval(mockTimerRef.current)
-        mockTimerRef.current = null
-        setLoading(false)
-        setStreaming(false)
-        const leftover = sentenceBufferRef.current.trim()
-        if (leftover) speakSentence(leftover)
-        sentenceBufferRef.current = ''
-        return
-      }
-      const word = words[idx++]
-      responseRef.current += word
-      setResponse(responseRef.current)
-
-      sentenceBufferRef.current += word
-      let match
-      const sentenceEnd = /[.!?](?:\s|$)/
-      while ((match = sentenceEnd.exec(sentenceBufferRef.current)) !== null) {
-        const cs = sentenceBufferRef.current.slice(0, match.index + 1)
-        sentenceBufferRef.current = sentenceBufferRef.current.slice(match.index + 1).trimStart()
-        speakSentence(cs)
-      }
-    }, delay)
-  }, [speakSentence])
-
-  useEffect(() => {
-    return cleanup
-  }, [cleanup])
 
   const speakSentence = useCallback((sentence: string) => {
     const utterance = new SpeechSynthesisUtterance(sentence)
-    utterance.rate = 0.9
+    utterance.rate = 0.65
     utterance.onend = () => {
       if (speechSynthesis.speaking === false) {
         setAiSpeaking(false)
@@ -363,20 +305,44 @@ function AiTab() {
     setAiSpeaking(false)
   }, [])
 
+  const cleanup = useCallback(() => {
+    for (const u of unlistenRef.current) u()
+    unlistenRef.current = []
+  }, [])
+
+  useEffect(() => {
+    return cleanup
+  }, [cleanup])
+
+  const handleProviderChange = (newProvider: string) => {
+    setProvider(newProvider)
+    const p = AI_PROVIDERS.find((x) => x.id === newProvider)
+    if (p) {
+      setEndpoint(p.endpoint)
+      setModel(p.model)
+    }
+    localStorage.setItem('refbible-ai-provider', newProvider)
+  }
+
   const handleSave = () => {
     localStorage.setItem('refbible-ai-key', apiKey)
+    localStorage.setItem('refbible-ai-provider', provider)
+    localStorage.setItem('refbible-ai-endpoint', endpoint)
+    localStorage.setItem('refbible-ai-model', model)
     window.location.reload()
   }
 
   const handleClear = () => {
     localStorage.removeItem('refbible-ai-key')
-    setApiKey('')
+    localStorage.removeItem('refbible-ai-provider')
+    localStorage.removeItem('refbible-ai-endpoint')
+    localStorage.removeItem('refbible-ai-model')
     window.location.reload()
   }
 
   const handleRun = async () => {
     if (!aiTarget) return
-    if (!demoMode && !apiKey) return
+    if (!apiKey) return
     const mode = AI_MODES.find((m) => m.id === (selectedMode ?? 'context'))
     if (!mode) return
     setLoading(true)
@@ -387,11 +353,6 @@ function AiTab() {
     sentenceBufferRef.current = ''
     stopAiSpeech()
     cleanup()
-
-    if (demoMode) {
-      startMockStream(selectedMode ?? 'context')
-      return
-    }
 
     const systemPrompt = mode.systemPrompt
     const combinedPrompt = customPrompt.trim()
@@ -425,7 +386,7 @@ function AiTab() {
       })
       unlistenRef.current.push(unlistenDone)
 
-      await invoke('ai_query_stream', { apiKey, prompt: combinedPrompt })
+      await invoke('ai_query_stream', { apiKey, prompt: combinedPrompt, provider, endpoint, model })
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
       setLoading(false)
@@ -433,7 +394,7 @@ function AiTab() {
     }
   }
 
-  if (!isOnline && !demoMode) {
+  if (!isOnline) {
     return (
       <div className="flex flex-col items-center gap-3 py-6 text-center">
         <WifiOff size={24} className="text-text-tertiary" />
@@ -443,7 +404,7 @@ function AiTab() {
     )
   }
 
-  if (!saved && !demoMode) {
+  if (!saved) {
     const selectedModeLabel = selectedMode ? AI_MODES.find((m) => m.id === selectedMode)?.label : null
     return (
       <div className="space-y-4">
@@ -475,30 +436,69 @@ function AiTab() {
             <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-accent/10 border border-accent/20">
               <Sparkles size={14} className="shrink-0 mt-0.5 text-accent" />
               <p className="text-xs text-text-primary leading-relaxed">
-                You picked <strong className="text-accent">{selectedModeLabel}</strong>. Enter your API key below and click <strong>Activate AI</strong> to start analyzing verses.
+                You picked <strong className="text-accent">{selectedModeLabel}</strong>. Configure your AI provider below and click <strong>Activate AI</strong>.
               </p>
             </div>
           ) : (
             <p className="text-xs text-text-tertiary mt-1">
-              Choose a mode above, then enter your API key to get started.
+              Choose a mode above, then configure your AI provider to get started.
             </p>
           )}
         </div>
 
         <hr className="border-border" />
 
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5">
-            <Key size={14} className="text-text-tertiary" />
-            <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider">API Key</h3>
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">AI Provider</label>
+            <select
+              value={provider}
+              onChange={(e) => handleProviderChange(e.target.value)}
+              className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
+            >
+              {AI_PROVIDERS.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
           </div>
-          <input
-            type="password"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Paste your Gemini API key"
-            className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
-          />
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">API Key</label>
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder={provider === 'gemini' ? 'Paste your Gemini API key' : 'Paste your API key'}
+              className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
+            />
+          </div>
+
+          {provider !== 'gemini' && (
+            <>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Endpoint</label>
+                <input
+                  type="text"
+                  value={endpoint}
+                  onChange={(e) => setEndpoint(e.target.value)}
+                  placeholder="https://api.openai.com/v1"
+                  className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Model</label>
+                <input
+                  type="text"
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                  placeholder={provider === 'custom' ? 'Enter model name' : undefined}
+                  className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
+                />
+              </div>
+            </>
+          )}
+
           <button
             type="button"
             onClick={handleSave}
@@ -507,65 +507,25 @@ function AiTab() {
           >
             Activate AI
           </button>
+
           <p className="text-xs text-text-tertiary flex items-start gap-1.5">
             <AlertCircle size={12} className="shrink-0 mt-0.5" />
-            Your key is stored locally and never sent anywhere except Google AI Studio.
+            Your key is stored locally and never sent anywhere except the API provider you choose.
           </p>
-          <div className="pt-2 border-t border-border">
-            <p className="text-xs font-semibold text-text-secondary mb-2">How to get your API key:</p>
-            <ol className="space-y-1.5 text-xs text-text-tertiary list-decimal list-inside leading-relaxed">
-              <li>Go to <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">aistudio.google.com/apikey</a></li>
-              <li>Sign in with your Google account</li>
-              <li>Click <strong>Create API Key</strong></li>
-              <li>Copy the generated key and paste it above</li>
-            </ol>
-          </div>
-
-          <hr className="border-border" />
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-1.5">
-              <Sparkles size={14} className="text-text-tertiary" />
-              <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider">No API Key?</h3>
-            </div>
-            <button
-              type="button"
-              onClick={() => { setDemoMode(true); localStorage.setItem('refbible-ai-demo', 'true') }}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg border-2 border-dashed border-accent/50 text-accent hover:bg-accent/5 hover:border-accent transition-all duration-150 cursor-pointer"
-            >
-              <Sparkles size={14} />
-              Try Demo Mode
-            </button>
-            <p className="text-xs text-text-tertiary flex items-start gap-1.5">
-              <AlertCircle size={12} className="shrink-0 mt-0.5" />
-              Simulated responses to test the full UI — no API key needed.
-            </p>
-          </div>
         </div>
       </div>
     )
   }
 
+  const currentProvider = AI_PROVIDERS.find((p) => p.id === provider)
+
   return (
     <div className="space-y-3">
       <div className="px-3 py-2 rounded-lg bg-surface-elevated border border-border-subtle flex items-center justify-between">
-        <span className="text-xs text-text-secondary">{demoMode ? 'Demo Mode' : 'AI activated'}</span>
-        <div className="flex items-center gap-2">
-          {demoMode && (
-            <button
-              type="button"
-              onClick={() => { setDemoMode(false); localStorage.removeItem('refbible-ai-demo') }}
-              className="text-xs text-accent hover:text-accent/80 transition-colors cursor-pointer"
-            >
-              Use API Key
-            </button>
-          )}
-          {!demoMode && (
-            <button type="button" onClick={handleClear} className="text-xs text-danger hover:text-danger/80 transition-colors cursor-pointer">
-              Revoke
-            </button>
-          )}
-        </div>
+        <span className="text-xs text-text-secondary">{currentProvider?.name ?? provider}</span>
+        <button type="button" onClick={handleClear} className="text-xs text-danger hover:text-danger/80 transition-colors cursor-pointer">
+          Revoke
+        </button>
       </div>
 
       {!aiTarget ? (
@@ -684,11 +644,15 @@ function AiTab() {
 function WordTab() {
   const { wordTarget, setAiTarget, setStudyTab } = useNavigation()
   const [strongs, setStrongs] = useState<StrongsEntry | null>(null)
+  const [verseWords, setVerseWords] = useState<InterlinearWord[]>([])
 
   useEffect(() => {
     if (!wordTarget) return
     getStrongsEntry(wordTarget.word.strongs_number ?? '').then((entry) => {
       setStrongs(entry)
+    })
+    getInterlinearWords(wordTarget.verseId).then((words) => {
+      setVerseWords(words)
     })
   }, [wordTarget])
 
@@ -707,6 +671,18 @@ function WordTab() {
     setStudyTab('ai')
   }, [wordTarget, setAiTarget, setStudyTab])
 
+  const speak = useCallback((text: string) => {
+    speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    const uri = localStorage.getItem('refbible-speech-voice')
+    if (uri) {
+      const voice = speechSynthesis.getVoices().find((v) => v.voiceURI === uri)
+      if (voice) utterance.voice = voice
+    }
+    utterance.rate = 0.65
+    speechSynthesis.speak(utterance)
+  }, [])
+
   if (!wordTarget) {
     return <p className="text-xs text-text-tertiary px-1 py-4 text-center">Tap a word to see its details here.</p>
   }
@@ -716,15 +692,30 @@ function WordTab() {
   const fontStack = isHebrew ? 'font-hebrew' : 'font-greek'
   const langLabel = isHebrew ? 'Hebrew' : 'Greek'
 
+  const fullVerseText = verseWords
+    .map((vw) => vw.transliteration)
+    .filter(Boolean)
+    .join(' ')
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col items-center py-4 px-3 rounded-xl bg-surface-elevated border border-border-subtle">
+      <div className="flex flex-col items-center py-4 px-3 rounded-xl bg-surface-elevated border border-border-subtle relative">
         <span className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider mb-2">{langLabel}</span>
         <span className={`${fontStack} text-2xl text-accent leading-tight`} dir={isHebrew ? 'rtl' : 'ltr'}>
           {w.original_text}
         </span>
         {w.transliteration && (
           <span className="text-sm text-text-tertiary italic mt-1">{w.transliteration}</span>
+        )}
+        {w.transliteration && (
+          <button
+            type="button"
+            onClick={() => speak(w.transliteration!)}
+            className="mt-2 flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border border-accent/30 bg-accent/5 text-accent hover:bg-accent/15 hover:border-accent/50 transition-all duration-150 cursor-pointer"
+          >
+            <Volume2 size={13} />
+            Pronounce
+          </button>
         )}
       </div>
 
@@ -758,6 +749,25 @@ function WordTab() {
           {strongs.word_count != null && (
             <p className="text-[10px] text-text-tertiary mt-1">Occurrences: {strongs.word_count}</p>
           )}
+        </div>
+      )}
+
+      {fullVerseText && (
+        <div className="px-3 py-3 rounded-lg bg-surface-elevated border border-border-subtle space-y-2">
+          <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">
+            Read Verse Aloud
+          </p>
+          <p className="text-xs text-text-secondary italic leading-relaxed line-clamp-3">
+            {fullVerseText}
+          </p>
+          <button
+            type="button"
+            onClick={() => speak(fullVerseText)}
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-accent/30 text-accent hover:bg-accent/10 hover:border-accent/50 transition-all duration-150 cursor-pointer"
+          >
+            <Volume2 size={13} />
+            Read Verse
+          </button>
         </div>
       )}
 

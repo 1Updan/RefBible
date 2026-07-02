@@ -97,7 +97,7 @@ export function VerseRow({
       id={`verse-${verse.id}`}
       className={clsx(
         'group flex gap-3 py-2.5 px-4 rounded-lg transition-colors duration-150 touch-manipulation cursor-pointer',
-        isSelected ? 'bg-accent/8 ring-1 ring-accent/30' : 'hover:bg-surface/50',
+        isHighlighted || isSelected ? 'bg-accent/20 ring-2 ring-accent/50' : 'hover:bg-surface/50',
         isHighlighted && 'animate-[highlightPulse_2s_ease-out]',
       )}
       style={highlightBg ? { backgroundColor: highlightBg } : undefined}
@@ -110,7 +110,7 @@ export function VerseRow({
       <span
         className={clsx(
           'shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold transition-colors duration-150',
-          isSelected
+          isHighlighted || isSelected
             ? 'bg-accent text-white'
             : 'bg-badge-bg text-badge-text group-hover:bg-accent group-hover:text-white',
         )}
