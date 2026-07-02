@@ -13,7 +13,10 @@ pub async fn ai_query_stream(app: tauri::AppHandle, api_key: String, prompt: Str
 
     let body_str = serde_json::to_string(&body).map_err(|e| e.to_string())?;
 
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder()
+        .build()
+        .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
+
     let resp = client
         .post(url)
         .header("X-Goog-Api-Key", &api_key)
@@ -22,6 +25,12 @@ pub async fn ai_query_stream(app: tauri::AppHandle, api_key: String, prompt: Str
         .send()
         .await
         .map_err(|e| format!("HTTP request failed: {}", e))?;
+
+    let status = resp.status();
+    if !status.is_success() {
+        let body = resp.text().await.unwrap_or_else(|e| format!("(failed to read: {})", e));
+        return Err(format!("Gemini API returned {}: {}", status.as_u16(), body));
+    }
 
     let mut buffer = String::new();
     let mut stream = resp.bytes_stream();

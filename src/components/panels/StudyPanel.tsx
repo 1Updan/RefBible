@@ -358,7 +358,7 @@ function AiTab() {
       })
       unlistenRef.current.push(unlistenDone)
 
-      void invoke('ai_query_stream', { apiKey, prompt: combinedPrompt })
+      await invoke('ai_query_stream', { apiKey, prompt: combinedPrompt })
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
       setLoading(false)
