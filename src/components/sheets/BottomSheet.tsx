@@ -71,7 +71,7 @@ export function BottomSheet({ open, onClose, title, children, position = 'bottom
         aria-modal="true"
         aria-label={title}
       >
-        {isTop && !hideHeader && (
+        {!hideHeader && (
           <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
             <h2 className="text-sm font-semibold text-text-primary">{title}</h2>
             <button

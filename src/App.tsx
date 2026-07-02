@@ -535,15 +535,7 @@ function NavBottomSheet({
   const NT_BOOKS = BOOKS.filter((b) => b.testament === 'NT')
 
   return (
-    <BottomSheet open={open} onClose={onClose} title="" position="top">
-      <button
-        type="button"
-        onClick={onClose}
-        className="absolute top-2 right-3 z-10 p-1 rounded-md hover:bg-surface text-text-tertiary hover:text-text-primary transition-colors duration-150 cursor-pointer"
-        aria-label="Close"
-      >
-        <X size={14} />
-      </button>
+    <BottomSheet open={open} onClose={onClose} title="" position="bottom">
       <div className="flex h-[50vh] overflow-hidden -mx-4 -mb-4 -mt-4">
         <div className="w-[44%] min-w-0 shrink-0 border-r border-border flex flex-col">
           <div className="flex-1 overflow-y-auto divide-y divide-border-subtle/50">
