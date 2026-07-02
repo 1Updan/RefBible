@@ -205,6 +205,8 @@ function NotesTab() {
   )
 }
 
+type AiMode = 'context' | 'words' | 'theology' | 'application' | 'story' | 'custom'
+
 const MOCK_RESPONSES: Record<AiMode, string> = {
   context: `**Immediate Context:** The surrounding verses establish this passage as a pivotal moment in the narrative arc. Verses immediately preceding set up a tension—a question, a conflict, or an expectation—that this passage resolves or intensifies. The author's flow moves from general principle to specific application, using this text as the hinge.\n\n**Book-Level Context:** This passage sits at a critical juncture in the book's overall argument. The author's purpose—whether theological instruction, historical record, or pastoral encouragement—shapes how every detail functions. The themes of covenant, faithfulness, and divine intervention recur throughout, and this passage develops them in a unique direction.\n\n**Historical & Cultural Setting:** Written in the first century AD, this passage reflects the socio-political realities of Roman occupation, Jewish religious expectations, and the early Christian community's struggle to define its identity. Key figures like Pharisees, Sadducees, and the common people all play roles that would have been immediately understood by the original audience.\n\n**Intertextual Connections:** This passage echoes several OT scriptures: it alludes to Isaiah 40 and Jeremiah 31, and directly quotes Psalm 110. The thematic connection to the Exodus narrative is unmistakable—what God did for Israel then, He is now doing through Christ. The author traces this thread from Genesis through Revelation, showing how this moment fulfills what was promised.`,
 
@@ -227,8 +229,6 @@ const MOCK_RESPONSES: Record<AiMode, string> = {
 
   custom: `Running your custom analysis... Results will appear here based on your specific instructions.`,
 }
-
-type AiMode = 'context' | 'words' | 'theology' | 'application' | 'story' | 'custom'
 
 interface AiModeDef {
   id: AiMode
