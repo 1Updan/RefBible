@@ -73,6 +73,12 @@ pub fn run() {
             sql: include_str!("../migrations/003_highlights.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 4,
+            description: "user custom cross references",
+            sql: include_str!("../migrations/004_user_cross_references.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

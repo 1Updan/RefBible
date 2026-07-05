@@ -73,53 +73,53 @@ export function VerseActionBar({
   }
 
   return (
-    <div className="fixed bottom-16 left-0 right-0 z-40 flex flex-col items-center px-4 animate-[slideUp_150ms_ease-out] pointer-events-none">
-      <div className="w-fit max-w-full flex items-center gap-1 px-2.5 py-1 bg-action-bar shadow-2xl rounded-2xl overflow-hidden pointer-events-auto">
-        <span className="text-xs text-white/80 font-medium shrink-0 pl-0.5">
+    <div className="fixed bottom-16 left-0 right-0 z-50 flex flex-col items-center px-2 animate-[slideUp_150ms_ease-out] pointer-events-none">
+      <div className="w-fit max-w-[96vw] flex items-center gap-0.5 px-1.5 py-1 bg-action-bar shadow-2xl rounded-2xl overflow-x-auto scrollbar-none pointer-events-auto">
+        <span className="text-[10px] sm:text-xs text-white/80 font-medium shrink-0 pl-0.5">
           {selectedCount}
           <span className="hidden sm:inline">v</span>
         </span>
-        <span className="w-px h-5 bg-white/20 shrink-0" />
+        <span className="w-px h-4 sm:h-5 bg-white/20 shrink-0 mx-0.5" />
         <button
           type="button"
           onClick={onToggleBookmark}
           className={clsx(
-            'flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg transition-all duration-150 cursor-pointer',
+            'flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg transition-all duration-150 cursor-pointer',
             allBookmarked ? 'text-white' : 'text-white/80 hover:text-white',
           )}
         >
-          {allBookmarked ? <BookmarkCheck size={15} /> : <Bookmark size={15} />}
-          <span className="text-[9px] leading-none">Save</span>
+          {allBookmarked ? <BookmarkCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Bookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+          <span className="text-[7px] sm:text-[9px] leading-none">Mark</span>
         </button>
         {onRangeSelect && selectedCount === 1 && (
           <button
             type="button"
             onClick={onRangeSelect}
             className={clsx(
-              'flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg transition-all duration-150 cursor-pointer',
+              'flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg transition-all duration-150 cursor-pointer',
               isRangeMode ? 'text-accent bg-white/15' : 'text-white/80 hover:text-white',
             )}
           >
-            {isRangeMode ? <XCircle size={15} /> : <List size={15} />}
-            <span className="text-[9px] leading-none">{isRangeMode ? 'Cancel' : 'Range'}</span>
+            {isRangeMode ? <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <List className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+            <span className="text-[7px] sm:text-[9px] leading-none">{isRangeMode ? 'Cancel' : 'Range'}</span>
           </button>
         )}
         <button
           type="button"
           onClick={onAddNote}
-          className="flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg text-white/80 hover:text-white transition-all duration-150 cursor-pointer"
+          className="flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg text-white/80 hover:text-white transition-all duration-150 cursor-pointer"
         >
-          <MessageSquareMore size={15} />
-          <span className="text-[9px] leading-none">Note</span>
+          <MessageSquareMore className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span className="text-[7px] sm:text-[9px] leading-none">Note</span>
         </button>
         {onShare && (
           <button
             type="button"
             onClick={onShare}
-            className="flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg text-white/80 hover:text-white transition-all duration-150 cursor-pointer"
+            className="flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg text-white/80 hover:text-white transition-all duration-150 cursor-pointer"
           >
-            <Share2 size={15} />
-            <span className="text-[9px] leading-none">Share</span>
+            <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="text-[7px] sm:text-[9px] leading-none">Share</span>
           </button>
         )}
         {onToggleHighlight && (
@@ -127,79 +127,82 @@ export function VerseActionBar({
             type="button"
             onClick={onToggleHighlight}
             className={clsx(
-              'flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg transition-all duration-150 cursor-pointer',
+              'flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg transition-all duration-150 cursor-pointer',
               highlightActive
                 ? 'text-accent bg-white/15'
                 : 'text-white/80 hover:text-white',
             )}
           >
-            <Highlighter size={15} />
-            <span className="text-[9px] leading-none">HL</span>
+            <Highlighter className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="text-[7px] sm:text-[9px] leading-none">Mark</span>
           </button>
         )}
         <button
           type="button"
           onClick={onCrossReferences}
-          className="flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg text-white/80 hover:text-white transition-all duration-150 cursor-pointer"
+          className="flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg text-white/80 hover:text-white transition-all duration-150 cursor-pointer"
         >
-          <Crosshair size={15} />
-          <span className="text-[9px] leading-none">Refs</span>
+          <Crosshair className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span className="text-[7px] sm:text-[9px] leading-none">Refs</span>
         </button>
         <button
           type="button"
-          onClick={onAiCommentary}
+          onClick={() => {
+            if (!isOnline) { alert('You are offline — AI features require an internet connection.'); return }
+            onAiCommentary()
+          }}
           disabled={!isOnline}
-          className="flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg transition-all duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed text-white/80 hover:text-white"
+          className="flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg transition-all duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed text-white/80 hover:text-white"
         >
-          <Sparkles size={15} />
-          <span className="text-[9px] leading-none">AI</span>
+          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span className="text-[7px] sm:text-[9px] leading-none">AI</span>
         </button>
         <button
           type="button"
           onClick={onToggleInterlinear}
           className={clsx(
-            'flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg transition-all duration-150 cursor-pointer',
+            'flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg transition-all duration-150 cursor-pointer',
             interlinearEnabled ? 'text-accent bg-white/15' : 'text-white/80 hover:text-white',
           )}
         >
-          <BookText size={15} />
-          <span className="text-[9px] leading-none">IL</span>
+          <BookText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span className="text-[7px] sm:text-[9px] leading-none">Inter</span>
         </button>
-        <span className="w-px h-5 bg-white/20 shrink-0" />
+        <span className="w-px h-4 sm:h-5 bg-white/20 shrink-0 mx-0.5" />
         <button
           type="button"
           onClick={onClearSelection}
-          className="flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg text-white/60 hover:text-white transition-all duration-150 cursor-pointer"
+          className="flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg text-white/60 hover:text-white transition-all duration-150 cursor-pointer"
         >
-          <X size={15} />
-          <span className="text-[9px] leading-none">Done</span>
+          <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span className="text-[7px] sm:text-[9px] leading-none">Done</span>
         </button>
       </div>
 
       {highlightActive && onHighlightColorSelect && (
-        <div className="mt-1.5 flex items-center gap-1.5 px-3 py-1.5 bg-action-bar shadow-xl rounded-full pointer-events-auto animate-[fadeIn_100ms_ease-out]">
+        <div className="mt-1.5 flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-action-bar shadow-xl rounded-full pointer-events-auto animate-[fadeIn_100ms_ease-out]">
           {HIGHLIGHT_COLORS.map((c) => (
             <button
               key={c.id}
               type="button"
               onClick={() => onHighlightColorSelect(activeHighlightColor === c.id ? null : c.id)}
               className={clsx(
-                'w-6 h-6 rounded-full transition-all duration-100 cursor-pointer ring-1 ring-white/20 hover:scale-110',
+                'w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-all duration-100 cursor-pointer ring-1 ring-white/20 hover:scale-110',
                 activeHighlightColor === c.id ? 'ring-2 ring-white scale-110' : '',
               )}
               style={{ backgroundColor: c.bg }}
               aria-label={c.label}
             />
           ))}
-          <span className="w-px h-4 bg-white/20 shrink-0" />
+          <span className="w-px h-3.5 sm:h-4 bg-white/20 shrink-0" />
           <button
             type="button"
             onClick={onEraseSelection}
-            className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-100 cursor-pointer ring-1 ring-white/20 hover:scale-110 bg-white/10"
+            className="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center transition-all duration-100 cursor-pointer ring-1 ring-white/20 hover:scale-110 bg-white/10"
             aria-label="Remove highlights"
             title="Remove highlights"
           >
-            <Eraser size={12} className="text-white/70" />
+            <Eraser className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white/70" />
           </button>
         </div>
       )}

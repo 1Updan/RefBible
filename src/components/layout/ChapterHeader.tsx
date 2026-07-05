@@ -27,6 +27,8 @@ interface ChapterHeaderProps {
   onSpeak: () => void
   onStop: () => void
   onOpenNav?: () => void
+  interlinearEnabled?: boolean
+  onToggleInterlinear?: () => void
 }
 
 export function ChapterHeader({
@@ -51,6 +53,8 @@ export function ChapterHeader({
   onSpeak,
   onStop,
   onOpenNav,
+  interlinearEnabled,
+  onToggleInterlinear,
 }: ChapterHeaderProps) {
   const [open, setOpen] = useState(false)
   const [searchInput, setSearchInput] = useState('')
@@ -243,17 +247,23 @@ export function ChapterHeader({
               <Bookmark size={15} />
             </button>
           </Tooltip>
-          <Tooltip label="AI Commentary">
+          <Tooltip label="AI">
             <button
               type="button"
-              onClick={() => onTogglePanel('ai')}
+              onClick={() => {
+                if (!navigator.onLine) {
+                  alert('You are offline — AI features require an internet connection.')
+                  return
+                }
+                onTogglePanel('ai')
+              }}
               className={clsx(
                 'p-1 rounded-md transition-all duration-150 cursor-pointer',
                 activePanel === 'study' && studyTab === 'ai'
                   ? 'bg-accent-light text-accent'
                   : 'text-text-tertiary hover:text-text-primary hover:bg-surface',
               )}
-              aria-label="AI Commentary"
+              aria-label="AI"
             >
               <Sparkles size={15} />
             </button>
@@ -304,31 +314,6 @@ export function ChapterHeader({
 
             {mobileMenuOpen && (
               <div className="absolute right-0 top-full mt-1 z-50 min-w-[200px] bg-surface-elevated rounded-xl shadow-xl border border-border py-1 animate-[scaleIn_100ms_ease-out] origin-top-right">
-                <div className="px-3 py-1.5 border-b border-border">
-                  <p className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider mb-1.5">Translations</p>
-                  <div className="space-y-0.5">
-                    {installedVersions.map((code) => {
-                      const isOn = visibleVersions.includes(code)
-                      return (
-                        <button
-                          key={code}
-                          type="button"
-                          onClick={() => { onToggleVersion(code); setMobileMenuOpen(false) }}
-                          className="flex items-center gap-2 px-1 py-1 text-xs text-text-primary hover:text-accent transition-colors duration-100 cursor-pointer w-full text-left"
-                        >
-                          <span className={clsx(
-                            'w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0',
-                            isOn ? 'bg-accent border-accent' : 'border-border',
-                          )}>
-                            {isOn && <Check size={9} className="text-white" />}
-                          </span>
-                          {code}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-
                 <div className="space-y-0.5 py-1">
                   <button
                     type="button"
@@ -363,6 +348,18 @@ export function ChapterHeader({
                   </button>
                   <button
                     type="button"
+                    onClick={() => { onToggleInterlinear?.(); setMobileMenuOpen(false) }}
+                    className={clsx(
+                      'w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors duration-100 cursor-pointer text-left',
+                      interlinearEnabled ? 'text-accent bg-accent/10' : 'text-text-primary hover:bg-surface',
+                    )}
+                  >
+                    <BookOpen size={14} />
+                    Interlinear
+                    {interlinearEnabled && <Check size={12} className="ml-auto text-accent" />}
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => { onTogglePanel('ai'); setMobileMenuOpen(false) }}
                     className={clsx(
                       'w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors duration-100 cursor-pointer text-left',
@@ -370,20 +367,33 @@ export function ChapterHeader({
                     )}
                   >
                     <Sparkles size={14} />
-                    AI Commentary
+                    AI
                   </button>
-                  <div className="border-t border-border my-1" />
-                  <button
-                    type="button"
-                    onClick={() => { onTogglePanel('settings'); setMobileMenuOpen(false) }}
-                    className={clsx(
-                      'w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors duration-100 cursor-pointer text-left',
-                      activePanel === 'settings' ? 'text-accent bg-accent/10' : 'text-text-primary hover:bg-surface',
-                    )}
-                  >
-                    <Settings size={14} />
-                    Settings
-                  </button>
+                </div>
+
+                <div className="border-t border-border px-3 py-1.5">
+                  <p className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider mb-1.5">Translations</p>
+                  <div className="space-y-0.5">
+                    {installedVersions.map((code) => {
+                      const isOn = visibleVersions.includes(code)
+                      return (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => { onToggleVersion(code); setMobileMenuOpen(false) }}
+                          className="flex items-center gap-2 px-1 py-1 text-xs text-text-primary hover:text-accent transition-colors duration-100 cursor-pointer w-full text-left"
+                        >
+                          <span className={clsx(
+                            'w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0',
+                            isOn ? 'bg-accent border-accent' : 'border-border',
+                          )}>
+                            {isOn && <Check size={9} className="text-white" />}
+                          </span>
+                          {code}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
             )}

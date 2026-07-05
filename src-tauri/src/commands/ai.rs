@@ -28,6 +28,8 @@ async fn gemini_stream(app: tauri::AppHandle, api_key: String, prompt: String) -
     let body_str = serde_json::to_string(&body).map_err(|e| e.to_string())?;
 
     let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(120))
+        .connect_timeout(std::time::Duration::from_secs(15))
         .build()
         .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
 
@@ -99,6 +101,8 @@ async fn openai_stream(
     let body_str = serde_json::to_string(&body).map_err(|e| e.to_string())?;
 
     let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(120))
+        .connect_timeout(std::time::Duration::from_secs(15))
         .build()
         .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
 

@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, AlertCircle, BookText, Volume2, VolumeX } from 'lucide-react'
 import { useNavigation } from '@/hooks/useNavigation'
 import { useNetworkState } from '@/hooks/useNetworkState'
-import { getCrossReferences, getTranslations, saveNote, getNotes, getAllNotes, deleteNote, getStrongsEntry, getInterlinearWords } from '@/lib/db'
-import { formatVerseId, parseOsisId } from '@/lib/utils'
+import { getCrossReferences, getTranslations, saveNote, getNotes, getAllNotes, deleteNote, getStrongsEntry, getInterlinearWords, getUserCrossReferences, addCustomCrossReference, removeCustomCrossReference } from '@/lib/db'
+import { formatVerseId, parseOsisId, parseReference, verseIdFromBookChapterVerse } from '@/lib/utils'
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { getBook } from '@/data/books'
@@ -20,18 +20,29 @@ const TABS: { id: ActiveTab; label: string; icon: typeof Crosshair }[] = [
 function CrossRefsTab() {
   const { crossRefTarget, navigateTo, bookId } = useNavigation()
   const [xrefs, setXrefs] = useState<CrossReference[]>([])
+  const [userXrefs, setUserXrefs] = useState<(CrossReference & { user_created: boolean })[]>([])
   const [previews, setPreviews] = useState<Map<string, string>>(new Map())
+  const [addInput, setAddInput] = useState('')
+  const [addError, setAddError] = useState<string | null>(null)
+  const [adding, setAdding] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
+  const addInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const target = crossRefTarget?.verseId
     let cancelled = false
     async function load() {
       if (!target) return
-      const refs = await getCrossReferences(target)
+      const [refs, userRefs] = await Promise.all([
+        getCrossReferences(target),
+        getUserCrossReferences(target),
+      ])
       if (cancelled) return
       setXrefs(refs)
+      setUserXrefs(userRefs)
+      const allRefs = [...refs, ...userRefs]
       const map = new Map<string, string>()
-      const batch = refs.map(async (x) => {
+      const batch = allRefs.map(async (x) => {
         const texts = await getTranslations(x.target_verse_id)
         const first = texts.find((t) => t.translation_code === 'KJV') ?? texts[0]
         if (first) {
@@ -43,7 +54,46 @@ function CrossRefsTab() {
     }
     load()
     return () => { cancelled = true }
-  }, [crossRefTarget])
+  }, [crossRefTarget, refreshKey])
+
+  const handleAdd = useCallback(async () => {
+    setAddError(null)
+    const target = crossRefTarget?.verseId
+    if (!target) return
+    const trimmed = addInput.trim()
+    if (!trimmed) {
+      setAddError('Enter a verse reference.')
+      return
+    }
+    const parsed = parseReference(trimmed)
+    if (!parsed) {
+      setAddError('Could not parse. Try e.g. "Romans 1:1"')
+      return
+    }
+    if (!parsed.verse) {
+      setAddError('Include a verse number, e.g. "Romans 1:1"')
+      return
+    }
+    const targetId = verseIdFromBookChapterVerse(parsed.bookId, parsed.chapter, parsed.verse)
+    if (!targetId) {
+      setAddError('Could not build verse ID.')
+      return
+    }
+    setAdding(true)
+    try {
+      await addCustomCrossReference(target, targetId)
+      setAddInput('')
+      addInputRef.current?.focus()
+      setRefreshKey((n) => n + 1)
+    } finally {
+      setAdding(false)
+    }
+  }, [crossRefTarget, addInput])
+
+  const handleRemove = useCallback(async (id: number) => {
+    await removeCustomCrossReference(id)
+    setRefreshKey((n) => n + 1)
+  }, [])
 
   if (!crossRefTarget) {
     return <p className="text-xs text-text-tertiary px-1 py-4 text-center">Select a verse to see cross references</p>
@@ -54,24 +104,65 @@ function CrossRefsTab() {
       <p className="text-xs text-text-secondary px-1">
         For <span className="font-semibold text-text-primary">{crossRefTarget.reference}</span>
       </p>
-      {xrefs.length === 0 && <p className="text-xs text-text-tertiary px-1">No cross references available.</p>}
-      {xrefs.map((xref) => {
+
+      <div className="flex items-center gap-1">
+        <input
+          ref={addInputRef}
+          type="text"
+          value={addInput}
+          onChange={(e) => { setAddInput(e.target.value); setAddError(null) }}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleAdd() }}
+          placeholder="Add a ref, e.g. Romans 1:1"
+          className="flex-1 px-2 py-1.5 text-xs rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
+        />
+        <button
+          type="button"
+          onClick={handleAdd}
+          disabled={adding || !addInput.trim()}
+          className="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer shrink-0"
+        >
+          {adding ? 'Adding\u2026' : 'Add'}
+        </button>
+      </div>
+      {addError && (
+        <p className="text-[10px] text-danger px-1">{addError}</p>
+      )}
+
+      {xrefs.length === 0 && userXrefs.length === 0 && (
+        <p className="text-xs text-text-tertiary px-1">No cross references available. Add your own above.</p>
+      )}
+      {[...xrefs, ...userXrefs].map((xref: CrossReference & { user_created?: boolean }) => {
         const preview = previews.get(xref.target_verse_id)
+        const isUser = (xref as CrossReference & { user_created?: boolean }).user_created
         return (
-          <button
+          <div
             key={xref.id}
-            type="button"
-            onClick={() => {
-              const parts = xref.target_verse_id.split('.')
-              if (parts.length >= 3) navigateTo(bookId, Number(parts[1]), xref.target_verse_id)
-            }}
-            className="w-full text-left p-2.5 rounded-lg bg-surface-elevated border border-border-subtle hover:bg-surface-hover transition-all duration-150 cursor-pointer group"
+            className="relative w-full text-left p-2.5 rounded-lg bg-surface-elevated border border-border-subtle hover:bg-surface-hover transition-all duration-150 group"
           >
-            <span className="text-xs font-semibold text-accent">{formatVerseId(xref.target_verse_id)}</span>
-            {preview && (
-              <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">{preview}</p>
+            <button
+              type="button"
+              onClick={() => {
+                const parts = xref.target_verse_id.split('.')
+                if (parts.length >= 3) navigateTo(bookId, Number(parts[1]), xref.target_verse_id)
+              }}
+              className="w-full text-left cursor-pointer"
+            >
+              <span className="text-xs font-semibold text-accent">{formatVerseId(xref.target_verse_id)}</span>
+              {preview && (
+                <p className="text-xs text-text-secondary mt-0.5 leading-relaxed break-words pr-8">{preview}</p>
+              )}
+            </button>
+            {isUser && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); handleRemove(xref.id) }}
+                className="absolute top-2 right-2 p-1 rounded text-text-tertiary hover:text-danger transition-colors duration-150 opacity-0 group-hover:opacity-100 cursor-pointer"
+                aria-label="Remove cross-reference"
+              >
+                <Trash2 size={12} />
+              </button>
             )}
-          </button>
+          </div>
         )
       })}
     </div>

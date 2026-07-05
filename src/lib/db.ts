@@ -269,4 +269,87 @@ export async function removeHighlight(verseId: string, color: string): Promise<v
   )
 }
 
+export async function getUserCrossReferences(verseId: string): Promise<(CrossReference & { user_created: boolean })[]> {
+  const conn = await getDb()
+  const rows = await conn.select<(CrossReference & { user_created: boolean })[]>(
+    `SELECT id, origin_verse_id, target_verse_id, created_at, 1 as user_created
+     FROM user_custom_cross_references
+     WHERE origin_verse_id = $1
+     ORDER BY created_at DESC`,
+    [verseId],
+  )
+  return rows
+}
+
+export async function addCustomCrossReference(originVerseId: string, targetVerseId: string): Promise<void> {
+  const conn = await getDb()
+  await conn.execute(
+    'INSERT OR IGNORE INTO user_custom_cross_references (origin_verse_id, target_verse_id) VALUES ($1, $2)',
+    [originVerseId, targetVerseId],
+  )
+}
+
+export async function removeCustomCrossReference(id: number): Promise<void> {
+  const conn = await getDb()
+  await conn.execute(
+    'DELETE FROM user_custom_cross_references WHERE id = $1',
+    [id],
+  )
+}
+
+export interface BackupData {
+  bookmarks: { verse_id: string; created_at: string }[]
+  notes: { verse_id: string; text_content: string; created_at: string }[]
+  highlights: { verse_id: string; color: string; created_at: string }[]
+  user_cross_references: { origin_verse_id: string; target_verse_id: string; created_at: string }[]
+}
+
+export async function exportBackupData(): Promise<BackupData> {
+  const conn = await getDb()
+  const bookmarks = await conn.select<{ verse_id: string; created_at: string }[]>(
+    'SELECT verse_id, created_at FROM bookmarks ORDER BY created_at'
+  )
+  const notes = await conn.select<{ verse_id: string; text_content: string; created_at: string }[]>(
+    'SELECT verse_id, text_content, created_at FROM notes ORDER BY created_at'
+  )
+  const highlights = await conn.select<{ verse_id: string; color: string; created_at: string }[]>(
+    'SELECT verse_id, color, created_at FROM highlights ORDER BY created_at'
+  )
+  const user_cross_references = await conn.select<{ origin_verse_id: string; target_verse_id: string; created_at: string }[]>(
+    'SELECT origin_verse_id, target_verse_id, created_at FROM user_custom_cross_references ORDER BY created_at'
+  )
+  return { bookmarks, notes, highlights, user_cross_references }
+}
+
+export async function importBackupData(data: BackupData): Promise<void> {
+  const conn = await getDb()
+  await conn.execute('DELETE FROM bookmarks')
+  await conn.execute('DELETE FROM notes')
+  await conn.execute('DELETE FROM highlights')
+  await conn.execute('DELETE FROM user_custom_cross_references')
+
+  const CHUNK = 200
+
+  async function batchInsert<T>(table: string, columns: string[], rows: T[], extract: (row: T) => unknown[]) {
+    for (let i = 0; i < rows.length; i += CHUNK) {
+      const chunk = rows.slice(i, i + CHUNK)
+      const placeholders = chunk.map((_, j) => {
+        const base = j * columns.length + 1
+        return `($${[...Array(columns.length)].map((_, k) => base + k).join(', $')})`
+      }).join(', ')
+      const binds: unknown[] = []
+      for (const r of chunk) binds.push(...extract(r))
+      await conn.execute(
+        `INSERT OR IGNORE INTO ${table} (${columns.join(', ')}) VALUES ${placeholders}`,
+        binds,
+      )
+    }
+  }
+
+  await batchInsert('bookmarks', ['verse_id', 'created_at'], data.bookmarks, (b) => [b.verse_id, b.created_at])
+  await batchInsert('notes', ['verse_id', 'text_content', 'created_at'], data.notes, (n) => [n.verse_id, n.text_content, n.created_at])
+  await batchInsert('highlights', ['verse_id', 'color', 'created_at'], data.highlights, (h) => [h.verse_id, h.color, h.created_at])
+  await batchInsert('user_custom_cross_references', ['origin_verse_id', 'target_verse_id', 'created_at'], data.user_cross_references, (x) => [x.origin_verse_id, x.target_verse_id, x.created_at])
+}
+
 

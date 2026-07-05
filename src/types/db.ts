@@ -69,3 +69,10 @@ export interface Highlight {
   color: string
   created_at: string
 }
+
+export interface UserCrossReference {
+  id: number
+  origin_verse_id: string
+  target_verse_id: string
+  created_at: string
+}

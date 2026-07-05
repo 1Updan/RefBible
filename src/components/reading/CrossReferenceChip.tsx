@@ -1,9 +1,11 @@
+import { memo } from 'react'
+
 interface CrossReferenceChipProps {
   reference: string
   onClick: () => void
 }
 
-export function CrossReferenceChip({ reference, onClick }: CrossReferenceChipProps) {
+export const CrossReferenceChip = memo(function CrossReferenceChip({ reference, onClick }: CrossReferenceChipProps) {
   return (
     <button
       type="button"
@@ -13,4 +15,4 @@ export function CrossReferenceChip({ reference, onClick }: CrossReferenceChipPro
       {reference}
     </button>
   )
-}
+})

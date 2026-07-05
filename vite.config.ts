@@ -15,4 +15,15 @@ export default defineConfig({
       ignored: ['**/src-tauri/target/**'],
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-ui': ['lucide-react'],
+          'vendor-tauri': ['@tauri-apps/api', '@tauri-apps/plugin-sql', '@tauri-apps/plugin-http', '@tauri-apps/plugin-notification'],
+        },
+      },
+    },
+  },
 })

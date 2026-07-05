@@ -1,4 +1,4 @@
-import { BOOKS } from '@/data/books'
+import { BOOKS, getBook } from '@/data/books'
 import { toOsis } from '@/data/osis'
 
 const OSIS_TO_BOOK: Record<string, string> = {}
@@ -150,6 +150,12 @@ export function parseReference(input: string): { bookId: number; chapter: number
   const chapter = Number(chStr)
   if (isNaN(chapter) || chapter < 1) return null
   return { bookId, chapter, verse: vStr ? Number(vStr) : undefined }
+}
+
+export function verseIdFromBookChapterVerse(bookId: number, chapter: number, verse: number): string | null {
+  const book = getBook(bookId)
+  if (!book) return null
+  return `${toOsis(book.abbreviation)}.${chapter}.${verse}`
 }
 
 export function highlightText(text: string, query: string): string {

@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { memo, useMemo, useRef } from 'react'
 import { BookmarkCheck, MessageSquareMore } from 'lucide-react'
 import { CrossReferenceChip } from './CrossReferenceChip'
 import { InterlinearView } from './InterlinearView'
@@ -30,7 +30,7 @@ interface VerseRowProps {
   onHighlightVerse?: (verseId: string, color?: HighlightColorId) => void
 }
 
-export function VerseRow({
+export const VerseRow = memo(function VerseRow({
   verse,
   translations,
   crossReferences,
@@ -97,7 +97,7 @@ export function VerseRow({
       id={`verse-${verse.id}`}
       className={clsx(
         'group flex gap-3 py-2.5 px-4 rounded-lg transition-colors duration-150 touch-manipulation cursor-pointer',
-        isHighlighted || isSelected ? 'bg-accent/20 ring-2 ring-accent/50' : 'hover:bg-surface/50',
+        isHighlighted || isSelected ? 'bg-accent/20 ring-2 ring-accent/50' : 'hover:bg-surface/50 active:bg-surface/70 active:scale-[0.99]',
         isHighlighted && 'animate-[highlightPulse_2s_ease-out]',
       )}
       style={highlightBg ? { backgroundColor: highlightBg } : undefined}
@@ -140,10 +140,10 @@ export function VerseRow({
                       {vt.translation_code}
                     </span>
                   )}
-                  <div
-                    className={clsx('block font-serif leading-[1.65] tracking-[0.01em] text-justify hyphens-auto', colorClass)}
-                    style={{ fontSize: `${size}px` }}
-                  >
+                    <div
+                      className={clsx('block font-serif leading-[1.65] tracking-[0.01em] text-left', colorClass)}
+                      style={{ fontSize: `${size}px` }}
+                    >
                     {vt.text_data}
                   </div>
                 </div>
@@ -181,4 +181,4 @@ export function VerseRow({
       </div>
     </div>
   )
-}
+})

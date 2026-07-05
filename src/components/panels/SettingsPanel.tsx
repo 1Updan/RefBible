@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Sun, Moon, BookMarked, Download, Trash2, CheckCircle, ChevronDown, ChevronRight, Globe, BookText, Volume2 } from 'lucide-react'
+import { useRef } from 'react'
+import { Sun, Moon, BookMarked, Download, Trash2, CheckCircle, ChevronDown, ChevronRight, Globe, BookText, Volume2, Cloud, FileUp } from 'lucide-react'
 import clsx from 'clsx'
 import type { Theme } from '@/contexts/theme'
-import { getInstalledTranslations, removeTranslation } from '@/lib/db'
+import { getInstalledTranslations, removeTranslation, exportBackupData, importBackupData } from '@/lib/db'
 import { downloadAndInstall } from '@/lib/downloader'
 import { getVersionsByLanguage } from '@/lib/versions'
 import type { VersionMeta } from '@/lib/versions'
@@ -321,8 +322,129 @@ export function SettingsPanel({
           </div>
           </>)}
         </section>
+
+        <BackupSection />
       </div>
     </div>
+  )
+}
+
+function BackupSection() {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [openBackup, toggleBackup] = useSectionState('backup')
+  const [importStatus, setImportStatus] = useState<string | null>(null)
+  const [importError, setImportError] = useState<string | null>(null)
+
+  const handleExport = async () => {
+    try {
+      const data = await exportBackupData()
+      const json = JSON.stringify(data, null, 2)
+      const blob = new Blob([json], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      const date = new Date().toISOString().slice(0, 10)
+      a.download = `refbible-backup-${date}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setImportError(e instanceof Error ? e.message : String(e))
+      setTimeout(() => setImportError(null), 5000)
+    }
+  }
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImportError(null)
+    setImportStatus(null)
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const text = await file.text()
+      const data = JSON.parse(text)
+      if (!data.bookmarks || !data.notes || !data.highlights) {
+        setImportError('Invalid backup file — missing required data.')
+        return
+      }
+      if (!confirm('This will replace all your current bookmarks, notes, highlights, and custom cross-references with the imported data. Continue?')) {
+        return
+      }
+      await importBackupData(data)
+      setImportStatus('Data imported successfully. Reload the app to see changes.')
+      setTimeout(() => setImportStatus(null), 6000)
+    } catch (e) {
+      setImportError(e instanceof Error ? e.message : 'Invalid backup file.')
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  return (
+    <section>
+      <button
+        type="button"
+        onClick={toggleBackup}
+        className="w-full flex items-center gap-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2.5 cursor-pointer"
+      >
+        {openBackup ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        <Cloud size={13} />
+        Backup & Restore
+      </button>
+
+      {openBackup && (
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={handleExport}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover transition-all duration-150 cursor-pointer"
+          >
+            <Cloud size={14} />
+            Export Backup
+          </button>
+          <p className="text-xs text-text-tertiary text-center">
+            Downloads a JSON file with your bookmarks, notes, highlights, and custom cross-references.
+          </p>
+
+          <hr className="border-border-subtle" />
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleImportFile}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={handleImportClick}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg bg-surface-elevated border border-border text-text-primary hover:bg-surface-hover transition-all duration-150 cursor-pointer"
+          >
+            <FileUp size={14} />
+            Import Backup
+          </button>
+          <p className="text-xs text-text-tertiary text-center">
+            Select a previously exported backup file to restore your data. This will replace all existing bookmarks, notes, highlights, and custom cross-references.
+          </p>
+
+          {importStatus && (
+            <div className="px-3 py-2 rounded-lg bg-success/10 border border-success/30">
+              <p className="text-xs text-success">{importStatus}</p>
+            </div>
+          )}
+          {importError && (
+            <div className="px-3 py-2 rounded-lg bg-danger/10 border border-danger/30">
+              <p className="text-xs text-danger">{importError}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
   )
 }
 
