@@ -90,36 +90,35 @@ export function BottomSheet({
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
+      if (position === "bottom") return;
       isDragging.current = true;
       drag.current = {
         startY: e.touches[0].clientY,
         startTranslate: translateY,
       };
     },
-    [translateY],
+    [translateY, position],
   );
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
-      if (!isDragging.current || closing) return;
+      if (!isDragging.current || closing || position === "bottom") return;
       const diff = e.touches[0].clientY - drag.current.startY;
-      if (position === "bottom" && diff > 0) {
-        const damped = diff * 0.6;
-        setTranslateY(damped);
-      }
+      const damped = diff * 0.6;
+      setTranslateY(damped);
     },
-    [position, closing],
+    [position, closing, translateY],
   );
 
   const handleTouchEnd = useCallback(() => {
     if (!isDragging.current) return;
     isDragging.current = false;
-    if (position === "bottom" && translateY > 120) {
+    if (translateY > 120) {
       animateClose();
       return;
     }
     setTranslateY(0);
-  }, [position, translateY, animateClose]);
+  }, [translateY, animateClose]);
 
   if (!open && !closing) return null;
 

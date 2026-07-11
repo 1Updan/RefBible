@@ -17,7 +17,6 @@ import { SearchPanel } from "./components/panels/SearchPanel";
 import { BottomSheet } from "./components/sheets/BottomSheet";
 
 import {
-  ensureSeeded,
   saveBookmark,
   removeBookmark,
   getInstalledTranslations,
@@ -63,6 +62,16 @@ function useMediaQuery(query: string): boolean {
 }
 
 function AppContent() {
+  useEffect(() => {
+    const splash = document.getElementById('splash')
+    if (!splash) return
+    const timer = setTimeout(() => {
+      splash.style.opacity = '0'
+      setTimeout(() => splash.remove(), 400)
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [])
+
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { theme, setTheme } = useTheme();
   const { prefs, update, toggleVersion, toggleInterlinear } =
@@ -83,7 +92,6 @@ function AppContent() {
     setPendingRange,
   } = useNavigation();
   const [ready, setReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
   const [bookmarkRefresh, setBookmarkRefresh] = useState(0);
   const [highlightColors, setHighlightColors] = useState<Map<string, string[]>>(
@@ -100,14 +108,18 @@ function AppContent() {
   const [showNav, setShowNav] = useState(false);
   const [navBookId, setNavBookId] = useState(bookId);
   const [navChapter, setNavChapter] = useState(chapter);
+
+  useEffect(() => {
+    setNavBookId(bookId);
+    setNavChapter(chapter);
+  }, [bookId, chapter]);
   const [votdNavigateTo, setVotdNavigateTo] = useState<string | undefined>(
     undefined,
   );
   const [controlsHidden, setControlsHidden] = useState(false);
+  const [isSelecting, setIsSelecting] = useState(false);
   const headerMeasureRef = useRef<HTMLDivElement>(null);
   const tabBarMeasureRef = useRef<HTMLDivElement>(null);
-  const [headerHeight, setHeaderHeight] = useState(48);
-  const [tabBarHeight, setTabBarHeight] = useState(56);
   const isOnline = useNetworkState();
   const {
     speak,
@@ -126,20 +138,7 @@ function AppContent() {
   const [canSpeak, setCanSpeak] = useState(false);
 
   useEffect(() => {
-    if (headerMeasureRef.current) {
-      setHeaderHeight(headerMeasureRef.current.offsetHeight);
-    }
-    if (tabBarMeasureRef.current) {
-      setTabBarHeight(tabBarMeasureRef.current.offsetHeight);
-    }
-  }, []);
-
-  useEffect(() => {
-    ensureSeeded()
-      .then(() => setReady(true))
-      .catch((e: unknown) =>
-        setError(e instanceof Error ? e.message : String(e)),
-      );
+    setReady(true)
   }, []);
 
   useEffect(() => {
@@ -215,8 +214,8 @@ function AppContent() {
     async (verseId: string, colorOverride?: HighlightColorId) => {
       const color = colorOverride ?? activeHighlightColor;
       if (!color) return;
-      const colors = highlightColors.get(verseId) ?? [];
-      if (colors.includes(color)) {
+      const existing = highlightColors.get(verseId) ?? [];
+      if (existing.includes(color)) {
         await removeHighlight(verseId, color);
         setHighlightColors((prev) => {
           const next = new Map(prev);
@@ -226,13 +225,19 @@ function AppContent() {
           return next;
         });
       } else {
-        await toggleHighlight(verseId, color);
         setHighlightColors((prev) => {
           const next = new Map(prev);
           const c = next.get(verseId) ?? [];
           next.set(verseId, [...c, color]);
           return next;
         });
+        try {
+          await toggleHighlight(verseId, color);
+        } catch (e) {
+          console.error('Highlight error:', e);
+          const fresh = await getHighlightsForChapter(bookId, chapter);
+          setHighlightColors(fresh);
+        }
       }
     },
     [activeHighlightColor, highlightColors],
@@ -332,14 +337,6 @@ function AppContent() {
     chapterTextRef.current.verses = verses;
     setSpeakFromVerse(null);
   }, []);
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-bg gap-4">
-        <p className="text-sm text-danger">Failed to initialize: {error}</p>
-      </div>
-    );
-  }
 
   if (!ready) {
     return (
@@ -481,7 +478,7 @@ function AppContent() {
       onOpenNote={handleOpenNote}
       onChapterText={handleChapterText}
       onChapterVerses={handleChapterVerses}
-      onSelectionVerse={setSpeakFromVerse}
+      onSelectionVerse={(v) => { setSpeakFromVerse(v); setIsSelecting(v !== null); }}
       onSwipePrev={
         !isDesktop
           ? () => chapter > 1 && navigateTo(bookId, chapter - 1)
@@ -670,7 +667,7 @@ function AppContent() {
 
   if (isDesktop) {
     return (
-      <div className="h-[100dvh] flex flex-col bg-bg">
+      <div className="min-h-[100dvh] h-[100dvh] flex flex-col bg-bg" style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <DesktopShell
           nav={nav}
           reading={reading}
@@ -683,14 +680,10 @@ function AppContent() {
 
   return (
     <>
-      <div className="h-[100dvh] flex flex-col overflow-hidden bg-bg">
+      <div className="min-h-[100dvh] h-[100dvh] flex flex-col overflow-hidden bg-bg" style={{ paddingTop: 'env(safe-area-inset-top, 26px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <div
           ref={headerMeasureRef}
-          className="shrink-0 transition-all duration-300 ease-out"
-          style={{
-            maxHeight: controlsHidden ? 0 : headerHeight,
-            overflow: controlsHidden ? "hidden" : "visible",
-          }}
+          className={controlsHidden ? 'hidden' : 'shrink-0'}
         >
           {chapterHeader}
         </div>
@@ -700,8 +693,7 @@ function AppContent() {
         </main>
         <div
           ref={tabBarMeasureRef}
-          className="shrink-0 overflow-hidden transition-all duration-300 ease-out"
-          style={{ maxHeight: controlsHidden ? 0 : tabBarHeight }}
+          className={controlsHidden ? 'hidden' : 'shrink-0'}
         >
           {tabBar}
         </div>
@@ -711,7 +703,7 @@ function AppContent() {
               <button
                 type="button"
                 onClick={() => navigateTo(bookId, chapter - 1)}
-                className="fixed bottom-[64px] left-4 z-30 flex items-center justify-center w-11 h-11 rounded-full text-text-tertiary hover:text-text-primary bg-black/25 dark:bg-white/20 ring-1 ring-black/15 dark:ring-white/10 active:bg-black/45 dark:active:bg-white/35 transition-all duration-150 cursor-pointer"
+                className={`fixed z-40 flex items-center justify-center w-11 h-11 rounded-full text-text-tertiary hover:text-text-primary bg-black/35 dark:bg-white/25 ring-1 ring-black/20 dark:ring-white/15 active:bg-black/55 dark:active:bg-white/45 transition-all duration-150 cursor-pointer touch-manipulation ${isSelecting ? 'bottom-[140px]' : 'bottom-[80px]'} left-4`}
                 aria-label="Previous chapter"
               >
                 <ChevronLeft size={22} />
@@ -721,7 +713,7 @@ function AppContent() {
               <button
                 type="button"
                 onClick={() => navigateTo(bookId, chapter + 1)}
-                className="fixed bottom-[64px] right-4 z-30 flex items-center justify-center w-11 h-11 rounded-full text-text-tertiary hover:text-text-primary bg-black/25 dark:bg-white/20 ring-1 ring-black/15 dark:ring-white/10 active:bg-black/45 dark:active:bg-white/35 transition-all duration-150 cursor-pointer"
+                className={`fixed z-40 flex items-center justify-center w-11 h-11 rounded-full text-text-tertiary hover:text-text-primary bg-black/35 dark:bg-white/25 ring-1 ring-black/20 dark:ring-white/15 active:bg-black/55 dark:active:bg-white/45 transition-all duration-150 cursor-pointer touch-manipulation ${isSelecting ? 'bottom-[140px]' : 'bottom-[80px]'} right-4`}
                 aria-label="Next chapter"
               >
                 <ChevronRight size={22} />

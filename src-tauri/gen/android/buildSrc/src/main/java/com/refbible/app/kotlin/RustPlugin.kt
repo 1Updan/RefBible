@@ -20,7 +20,7 @@ open class RustPlugin : Plugin<Project> {
         val defaultAbiList = listOf("arm64-v8a");
         val abiList = (findProperty("abiList") as? String)?.split(',') ?: defaultAbiList
 
-        val defaultArchList = listOf("arm64");
+        val defaultArchList = listOf("arm", "arm64", "x86", "x86_64");
         val archList = (findProperty("archList") as? String)?.split(',') ?: defaultArchList
 
         val targetsList = (findProperty("targetList") as? String)?.split(',') ?: listOf("aarch64")
@@ -39,7 +39,7 @@ open class RustPlugin : Plugin<Project> {
                     create(arch) {
                         dimension = "abi"
                         ndk {
-                            abiFilters.add(defaultAbiList[index])
+                            abiFilters.add("arm64-v8a")
                         }
                     }
                 }
@@ -49,6 +49,20 @@ open class RustPlugin : Plugin<Project> {
         afterEvaluate {
             for (profile in listOf("debug", "release")) {
                 val profileCapitalized = profile.replaceFirstChar { it.uppercase() }
+
+                // Create a single Rust build task for aarch64
+                val targetBuildTask = project.tasks.maybeCreate(
+                    "rustBuildArm64${profileCapitalized}",
+                    BuildTask::class.java
+                ).apply {
+                    group = TASK_GROUP
+                    description = "Build dynamic library in $profile mode for arm64"
+                    rootDirRel = config.rootDirRel
+                    target = "aarch64"
+                    release = profile == "release"
+                }
+
+                // Universal build task depends on arm64 build
                 val buildTask = tasks.maybeCreate(
                     "rustBuildUniversal$profileCapitalized",
                     DefaultTask::class.java
@@ -56,26 +70,14 @@ open class RustPlugin : Plugin<Project> {
                     group = TASK_GROUP
                     description = "Build dynamic library in $profile mode for all targets"
                 }
+                buildTask.dependsOn(targetBuildTask)
 
                 tasks["mergeUniversal${profileCapitalized}JniLibFolders"].dependsOn(buildTask)
 
-                for (targetPair in targetsList.withIndex()) {
-                    val targetName = targetPair.value
-                    val targetArch = archList[targetPair.index]
-                    val targetArchCapitalized = targetArch.replaceFirstChar { it.uppercase() }
-                    val targetBuildTask = project.tasks.maybeCreate(
-                        "rustBuild$targetArchCapitalized$profileCapitalized",
-                        BuildTask::class.java
-                    ).apply {
-                        group = TASK_GROUP
-                        description = "Build dynamic library in $profile mode for $targetArch"
-                        rootDirRel = config.rootDirRel
-                        target = targetName
-                        release = profile == "release"
-                    }
-
-                    buildTask.dependsOn(targetBuildTask)
-                    tasks["merge$targetArchCapitalized${profileCapitalized}JniLibFolders"].dependsOn(
+                // Wire each flavor's merge task to the single arm64 build
+                for (arch in archList) {
+                    val archCapitalized = arch.replaceFirstChar { it.uppercase() }
+                    tasks["merge${archCapitalized}${profileCapitalized}JniLibFolders"].dependsOn(
                         targetBuildTask
                     )
                 }

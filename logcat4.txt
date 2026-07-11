@@ -1,0 +1,931 @@
+--------- beginning of main
+07-08 20:33:27.173 32599  9999 I FA      : Application backgrounded at: timestamp_millis: 1783539205172
+07-08 20:33:27.243   780   780 I BufferQueueProducer: [com.refbible.app/com.refbible.app.MainActivity#12906](this:0xb40000761774b248,id:-1,api:0,p:-1,c:780) queueBuffer: fps=2.75 dur=1815.28 max=1333.46 min=16.54
+07-08 20:33:27.244   733   832 I hwcomposer: [HWCDisplay] [Display_0 (type:1)] fps:18.574860,dur:2099.61,max:1333.80,min:13.08  
+07-08 20:33:27.245   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 20:33:27.245   746   803 I libPerfCtl: xgfGetFPS pid:10152 fps:-1
+07-08 20:33:27.245   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 20:33:27.252   780  1159 W VSyncPredictor: VSyncPredictor::setPeriod current period =16666667
+07-08 20:33:27.326  5683  5683 I adbd    : adbd service requested 'shell,v2:export ANDROID_LOG_TAGS=''; exec logcat'
+07-08 20:33:27.442  6120  6120 W ThreadPoolForeg: type=1400 audit(0.0:83411): avc: denied { write } for name="traced_producer" dev="tmpfs" ino=12097 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:traced_producer_socket:s0 tclass=sock_file permissive=0 app=com.google.android.gms
+07-08 20:33:27.851 10152 10152 D RustWebViewClient: STEP_DIAG[1]: "none:0"
+07-08 20:33:28.155  6120  6120 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.auth.aang.events.services.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-08 20:33:28.245   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 20:33:28.245   746   803 I libPerfCtl: xgfGetFPS pid:10152 fps:60
+07-08 20:33:28.245   746   803 I libPowerHal: [updateFPS] pid(10152) : -1 => 60
+07-08 20:33:28.245   746   828 I libPowerHal: [perfNotifyAppState] pack:com.refbible.app, act:com.refbible.app.MainActivity, state:5, pid:10152, uid:10336, fps:60
+07-08 20:33:28.245   746   828 I UxUtility: notifyForegroundApp pack:com.refbible.app, uid:10336
+07-08 20:33:28.245   746   828 I TouchUtility: notifyAppState error = NULL
+07-08 20:33:28.245   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 20:33:28.398 23774 23774 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+07-08 20:33:28.660  1479  3477 I BaseFilesVerify: Base File verify start
+07-08 20:33:28.661  1479  3477 W BaseFilesVerify: 133_task.xmlis not in fileProtect list,can not protect this file
+07-08 20:33:28.722 23774 23774 W PerfettoTrace: type=1400 audit(0.0:83412): avc: denied { write } for name="traced_producer" dev="tmpfs" ino=12097 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:traced_producer_socket:s0 tclass=sock_file permissive=0 app=com.google.android.gms
+07-08 20:33:29.042  8713  8892 I PlayCommon: [164] Preparing logs for uploading
+07-08 20:33:29.043  8713  8892 I PlayCommon: [164] Connecting to server for timestamp: https://play.googleapis.com/play/log/timestamp
+07-08 20:33:29.045  8713  8892 E PlayCommon: [164] Failed to connect to server for server timestamp: java.net.UnknownHostException: Unable to resolve host "play.googleapis.com": No address associated with hostname
+07-08 20:33:29.074  6120 23663 W DeviceStateUtils: Active network is null
+07-08 20:33:29.074  6120 23663 W Auth    : [TokenResponseCallback] TokenResponse failed with exception [CONTEXT service_id=343 ]
+07-08 20:33:29.074  6120 23663 W Auth    : czuh: Failed to process request
+07-08 20:33:29.074  6120 23663 W Auth    : 	at czuo.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):23)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at czyl.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):15)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):82)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at lhn.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):19)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at czxq.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):6)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at ccez.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at agnz.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):13)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at agnz.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):130)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at aovq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):28)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):170)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):47)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at ahjr.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):745)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at ahjq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):151)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at aawh.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):829)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at ahdd.getAuthToken(:com.google.android.gms@262434029@26.24.34 (190400-938041327):411)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at android.accounts.AbstractAccountAuthenticator$Transport.getAuthToken(AbstractAccountAuthenticator.java:246)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:242)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at cpdj.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at ccit.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):169)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 20:33:29.074  6120 23663 W Auth    : 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 20:33:29.074  6120 23663 W Auth    : Caused by: czxm: Connectivity error
+07-08 20:33:29.074  6120 23663 W Auth    : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):76)
+07-08 20:33:29.074  6120 23663 W Auth    : 	... 20 more
+07-08 20:33:29.074  6120 23663 W Auth    : Caused by: java.io.IOException
+07-08 20:33:29.074  6120 23663 W Auth    : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):73)
+07-08 20:33:29.074  6120 23663 W Auth    : 	... 20 more
+07-08 20:33:29.075  6120 23663 E AuthPII : [RequestTokenManager] getToken() -> NETWORK_ERROR. App: com.android.vending, Service: oauth2:https://www.googleapis.com/auth/googleplay
+07-08 20:33:29.075  6120 23663 E AuthPII : bjap: Error when calling server using GmsNetworkStack.
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):1542)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at ahjr.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):745)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at ahjq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):151)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at aawh.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):829)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at ahdd.getAuthToken(:com.google.android.gms@262434029@26.24.34 (190400-938041327):411)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at android.accounts.AbstractAccountAuthenticator$Transport.getAuthToken(AbstractAccountAuthenticator.java:246)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:242)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at cpdj.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at ccit.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):169)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 20:33:29.075  6120 23663 E AuthPII : Caused by: bjap: Error requesting token.
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):212)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):47)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	... 12 more
+07-08 20:33:29.075  6120 23663 E AuthPII : Caused by: java.util.concurrent.ExecutionException: czuh: Failed to process request
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at hmrc.j(:com.google.android.gms@262434029@26.24.34 (190400-938041327):21)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at hmrl.u(:com.google.android.gms@262434029@26.24.34 (190400-938041327):110)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):197)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	... 13 more
+07-08 20:33:29.075  6120 23663 E AuthPII : Caused by: czuh: Failed to process request
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at czuo.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):23)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at czyl.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):15)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):82)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at lhn.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):19)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at czxq.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):6)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at ccez.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at agnz.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):13)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at agnz.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):130)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at aovq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):28)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):170)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	... 13 more
+07-08 20:33:29.075  6120 23663 E AuthPII : Caused by: czxm: Connectivity error
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):76)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	... 20 more
+07-08 20:33:29.075  6120 23663 E AuthPII : Caused by: java.io.IOException
+07-08 20:33:29.075  6120 23663 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):73)
+07-08 20:33:29.075  6120 23663 E AuthPII : 	... 20 more
+07-08 20:33:29.076  6120 23663 E AuthPII : Message is Error when calling server using GmsNetworkStack.
+07-08 20:33:29.076  6120 23663 E AuthPII : bjap: Error when calling server using GmsNetworkStack.
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):1542)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at ahjr.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):745)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at ahjq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):151)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at aawh.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):829)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at ahdd.getAuthToken(:com.google.android.gms@262434029@26.24.34 (190400-938041327):411)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at android.accounts.AbstractAccountAuthenticator$Transport.getAuthToken(AbstractAccountAuthenticator.java:246)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:242)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at cpdj.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at ccit.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):169)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 20:33:29.076  6120 23663 E AuthPII : Caused by: bjap: Error requesting token.
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):212)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):47)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	... 12 more
+07-08 20:33:29.076  6120 23663 E AuthPII : Caused by: java.util.concurrent.ExecutionException: czuh: Failed to process request
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at hmrc.j(:com.google.android.gms@262434029@26.24.34 (190400-938041327):21)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at hmrl.u(:com.google.android.gms@262434029@26.24.34 (190400-938041327):110)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):197)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	... 13 more
+07-08 20:33:29.076  6120 23663 E AuthPII : Caused by: czuh: Failed to process request
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at czuo.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):23)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at czyl.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):15)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):82)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at lhn.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):19)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at czxq.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):6)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at ccez.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at agnz.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):13)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at agnz.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):130)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at aovq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):28)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):170)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	... 13 more
+07-08 20:33:29.076  6120 23663 E AuthPII : Caused by: czxm: Connectivity error
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):76)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	... 20 more
+07-08 20:33:29.076  6120 23663 E AuthPII : Caused by: java.io.IOException
+07-08 20:33:29.076  6120 23663 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):73)
+07-08 20:33:29.076  6120 23663 E AuthPII : 	... 20 more
+07-08 20:33:29.076  6120 23663 I Auth    : (REDACTED) [GetToken] GetToken failed for app=%s with non recoverable status code: %s 
+07-08 20:33:29.076  6120 23663 W Auth    : [ChimeraGetToken] exception while trying to fetch auth tokens for app=com.google.android.gsf, scope=oauth2:https://www.googleapis.com/auth/googleplay [CONTEXT service_id=153 ]
+07-08 20:33:29.076  6120 23663 W Auth    : ahjl: GetToken failed with status code: NetworkError
+07-08 20:33:29.076  6120 23663 W Auth    : 	at ahjq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):359)
+07-08 20:33:29.076  6120 23663 W Auth    : 	at aawh.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):829)
+07-08 20:33:29.076  6120 23663 W Auth    : 	at ahdd.getAuthToken(:com.google.android.gms@262434029@26.24.34 (190400-938041327):411)
+07-08 20:33:29.076  6120 23663 W Auth    : 	at android.accounts.AbstractAccountAuthenticator$Transport.getAuthToken(AbstractAccountAuthenticator.java:246)
+07-08 20:33:29.076  6120 23663 W Auth    : 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:242)
+07-08 20:33:29.076  6120 23663 W Auth    : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.076  6120 23663 W Auth    : 	at cpdj.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.076  6120 23663 W Auth    : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.076  6120 23663 W Auth    : 	at ccit.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):169)
+07-08 20:33:29.076  6120 23663 W Auth    : 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 20:33:29.076  6120 23663 W Auth    : 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 20:33:29.076  6120 23663 W GLSActivity: [GmsAccountAuthenticatorImpl] error status while fetching token:NetworkError
+07-08 20:33:29.079  8713  8892 E PlayCommon: [164] Failed to get auth token: java.io.IOException: NetworkError
+07-08 20:33:29.079  8713  8892 W PlayCommon: [164] Deferring log upload because couldn't retrieve auth token
+07-08 20:33:29.092   547   547 D TlcTeeKeyMaster: TEE_Begin 4.1
+07-08 20:33:29.092   547   547 D TlcTeeKeyMaster: purpose = 0x00000002
+07-08 20:33:29.093   547   547 D TlcTeeKeyMaster: find_spare_operation_slot: allocate op 0xdc8d1cb9841a2aed to slot #0 (1 ops live)
+07-08 20:33:29.093   547   547 D TlcTeeKeyMaster: TEE_Begin exiting with 0
+07-08 20:33:29.094   547   547 D TlcTeeKeyMaster: TEE_Finish
+07-08 20:33:29.094   547   547 D TlcTeeKeyMaster: split_update_chunks
+07-08 20:33:29.097   547   547 D TlcTeeKeyMaster: release_operation_slot: release op slot #0 (handle 0xdc8d1cb9841a2aed; 0 ops live)
+07-08 20:33:29.097   547   547 D TlcTeeKeyMaster: TEE_Finish exiting with 0
+07-08 20:33:29.245   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 20:33:29.245   746   803 I libPerfCtl: xgfGetFPS pid:10152 fps:-1
+07-08 20:33:29.245   746   803 I libPowerHal: [updateFPS] pid(10152) : 60 => -1
+07-08 20:33:29.245   746   828 I libPowerHal: [perfNotifyAppState] pack:com.refbible.app, act:com.refbible.app.MainActivity, state:5, pid:10152, uid:10336, fps:-1
+07-08 20:33:29.245   746   828 I UxUtility: notifyForegroundApp pack:com.refbible.app, uid:10336
+07-08 20:33:29.245   746   828 I TouchUtility: notifyAppState error = NULL
+07-08 20:33:29.245   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 20:33:29.850 10152 10152 D RustWebViewClient: STEP_DIAG[2]: "none:0"
+07-08 20:33:29.887  9738  9768 I Finsky  : [135] Initializing the instant apps module.
+07-08 20:33:29.908  9738  9738 I Finsky  : [2] setup::RES: shouldRecoverRestoredPackages: versionCodeSystem 83501510
+07-08 20:33:29.912  9738  9738 I Finsky  : [2] Detected restoreservicev2://recovery not needed, will not run
+07-08 20:33:29.913  9738  9769 W Finsky  : [136] PreloadClasses: Unable to load [androidx.navigation.NavControllerViewModel, androidx.navigation.NavControllerViewModel$Companion]
+07-08 20:33:29.920  6120 26661 W DeviceStateUtils: Active network is null
+07-08 20:33:29.921  6120 26661 W Auth    : [TokenResponseCallback] TokenResponse failed with exception [CONTEXT service_id=343 ]
+07-08 20:33:29.921  6120 26661 W Auth    : czuh: Failed to process request
+07-08 20:33:29.921  6120 26661 W Auth    : 	at czuo.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):23)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at czyl.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):15)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):82)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at lhn.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):19)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at czxq.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):6)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at ccez.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at agnz.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):13)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at agnz.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):130)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at aovq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):28)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):170)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):47)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at ahjr.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):745)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at ahjq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):151)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at aawh.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):829)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at ahdd.getAuthToken(:com.google.android.gms@262434029@26.24.34 (190400-938041327):411)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at android.accounts.AbstractAccountAuthenticator$Transport.getAuthToken(AbstractAccountAuthenticator.java:246)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:242)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at cpdj.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at ccit.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):169)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 20:33:29.921  6120 26661 W Auth    : 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 20:33:29.921  6120 26661 W Auth    : Caused by: czxm: Connectivity error
+07-08 20:33:29.921  6120 26661 W Auth    : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):76)
+07-08 20:33:29.921  6120 26661 W Auth    : 	... 20 more
+07-08 20:33:29.921  6120 26661 W Auth    : Caused by: java.io.IOException
+07-08 20:33:29.921  6120 26661 W Auth    : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):73)
+07-08 20:33:29.921  6120 26661 W Auth    : 	... 20 more
+07-08 20:33:29.922  6120 26661 E AuthPII : [RequestTokenManager] getToken() -> NETWORK_ERROR. App: com.android.vending, Service: oauth2:https://www.googleapis.com/auth/googleplay
+07-08 20:33:29.922  6120 26661 E AuthPII : bjap: Error when calling server using GmsNetworkStack.
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):1542)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjr.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):745)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):151)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at aawh.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):829)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahdd.getAuthToken(:com.google.android.gms@262434029@26.24.34 (190400-938041327):411)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at android.accounts.AbstractAccountAuthenticator$Transport.getAuthToken(AbstractAccountAuthenticator.java:246)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:242)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at cpdj.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ccit.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):169)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 20:33:29.922  6120 26661 E AuthPII : Caused by: bjap: Error requesting token.
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):212)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):47)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	... 12 more
+07-08 20:33:29.922  6120 26661 E AuthPII : Caused by: java.util.concurrent.ExecutionException: czuh: Failed to process request
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at hmrc.j(:com.google.android.gms@262434029@26.24.34 (190400-938041327):21)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at hmrl.u(:com.google.android.gms@262434029@26.24.34 (190400-938041327):110)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):197)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	... 13 more
+07-08 20:33:29.922  6120 26661 E AuthPII : Caused by: czuh: Failed to process request
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at czuo.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):23)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at czyl.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):15)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):82)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at lhn.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):19)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at czxq.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):6)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ccez.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at agnz.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):13)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at agnz.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):130)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at aovq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):28)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):170)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	... 13 more
+07-08 20:33:29.922  6120 26661 E AuthPII : Caused by: czxm: Connectivity error
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):76)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	... 20 more
+07-08 20:33:29.922  6120 26661 E AuthPII : Caused by: java.io.IOException
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):73)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	... 20 more
+07-08 20:33:29.922  6120 26661 E AuthPII : Message is Error when calling server using GmsNetworkStack.
+07-08 20:33:29.922  6120 26661 E AuthPII : bjap: Error when calling server using GmsNetworkStack.
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):1542)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjr.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):745)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):151)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at aawh.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):829)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahdd.getAuthToken(:com.google.android.gms@262434029@26.24.34 (190400-938041327):411)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at android.accounts.AbstractAccountAuthenticator$Transport.getAuthToken(AbstractAccountAuthenticator.java:246)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:242)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at cpdj.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ccit.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):169)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 20:33:29.922  6120 26661 E AuthPII : Caused by: bjap: Error requesting token.
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):212)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):47)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	... 12 more
+07-08 20:33:29.922  6120 26661 E AuthPII : Caused by: java.util.concurrent.ExecutionException: czuh: Failed to process request
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at hmrc.j(:com.google.android.gms@262434029@26.24.34 (190400-938041327):21)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at hmrl.u(:com.google.android.gms@262434029@26.24.34 (190400-938041327):110)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):197)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	... 13 more
+07-08 20:33:29.922  6120 26661 E AuthPII : Caused by: czuh: Failed to process request
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at czuo.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):23)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at czyl.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):15)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):82)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at lhn.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):19)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at czxq.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):6)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ccez.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at agnz.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):13)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at agnz.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):130)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at aovq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):28)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):170)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	... 13 more
+07-08 20:33:29.922  6120 26661 E AuthPII : Caused by: czxm: Connectivity error
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):76)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	... 20 more
+07-08 20:33:29.922  6120 26661 E AuthPII : Caused by: java.io.IOException
+07-08 20:33:29.922  6120 26661 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):73)
+07-08 20:33:29.922  6120 26661 E AuthPII : 	... 20 more
+07-08 20:33:29.922  6120 26661 I Auth    : (REDACTED) [GetToken] GetToken failed for app=%s with non recoverable status code: %s 
+07-08 20:33:29.923  6120 26661 W Auth    : [ChimeraGetToken] exception while trying to fetch auth tokens for app=com.google.android.gsf, scope=oauth2:https://www.googleapis.com/auth/googleplay [CONTEXT service_id=153 ]
+07-08 20:33:29.923  6120 26661 W Auth    : ahjl: GetToken failed with status code: NetworkError
+07-08 20:33:29.923  6120 26661 W Auth    : 	at ahjq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):359)
+07-08 20:33:29.923  6120 26661 W Auth    : 	at aawh.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):829)
+07-08 20:33:29.923  6120 26661 W Auth    : 	at ahdd.getAuthToken(:com.google.android.gms@262434029@26.24.34 (190400-938041327):411)
+07-08 20:33:29.923  6120 26661 W Auth    : 	at android.accounts.AbstractAccountAuthenticator$Transport.getAuthToken(AbstractAccountAuthenticator.java:246)
+07-08 20:33:29.923  6120 26661 W Auth    : 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:242)
+07-08 20:33:29.923  6120 26661 W Auth    : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.923  6120 26661 W Auth    : 	at cpdj.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 20:33:29.923  6120 26661 W Auth    : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 20:33:29.923  6120 26661 W Auth    : 	at ccit.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):169)
+07-08 20:33:29.923  6120 26661 W Auth    : 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 20:33:29.923  6120 26661 W Auth    : 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 20:33:29.923  6120 26661 W GLSActivity: [GmsAccountAuthenticatorImpl] error status while fetching token:NetworkError
+07-08 20:33:29.925  9738  9863 E Finsky  : [162] Get authentication token failed with error java.util.concurrent.ExecutionException: com.android.volley.AuthFailureError: Error while retrieving auth token
+07-08 20:33:29.945   547   547 D TlcTeeKeyMaster: TEE_Begin 4.1
+07-08 20:33:29.945   547   547 D TlcTeeKeyMaster: purpose = 0x00000002
+07-08 20:33:29.946   547   547 D TlcTeeKeyMaster: find_spare_operation_slot: allocate op 0x46795fa7107c9682 to slot #0 (1 ops live)
+07-08 20:33:29.947   547   547 D TlcTeeKeyMaster: TEE_Begin exiting with 0
+07-08 20:33:29.947   547   547 D TlcTeeKeyMaster: TEE_Finish
+07-08 20:33:29.948   547   547 D TlcTeeKeyMaster: split_update_chunks
+07-08 20:33:29.950  9738 10079 I Finsky  : [190] registerListener
+07-08 20:33:29.950  9738 10079 I Finsky  : [190] DSC: reviveDownloads()
+07-08 20:33:29.951   547   547 D TlcTeeKeyMaster: release_operation_slot: release op slot #0 (handle 0x46795fa7107c9682; 0 ops live)
+07-08 20:33:29.951   547   547 D TlcTeeKeyMaster: TEE_Finish exiting with 0
+07-08 20:33:29.952  9738 10079 I Finsky  : [190] Initialized AssetModuleDownloader.
+07-08 20:33:29.953  8713  8777 I Finsky:background: [138] DS: reviveDownloads()
+07-08 20:33:29.963  9738 10079 I Finsky  : [190] Skipped download state update for download 91 on initialize. java.util.concurrent.ExecutionException: com.google.android.finsky.assetmoduleserviceutils.AssetModuleException: Session not found.
+07-08 20:33:30.245   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 20:33:30.245   746   803 I libPerfCtl: xgfGetFPS pid:10152 fps:-1
+07-08 20:33:30.245   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 20:33:30.629   787   794 D ccci_mdinit: (1):monitor_time_update_thread round:17237 ########
+07-08 20:33:30.799 10152 10285 D ProfileInstaller: Installing profile for com.refbible.app
+07-08 20:33:31.099  1981  1981 D TranCellSignalStrengthImpl: [LTE] dbm: -111
+07-08 20:33:31.099  1981  1981 D TranCellSignalStrengthImpl: [LTE] dbm: -111
+07-08 20:33:31.099  1981  1981 D TranCellSignalStrengthImpl: [LTE] dbm: -111
+--------- beginning of system
+07-08 20:33:31.099  1479  1479 I MWN     : onSignalStrengthsChanged...
+07-08 20:33:31.100  1479  1479 I MWN     : network type was unavailable.
+07-08 20:33:31.100  1479  1479 I MWN     : Write 3 to node. type=unknown mSimExist=true mFlightMode=false
+07-08 20:33:31.100  1479  1538 D TranCellSignalStrengthImpl: [LTE] dbm: -111
+07-08 20:33:31.100  1479  1479 I MWN     : write the value:3 to node successfully.
+07-08 20:33:31.110  1777  1928 D Dito    : mcc=621, mnc=50
+07-08 20:33:31.245   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 20:33:31.245   746   803 I libPerfCtl: xgfGetFPS pid:10152 fps:-1
+07-08 20:33:31.245   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 20:33:31.434   746   828 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:19989
+07-08 20:33:31.851 10152 10152 D RustWebViewClient: STEP_DIAG[3]: "none:0"
+07-08 20:33:32.245   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 20:33:32.245   746   803 I libPerfCtl: xgfGetFPS pid:10152 fps:-1
+07-08 20:33:32.245   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 20:33:32.264  1017  1017 I thermal_repeater: [recvMdThermalInfo] ret=29, strLen=127,  3, 42, -50, -28401, 32767, 0
+07-08 20:33:32.415  1027  1142 D AAL     : 07-08 08:33:32.082 BL= 129,ESS= 256, 07-08 08:33:32.215 BL= 130,ESS= 256, 07-08 08:33:32.332 BL= 131,ESS= 256, 
+07-08 20:33:32.505  6120  6120 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.presencemanager.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-08 20:33:32.507  6120  6120 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.presencemanager.service.INTERNAL_IDENTITY dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-08 20:33:33.238 25754  6375 I native  : I0000 00:00:1783539213.238688    6375 soda_async_impl.cc:1424] Current audio timestamp: 1783539213080150
+07-08 20:33:33.245   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 20:33:33.245   746   803 I libPerfCtl: xgfGetFPS pid:10152 fps:-1
+07-08 20:33:33.245   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 20:33:33.484   798   835 W TeeEndorsementInstaller: Endorsement token not found, wait a bit longer [vendor/mediatek/proprietary/trustzone/trustonic/source/external/mobicore/common/500/Daemon/src/EndorsementInstaller.cpp:105]
+07-08 20:33:33.852 10152 10152 D RustWebViewClient: STEP_DIAG[4]: "none:0"
+07-08 20:33:34.245   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 20:33:34.245   746   803 I libPerfCtl: xgfGetFPS pid:10152 fps:-1
+07-08 20:33:34.245   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 20:33:34.947 23774 23774 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.potokens.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsApiService }
+07-08 20:33:35.245   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 20:33:35.245   746   803 I libPerfCtl: xgfGetFPS pid:10152 fps:-1
+07-08 20:33:35.245   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 20:33:35.430   780  1159 W VSyncPredictor: VSyncPredictor::setPeriod current period =16666667
+07-08 20:33:35.515   746   772 D power@timer: [mtkPowerTimer] visRead:0
+07-08 20:33:35.851 10152 10152 D RustWebViewClient: STEP_DIAG[5]: "none:0"
+07-08 20:33:36.218  1981  1981 D TranCellSignalStrengthImpl: [LTE] dbm: -110
+07-08 20:33:36.218  1981  1981 D TranCellSignalStrengthImpl: [LTE] dbm: -110
+07-08 20:33:36.218  1981  1981 D TranCellSignalStrengthImpl: [LTE] dbm: -110
+07-08 20:33:36.219  1479  1479 I MWN     : onSignalStrengthsChanged...
+07-08 20:33:36.219  1479  1538 D TranCellSignalStrengthImpl: [LTE] dbm: -110
+07-08 20:33:36.220  1479  1479 I MWN     : network type was unavailable.
+07-08 20:33:36.220  1479  1479 I MWN     : Write 3 to node. type=unknown mSimExist=true mFlightMode=false
+07-08 20:33:36.220  1479  1479 I MWN     : write the value:3 to node successfully.
+07-08 20:33:36.229  1777  1928 D Dito    : mcc=621, mnc=50
+07-08 20:33:36.245   746   803 I libPerfCtl: xgfGetFPS pid:10152 fps:-1
+07-08 20:33:36.556  1479  1756 D ResMonitor2Proxy: visible mem gap 843961Kb
+07-08 20:33:36.556  1479  1756 D Griffin/AdjClean: item=2
+07-08 20:33:36.556  1479  1524 D Griffin/CleanManager: dispatch clean index=9
+07-08 20:33:36.556  1479  1524 D Griffin/AdjClean: clean code: visible(2) begin:
+07-08 20:33:36.557  3515  3683 W Parcel  : **** enforceInterface() expected 'com.transsion.hubsdk.uxdetector.ITranUxDetectorService' but read 'com.transsion.trancare.handler.uxdetector.IUxDetectorService'
+07-08 20:33:36.558  1479  1524 D Griffin/StateProvider: getAppsArrayRecommend: get ux detector service error!!
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: getAppsArrayRecommend: 
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: java.lang.SecurityException: Binder invocation to an incorrect interface
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3021)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at android.os.Parcel.createException(Parcel.java:3005)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at android.os.Parcel.readException(Parcel.java:2988)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at android.os.Parcel.readException(Parcel.java:2930)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at gc.o$a$a.a(SourceFile:72)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at com.transsion.griffin.core.StateImpl.getAppsArrayRecommend(SourceFile:13)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at f.a.a(SourceFile:1165)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at f.a.g(SourceFile:87)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at f.a.b(SourceFile:61)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at f.a.b(SourceFile:2)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at f.a$d.handleMessage(SourceFile:281)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:36.558  1479  1524 E Griffin/StateProvider: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:36.559  1479  1524 D Griffin/AdjClean: clean code:visible(2) finish: coast 2ms
+07-08 20:33:37.203 23774 23774 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.measurement.START pkg=com.google.android.gms }
+07-08 20:33:37.245   746   803 I libPerfCtl: xgfGetFPS pid:10152 fps:-1
+07-08 20:33:37.852 10152 10152 D RustWebViewClient: STEP_DIAG[6]: "none:0"
+07-08 20:33:39.952   546  9817 I keystore2: keystore2::watchdog: Watchdog thread idle -> terminating. Have a great day.
+07-08 20:33:40.659 23774 23774 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.safetynet.service.START pkg=com.google.android.gms }
+07-08 20:33:40.661 23774 23774 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.safebrowsing.SafeBrowsingService.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+07-08 20:33:40.664  1479  1537 W libprocessgroup: Failed to open /dev/blkio/background/cgroup.procs: No such file or directory
+07-08 20:33:40.666  1479  2121 I ActivityManager: Killing 9194:com.google.android.cellbroadcastreceiver/u0a185 (adj 985): empty for 41s
+07-08 20:33:40.667  3605 32590 D SmartPanelService: processName = com.google.android.cellbroadcastreceiverpackages = [com.google.android.cellbroadcastreceiver]
+07-08 20:33:40.669  3605 32590 D Game_Utils: isTheMainScreen, displayId: 0  classname = com.refbible.app.MainActivity
+07-08 20:33:40.670  3605 32590 D Game_Utils: getTopPackageNameNew pkm = com.refbible.app
+07-08 20:33:40.672  1479  1534 I libprocessgroup: Successfully killed process cgroup uid 10185 pid 9194 in 5ms
+07-08 20:33:40.672  3605 32590 D Game_Utils: isTheMainScreen, displayId: 0  classname = com.refbible.app.MainActivity
+07-08 20:33:40.672  3605 32590 D Game_Utils: getTopClassNameNew className = com.refbible.app.MainActivity
+07-08 20:33:40.688  1479  1496 V ActivityManager: Death received in com.android.server.am.ActivityManagerService$AppDeathRecipient@aef0d3b for thread android.os.BinderProxy@472cc58
+07-08 20:33:40.689  1479  1496 D os.ActivityManagerServiceLice: make process inactive com.google.android.cellbroadcastreceiver(9194)
+07-08 20:33:40.689   718   718 I Zygote  : Process 9194 exited due to signal 9 (Killed)
+07-08 20:33:40.689  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.689  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.689  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.689  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.689  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.689  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.689  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.689  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.689  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.689  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.689  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.689  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.689  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.689  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.690  1479  1496 I mtkpower_client: [Legacy][PowerHal_Wrap_notifyAppState] com.google.android.cellbroadcastreceiver/com.google.android.cellbroadcastreceiver pid=9194 state:3
+07-08 20:33:40.690  1479  1496 I game_scn: collectForegroundAppList packName=com.google.android.cellbroadcastreceiver, actName=com.google.android.cellbroadcastreceiver, pid=9194, uid=10185, state:DEAD
+07-08 20:33:40.690  1479  1496 I game_scn: powerNotifyForegroundApp multi_resumed_app_info: pid: 10152, packname: com.refbible.app, actname: com.refbible.app.MainActivity
+07-08 20:33:40.690  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.690  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.690  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.690   746   828 I libPowerHal: [perfNotifyAppState] pack:com.google.android.cellbroadcastreceiver, act:com.google.android.cellbroadcastreceiver, state:3, pid:9194, uid:10185, fps:-1
+07-08 20:33:40.690   746   828 I libPowerHal: [perfNotifyAppState] pack:com.google.android.cellbroadcastreceiver, pid:9194, STATE_DEAD
+07-08 20:33:40.690   746   828 D RilUtility: notify_rild_crash_pid_set certPid:-1, crash:9194, scn:0x0
+07-08 20:33:40.690  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.690  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.690  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.690  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.690  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.690  1479  1496 I ActivityManager: Killing 9787:com.transsnet.store:remote/u0a95 (adj 995): empty for 29s
+07-08 20:33:40.690  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.690  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.690  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.691  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.691  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.691  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.691  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.691  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.691  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.691  3605 32590 D SmartPanelService: processName = com.transsnet.store:remotepackages = [com.transsnet.store]
+07-08 20:33:40.691  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.691  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.691  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.692  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.692  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.692  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.695  3605 32590 D Game_Utils: isTheMainScreen, displayId: 0  classname = com.refbible.app.MainActivity
+07-08 20:33:40.695  3605 32590 D Game_Utils: getTopPackageNameNew pkm = com.refbible.app
+07-08 20:33:40.698  3605 32590 D Game_Utils: isTheMainScreen, displayId: 0  classname = com.refbible.app.MainActivity
+07-08 20:33:40.698  3605 32590 D Game_Utils: getTopClassNameNew className = com.refbible.app.MainActivity
+07-08 20:33:40.698  1479  1534 I libprocessgroup: Successfully killed process cgroup uid 10095 pid 9787 in 5ms
+07-08 20:33:40.728  1479  1496 V ActivityManager: Death received in com.android.server.am.ActivityManagerService$AppDeathRecipient@5f4ff16 for thread android.os.BinderProxy@d8097
+07-08 20:33:40.729  1479  1496 D os.ActivityManagerServiceLice: make process inactive com.transsnet.store:remote(9787)
+07-08 20:33:40.729   718   718 I Zygote  : Process 9787 exited due to signal 9 (Killed)
+07-08 20:33:40.730  1479  1496 I mtkpower_client: [Legacy][PowerHal_Wrap_notifyAppState] com.transsnet.store/com.transsnet.store pid=9787 state:3
+07-08 20:33:40.730  1479  1496 I game_scn: collectForegroundAppList packName=com.transsnet.store, actName=com.transsnet.store, pid=9787, uid=10095, state:DEAD
+07-08 20:33:40.730  1479  1496 I game_scn: powerNotifyForegroundApp multi_resumed_app_info: pid: 10152, packname: com.refbible.app, actname: com.refbible.app.MainActivity
+07-08 20:33:40.730  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.730  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.730  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.730  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.731  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.731   746   828 I libPowerHal: [perfNotifyAppState] pack:com.transsnet.store, act:com.transsnet.store, state:3, pid:9787, uid:10095, fps:-1
+07-08 20:33:40.731   746   828 I libPowerHal: [perfNotifyAppState] pack:com.transsnet.store, pid:9787, STATE_DEAD
+07-08 20:33:40.731   746   828 D RilUtility: notify_rild_crash_pid_set certPid:-1, crash:9787, scn:0x0
+07-08 20:33:40.731  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.731  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.731  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.731  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.731  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.731  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.731  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.731  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.732  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.732  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.732  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.732  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.732  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.732  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.732  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.732  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:40.733  1479  1503 E TranActivityManager: TranProcessObserver # onProcessDied
+07-08 20:33:40.733  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 20:33:40.733  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 20:33:40.733  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 20:33:40.733  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onProcessDied(ITranProcessObserver.java:158)
+07-08 20:33:40.733  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onProcessDied(TranActivityManagerService.java:554)
+07-08 20:33:40.733  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessDied(ProcessList.java:4782)
+07-08 20:33:40.733  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1839)
+07-08 20:33:40.733  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 20:33:40.733  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 20:33:40.733  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 20:33:40.733  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 20:33:40.733  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 20:33:40.733  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 20:33:41.338  1981  1981 D TranCellSignalStrengthImpl: [LTE] dbm: -111
+07-08 20:33:41.338  1981  1981 D TranCellSignalStrengthImpl: [LTE] dbm: -111
+07-08 20:33:41.339  1981  1981 D TranCellSignalStrengthImpl: [LTE] dbm: -111
+07-08 20:33:41.339  1479  1479 I MWN     : onSignalStrengthsChanged...
+07-08 20:33:41.340  1479  1479 I MWN     : network type was unavailable.
+07-08 20:33:41.340  1479  1479 I MWN     : Write 3 to node. type=unknown mSimExist=true mFlightMode=false
+07-08 20:33:41.340  1479  1479 I MWN     : write the value:3 to node successfully.
+07-08 20:33:41.340  1479  1538 D TranCellSignalStrengthImpl: [LTE] dbm: -111
+07-08 20:33:41.350  1777  1928 D Dito    : mcc=621, mnc=50
+07-08 20:33:41.501  2045  2045 E Athena  : ------------------------------------------------------------
+07-08 20:33:41.501  2045  2045 E Athena  : 
+07-08 20:33:41.501  2045  2045 E Athena  : Athena is in DEBUG or TEST mode, should not release this APK [com.transsion.multiwindow]
+07-08 20:33:41.501  2045  2045 E Athena  : 
+07-08 20:33:41.501  2045  2045 E Athena  : ------------------------------------------------------------

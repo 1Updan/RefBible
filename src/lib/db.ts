@@ -1,88 +1,66 @@
-import Database from '@tauri-apps/plugin-sql'
+import { invoke } from '@tauri-apps/api/core'
 import type { Verse, ContentText, CrossReference, Bookmark, Note, InterlinearWord, StrongsEntry, Highlight } from '@/types/db'
 import { parseReference } from './utils'
 
-let db: Database | null = null
-
-function isTauriContext(): boolean {
-  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
+export async function query<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+  return invoke<T[]>('db_query', { sql, params })
 }
 
-export async function getDb(): Promise<Database> {
-  if (!isTauriContext()) {
-    throw new Error('This app requires a Tauri shell. Run "pnpm tauri dev" instead of "pnpm dev".')
-  }
-  if (!db) {
-    db = await Database.load('sqlite:refbible.db')
-  }
-  return db
-}
-
-export async function ensureSeeded(): Promise<void> {
-  // Database is pre-seeded and bundled with the app.
-  // Rust backend copies it to app data dir on first launch.
-  await getDb()
+export async function exec(sql: string, params: unknown[] = []): Promise<void> {
+  await invoke<number>('db_execute', { sql, params })
 }
 
 export async function getVerses(bookId: number, chapter: number): Promise<Verse[]> {
-  const conn = await getDb()
-  return conn.select<Verse[]>(
+  return query<Verse>(
     'SELECT id, book_id, chapter_num, verse_num FROM verses WHERE book_id = $1 AND chapter_num = $2 ORDER BY verse_num',
     [bookId, chapter],
   )
 }
 
 export async function getTranslations(verseId: string): Promise<ContentText[]> {
-  const conn = await getDb()
-  return conn.select<ContentText[]>(
+  return query<ContentText>(
     'SELECT id, verse_id, translation_code, text_data FROM content_text WHERE verse_id = $1',
     [verseId],
   )
 }
 
 export async function getCrossReferences(verseId: string): Promise<CrossReference[]> {
-  const conn = await getDb()
-  return conn.select<CrossReference[]>(
+  return query<CrossReference>(
     'SELECT id, origin_verse_id, target_verse_id, thematic_weight FROM cross_references WHERE origin_verse_id = $1 ORDER BY thematic_weight DESC',
     [verseId],
   )
 }
 
 export async function getBookmarks(): Promise<Bookmark[]> {
-  const conn = await getDb()
-  return conn.select<Bookmark[]>('SELECT id, verse_id, created_at FROM bookmarks ORDER BY created_at DESC')
+  return query<Bookmark>('SELECT id, verse_id, created_at FROM bookmarks ORDER BY created_at DESC')
 }
 
 export async function saveBookmark(verseId: string): Promise<void> {
-  const conn = await getDb()
-  await conn.execute('INSERT OR IGNORE INTO bookmarks (verse_id) VALUES ($1)', [verseId])
+  await exec('INSERT OR IGNORE INTO bookmarks (verse_id) VALUES ($1)', [verseId])
 }
 
 export async function removeBookmark(verseId: string): Promise<void> {
-  const conn = await getDb()
-  await conn.execute('DELETE FROM bookmarks WHERE verse_id = $1', [verseId])
+  await exec('DELETE FROM bookmarks WHERE verse_id = $1', [verseId])
 }
 
 export async function getNotes(verseId: string): Promise<Note[]> {
-  const conn = await getDb()
-  return conn.select<Note[]>(
+  return query<Note>(
     'SELECT id, verse_id, text_content, created_at FROM notes WHERE verse_id = $1 ORDER BY created_at DESC',
     [verseId],
   )
 }
 
 export async function saveNote(verseId: string, text: string): Promise<Note> {
-  const conn = await getDb()
-  const existing = await conn.select<Note[]>(
+  const existing = await query<Note>(
     'SELECT id, verse_id, text_content, created_at FROM notes WHERE verse_id = $1 ORDER BY created_at DESC LIMIT 1',
     [verseId],
   )
   if (existing.length > 0) {
-    await conn.execute('UPDATE notes SET text_content = $1, created_at = CURRENT_TIMESTAMP WHERE id = $2', [text, existing[0].id])
+    await exec('UPDATE notes SET text_content = $1, created_at = CURRENT_TIMESTAMP WHERE id = $2', [text, existing[0].id])
     return { ...existing[0], text_content: text, created_at: new Date().toISOString() }
   }
-  await conn.execute('INSERT INTO notes (verse_id, text_content) VALUES ($1, $2)', [verseId, text])
-  const rows = await conn.select<Note[]>(
+  await exec('INSERT INTO notes (verse_id, text_content) VALUES ($1, $2)', [verseId, text])
+  const rows = await query<Note>(
     'SELECT id, verse_id, text_content, created_at FROM notes WHERE verse_id = $1 ORDER BY created_at DESC LIMIT 1',
     [verseId],
   )
@@ -90,18 +68,15 @@ export async function saveNote(verseId: string, text: string): Promise<Note> {
 }
 
 export async function deleteNote(verseId: string): Promise<void> {
-  const conn = await getDb()
-  await conn.execute('DELETE FROM notes WHERE verse_id = $1', [verseId])
+  await exec('DELETE FROM notes WHERE verse_id = $1', [verseId])
 }
 
 export async function getAllNotes(): Promise<Note[]> {
-  const conn = await getDb()
-  return conn.select<Note[]>('SELECT id, verse_id, text_content, created_at FROM notes ORDER BY created_at DESC')
+  return query<Note>('SELECT id, verse_id, text_content, created_at FROM notes ORDER BY created_at DESC')
 }
 
 export async function getNotesForChapter(bookId: number, chapter: number): Promise<Set<string>> {
-  const conn = await getDb()
-  const rows = await conn.select<{ verse_id: string }[]>(
+  const rows = await query<{ verse_id: string }>(
     `SELECT DISTINCT n.verse_id FROM notes n
      JOIN verses v ON v.id = n.verse_id
      WHERE v.book_id = $1 AND v.chapter_num = $2`,
@@ -111,8 +86,7 @@ export async function getNotesForChapter(bookId: number, chapter: number): Promi
 }
 
 export async function checkCache(verseId: string, mode: string): Promise<string | null> {
-  const conn = await getDb()
-  const rows = await conn.select<{ cached_response: string }[]>(
+  const rows = await query<{ cached_response: string }>(
     'SELECT cached_response FROM ai_commentary_cache WHERE verse_id = $1 AND query_mode = $2 ORDER BY timestamp DESC LIMIT 1',
     [verseId, mode],
   )
@@ -120,24 +94,21 @@ export async function checkCache(verseId: string, mode: string): Promise<string 
 }
 
 export async function writeCache(verseId: string, mode: string, response: string): Promise<void> {
-  const conn = await getDb()
-  await conn.execute(
+  await exec(
     'INSERT INTO ai_commentary_cache (verse_id, query_mode, cached_response) VALUES ($1, $2, $3)',
     [verseId, mode, response],
   )
 }
 
 export async function getInstalledTranslations(): Promise<string[]> {
-  const conn = await getDb()
-  const rows = await conn.select<{ translation_code: string }[]>(
+  const rows = await query<{ translation_code: string }>(
     'SELECT DISTINCT translation_code FROM content_text ORDER BY translation_code',
   )
   return rows.map((r) => r.translation_code)
 }
 
 export async function removeTranslation(code: string): Promise<void> {
-  const conn = await getDb()
-  await conn.execute('DELETE FROM content_text WHERE translation_code = $1', [code])
+  await exec('DELETE FROM content_text WHERE translation_code = $1', [code])
 }
 
 export interface SearchResult {
@@ -149,9 +120,8 @@ export interface SearchResult {
   text_data: string
 }
 
-export async function searchVerses(query: string, versions?: string[]): Promise<SearchResult[]> {
-  const conn = await getDb()
-  const ref = parseReference(query)
+export async function searchVerses(search: string, versions?: string[]): Promise<SearchResult[]> {
+  const ref = parseReference(search)
 
   function withVersionFilter(startParam: number): string {
     if (!versions || versions.length === 0) return ''
@@ -163,7 +133,7 @@ export async function searchVerses(query: string, versions?: string[]): Promise<
       if (ref.verseEnd) {
         const binds: unknown[] = [ref.bookId, ref.chapter, ref.verse, ref.verseEnd]
         if (versions) binds.push(...versions)
-        return conn.select<SearchResult[]>(
+        return query<SearchResult>(
           `SELECT v.id as verse_id, v.book_id, v.chapter_num, v.verse_num, ct.translation_code, ct.text_data
 FROM content_text ct JOIN verses v ON v.id = ct.verse_id
 WHERE v.book_id = $1 AND v.chapter_num = $2 AND v.verse_num BETWEEN $3 AND $4${withVersionFilter( 5)}
@@ -173,7 +143,7 @@ ORDER BY v.verse_num, ct.translation_code`,
       }
       const binds: unknown[] = [ref.bookId, ref.chapter, ref.verse]
       if (versions) binds.push(...versions)
-      return conn.select<SearchResult[]>(
+      return query<SearchResult>(
         `SELECT v.id as verse_id, v.book_id, v.chapter_num, v.verse_num, ct.translation_code, ct.text_data
 FROM content_text ct JOIN verses v ON v.id = ct.verse_id
 WHERE v.book_id = $1 AND v.chapter_num = $2 AND v.verse_num = $3${withVersionFilter( 4)}
@@ -183,7 +153,7 @@ ORDER BY ct.translation_code`,
     }
     const binds: unknown[] = [ref.bookId, ref.chapter]
     if (versions) binds.push(...versions)
-    return conn.select<SearchResult[]>(
+    return query<SearchResult>(
       `SELECT v.id as verse_id, v.book_id, v.chapter_num, v.verse_num, ct.translation_code, ct.text_data
 FROM content_text ct JOIN verses v ON v.id = ct.verse_id
 WHERE v.book_id = $1 AND v.chapter_num = $2${withVersionFilter( 3)}
@@ -192,10 +162,10 @@ ORDER BY v.verse_num, ct.translation_code`,
     )
   }
 
-  const binds: unknown[] = [`%${query}%`]
+  const binds: unknown[] = [`%${search}%`]
   if (versions) binds.push(...versions)
   const verParam = versions && versions.length > 0 ? 2 : 0
-  return conn.select<SearchResult[]>(
+  return query<SearchResult>(
     `SELECT v.id as verse_id, v.book_id, v.chapter_num, v.verse_num, ct.translation_code, ct.text_data
 FROM content_text ct JOIN verses v ON v.id = ct.verse_id
 WHERE ct.text_data LIKE $1${verParam > 0 ? ` AND ct.translation_code IN (${versions!.map((_, i) => `$${verParam + i}`).join(',')})` : ''}
@@ -206,16 +176,14 @@ LIMIT 100`,
 }
 
 export async function getInterlinearWords(verseId: string): Promise<InterlinearWord[]> {
-  const conn = await getDb()
-  return conn.select<InterlinearWord[]>(
+  return query<InterlinearWord>(
     'SELECT id, verse_id, word_index, language, original_text, transliteration, strongs_number, lemma, gloss, morphology FROM interlinear_words WHERE verse_id = $1 ORDER BY word_index',
     [verseId],
   )
 }
 
 export async function getStrongsEntry(number: string): Promise<StrongsEntry | null> {
-  const conn = await getDb()
-  const rows = await conn.select<StrongsEntry[]>(
+  const rows = await query<StrongsEntry>(
     'SELECT number, language, transliteration, definition, pronunciation, word_count FROM strongs_definitions WHERE number = $1',
     [number],
   )
@@ -223,8 +191,7 @@ export async function getStrongsEntry(number: string): Promise<StrongsEntry | nu
 }
 
 export async function getHighlights(): Promise<Map<string, string[]>> {
-  const conn = await getDb()
-  const rows = await conn.select<Highlight[]>(
+  const rows = await query<Highlight>(
     'SELECT id, verse_id, color, created_at FROM highlights ORDER BY created_at',
   )
   const map = new Map<string, string[]>()
@@ -237,8 +204,7 @@ export async function getHighlights(): Promise<Map<string, string[]>> {
 }
 
 export async function getHighlightsForChapter(bookId: number, chapter: number): Promise<Map<string, string[]>> {
-  const conn = await getDb()
-  const rows = await conn.select<{ verse_id: string; color: string }[]>(
+  const rows = await query<{ verse_id: string; color: string }>(
     `SELECT h.verse_id, h.color FROM highlights h
      JOIN verses v ON v.id = h.verse_id
      WHERE v.book_id = $1 AND v.chapter_num = $2`,
@@ -254,24 +220,21 @@ export async function getHighlightsForChapter(bookId: number, chapter: number): 
 }
 
 export async function toggleHighlight(verseId: string, color: string): Promise<void> {
-  const conn = await getDb()
-  await conn.execute(
+  await exec(
     'INSERT OR IGNORE INTO highlights (verse_id, color) VALUES ($1, $2)',
     [verseId, color],
   )
 }
 
 export async function removeHighlight(verseId: string, color: string): Promise<void> {
-  const conn = await getDb()
-  await conn.execute(
+  await exec(
     'DELETE FROM highlights WHERE verse_id = $1 AND color = $2',
     [verseId, color],
   )
 }
 
 export async function getUserCrossReferences(verseId: string): Promise<(CrossReference & { user_created: boolean })[]> {
-  const conn = await getDb()
-  const rows = await conn.select<(CrossReference & { user_created: boolean })[]>(
+  const rows = await query<(CrossReference & { user_created: boolean })>(
     `SELECT id, origin_verse_id, target_verse_id, created_at, 1 as user_created
      FROM user_custom_cross_references
      WHERE origin_verse_id = $1
@@ -282,16 +245,14 @@ export async function getUserCrossReferences(verseId: string): Promise<(CrossRef
 }
 
 export async function addCustomCrossReference(originVerseId: string, targetVerseId: string): Promise<void> {
-  const conn = await getDb()
-  await conn.execute(
+  await exec(
     'INSERT OR IGNORE INTO user_custom_cross_references (origin_verse_id, target_verse_id) VALUES ($1, $2)',
     [originVerseId, targetVerseId],
   )
 }
 
 export async function removeCustomCrossReference(id: number): Promise<void> {
-  const conn = await getDb()
-  await conn.execute(
+  await exec(
     'DELETE FROM user_custom_cross_references WHERE id = $1',
     [id],
   )
@@ -305,28 +266,20 @@ export interface BackupData {
 }
 
 export async function exportBackupData(): Promise<BackupData> {
-  const conn = await getDb()
-  const bookmarks = await conn.select<{ verse_id: string; created_at: string }[]>(
-    'SELECT verse_id, created_at FROM bookmarks ORDER BY created_at'
-  )
-  const notes = await conn.select<{ verse_id: string; text_content: string; created_at: string }[]>(
-    'SELECT verse_id, text_content, created_at FROM notes ORDER BY created_at'
-  )
-  const highlights = await conn.select<{ verse_id: string; color: string; created_at: string }[]>(
-    'SELECT verse_id, color, created_at FROM highlights ORDER BY created_at'
-  )
-  const user_cross_references = await conn.select<{ origin_verse_id: string; target_verse_id: string; created_at: string }[]>(
-    'SELECT origin_verse_id, target_verse_id, created_at FROM user_custom_cross_references ORDER BY created_at'
-  )
+  const [bookmarks, notes, highlights, user_cross_references] = await Promise.all([
+    query<{ verse_id: string; created_at: string }>('SELECT verse_id, created_at FROM bookmarks ORDER BY created_at'),
+    query<{ verse_id: string; text_content: string; created_at: string }>('SELECT verse_id, text_content, created_at FROM notes ORDER BY created_at'),
+    query<{ verse_id: string; color: string; created_at: string }>('SELECT verse_id, color, created_at FROM highlights ORDER BY created_at'),
+    query<{ origin_verse_id: string; target_verse_id: string; created_at: string }>('SELECT origin_verse_id, target_verse_id, created_at FROM user_custom_cross_references ORDER BY created_at'),
+  ])
   return { bookmarks, notes, highlights, user_cross_references }
 }
 
 export async function importBackupData(data: BackupData): Promise<void> {
-  const conn = await getDb()
-  await conn.execute('DELETE FROM bookmarks')
-  await conn.execute('DELETE FROM notes')
-  await conn.execute('DELETE FROM highlights')
-  await conn.execute('DELETE FROM user_custom_cross_references')
+  await exec('DELETE FROM bookmarks')
+  await exec('DELETE FROM notes')
+  await exec('DELETE FROM highlights')
+  await exec('DELETE FROM user_custom_cross_references')
 
   const CHUNK = 200
 
@@ -339,7 +292,7 @@ export async function importBackupData(data: BackupData): Promise<void> {
       }).join(', ')
       const binds: unknown[] = []
       for (const r of chunk) binds.push(...extract(r))
-      await conn.execute(
+      await exec(
         `INSERT OR IGNORE INTO ${table} (${columns.join(', ')}) VALUES ${placeholders}`,
         binds,
       )

@@ -84,6 +84,7 @@
 
 html {
   color-scheme: light;
+  overscroll-behavior-y: contain;
 }
 
 [data-theme="dark"] html {
@@ -92,7 +93,6 @@ html {
 
 body {
   margin: 0;
-  padding-top: env(safe-area-inset-top, 0px);
   font-family: var(--font-sans);
   color: var(--color-text-primary);
   background: var(--color-bg);

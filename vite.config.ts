@@ -18,10 +18,10 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-ui': ['lucide-react'],
-          'vendor-tauri': ['@tauri-apps/api', '@tauri-apps/plugin-sql', '@tauri-apps/plugin-http', '@tauri-apps/plugin-notification'],
+        manualChunks(id) {
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) return 'vendor-react'
+          if (id.includes('node_modules/lucide-react/')) return 'vendor-ui'
+          if (id.includes('node_modules/@tauri-apps/')) return 'vendor-tauri'
         },
       },
     },

@@ -1,5 +1,6 @@
-import { getDb } from './db'
+import { exec } from './db'
 import { getVersion } from './versions'
+import { fetch } from '@tauri-apps/plugin-http'
 
 interface DownloadedVerse {
   number: number
@@ -59,16 +60,14 @@ export async function downloadAndInstall(code: string): Promise<void> {
   if (!meta || !meta.url) throw new Error(`No download URL for ${code}`)
   if (meta.builtIn) throw new Error(`${meta.name} is built in and cannot be downloaded`)
 
-  const resp = await fetch(meta.url)
-  if (!resp.ok) throw new Error(`Failed to fetch ${meta.name}: ${resp.status} ${resp.statusText}`)
-
-  const contentLength = resp.headers.get('Content-Length')
-  if (contentLength && Number(contentLength) > 10_000_000) {
-    throw new Error(`Download too large (${Math.round(Number(contentLength) / 1_000_000)}MB)`)
+  let text: string;
+  try {
+    const resp = await fetch(meta.url, { method: 'GET', connectTimeout: 30 });
+    text = await resp.text();
+  } catch (e) {
+    throw new Error(`Download failed: ${e instanceof Error ? e.message : String(e)}`);
   }
-
-  const text = await resp.text()
-  if (text.length > 10_000_000) throw new Error(`Download too large (${Math.round(text.length / 1_000_000)}MB)`)
+  if (text.length > 50_000_000) throw new Error(`Download too large (${Math.round(text.length / 1_000_000)}MB)`)
 
   let parsed: unknown
   try {
@@ -78,8 +77,6 @@ export async function downloadAndInstall(code: string): Promise<void> {
   }
 
   const bible = validateDownloadedBible(parsed)
-
-  const conn = await getDb()
 
   const allTexts: { id: string; code: string; text: string }[] = []
 
@@ -101,7 +98,7 @@ export async function downloadAndInstall(code: string): Promise<void> {
     const binds: unknown[] = []
     for (const r of chunk) binds.push(r.id, r.code, r.text)
 
-    await conn.execute(
+    await exec(
       `INSERT OR IGNORE INTO content_text (verse_id, translation_code, text_data) VALUES ${placeholders}`,
       binds,
     )

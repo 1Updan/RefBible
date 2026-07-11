@@ -103,6 +103,7 @@ export function ReadingView({
     >
   >(new Map());
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectionAnchor, setSelectionAnchor] = useState<string | null>(null);
   const [rangeMode, setRangeMode] = useState(false);
@@ -116,6 +117,9 @@ export function ReadingView({
   const topRef = useRef<HTMLDivElement>(null);
   const swipeStartX = useRef(0);
   const swipeStartY = useRef(0);
+  const swiping = useRef(false);
+  const swipeTranslate = useRef(0);
+  const swipeContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
   const controlsVisibleRef = useRef(true);
   const controlsCallbackRef = useRef(onControlsVisibleChange);
@@ -128,7 +132,6 @@ export function ReadingView({
     const scrollY = target.scrollTop;
     const diff = scrollY - lastScrollY.current;
     lastScrollY.current = scrollY;
-
     if (diff > 8 && scrollY > 40 && controlsVisibleRef.current) {
       controlsVisibleRef.current = false;
       controlsCallbackRef.current?.(true);
@@ -141,13 +144,41 @@ export function ReadingView({
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     swipeStartX.current = e.touches[0].clientX;
     swipeStartY.current = e.touches[0].clientY;
+    swiping.current = false;
+    swipeTranslate.current = 0;
+    if (swipeContainerRef.current) {
+      swipeContainerRef.current.style.transition = 'none';
+    }
   }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!onSwipePrev && !onSwipeNext) return;
+    const dx = e.touches[0].clientX - swipeStartX.current;
+    const dy = e.touches[0].clientY - swipeStartY.current;
+    if (Math.abs(dy) > Math.abs(dx)) {
+      if (swipeContainerRef.current) {
+        swipeContainerRef.current.style.transform = '';
+      }
+      return;
+    }
+    swiping.current = true;
+    swipeTranslate.current = dx;
+    if (swipeContainerRef.current) {
+      swipeContainerRef.current.style.transform = `translateX(${dx * 0.3}px)`;
+      swipeContainerRef.current.style.opacity = String(Math.max(0.4, 1 - Math.abs(dx) / 500));
+    }
+  }, [onSwipePrev, onSwipeNext]);
 
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
       if (!onSwipePrev && !onSwipeNext) return;
       const dx = e.changedTouches[0].clientX - swipeStartX.current;
       const dy = e.changedTouches[0].clientY - swipeStartY.current;
+      if (swipeContainerRef.current) {
+        swipeContainerRef.current.style.transition = 'transform 200ms ease-out, opacity 200ms ease-out';
+        swipeContainerRef.current.style.transform = '';
+        swipeContainerRef.current.style.opacity = '1';
+      }
       if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
       if (dx > 0) onSwipePrev?.();
       else onSwipeNext?.();
@@ -158,11 +189,40 @@ export function ReadingView({
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     swipeStartX.current = e.clientX;
     swipeStartY.current = e.clientY;
+    swiping.current = false;
+    swipeTranslate.current = 0;
+    if (swipeContainerRef.current) {
+      swipeContainerRef.current.style.transition = 'none';
+    }
   }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!onSwipePrev && !onSwipeNext) return;
+    if ((e.buttons & 1) === 0) return;
+    const dx = e.clientX - swipeStartX.current;
+    const dy = e.clientY - swipeStartY.current;
+    if (Math.abs(dy) > Math.abs(dx)) {
+      if (swipeContainerRef.current) {
+        swipeContainerRef.current.style.transform = '';
+      }
+      return;
+    }
+    swiping.current = true;
+    swipeTranslate.current = dx;
+    if (swipeContainerRef.current) {
+      swipeContainerRef.current.style.transform = `translateX(${dx * 0.3}px)`;
+      swipeContainerRef.current.style.opacity = String(Math.max(0.4, 1 - Math.abs(dx) / 500));
+    }
+  }, [onSwipePrev, onSwipeNext]);
 
   const handleMouseUp = useCallback(
     (e: React.MouseEvent) => {
       if (!onSwipePrev && !onSwipeNext) return;
+      if (swipeContainerRef.current) {
+        swipeContainerRef.current.style.transition = 'transform 200ms ease-out, opacity 200ms ease-out';
+        swipeContainerRef.current.style.transform = '';
+        swipeContainerRef.current.style.opacity = '1';
+      }
       const dx = e.clientX - swipeStartX.current;
       const dy = e.clientY - swipeStartY.current;
       if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
@@ -178,16 +238,28 @@ export function ReadingView({
       setSelectionAnchor(null);
       setRangeMode(false);
       setHighlightedVerseId(null);
+      setLoadError(null);
       const chapterChanged =
         bookId !== prevChapterRef.current.bookId ||
         chapter !== prevChapterRef.current.chapter;
       prevChapterRef.current = { bookId, chapter };
       if (chapterChanged) setLoading(true);
-      const [vs, noteIds] = await Promise.all([
-        getVerses(bookId, chapter),
-        getNotesForChapter(bookId, chapter),
-      ]);
-      if (cancelled) return;
+      let vs: Verse[];
+      let noteIds: Set<string>;
+      try {
+        const result = await Promise.all([
+          getVerses(bookId, chapter),
+          getNotesForChapter(bookId, chapter),
+        ]);
+        if (cancelled) return;
+        vs = result[0];
+        noteIds = result[1];
+      } catch (e) {
+        if (cancelled) return;
+        setLoadError(String(e));
+        setLoading(false);
+        return;
+      }
       setVerses(vs);
       setVerseNotes(noteIds);
       const map = new Map<
@@ -199,14 +271,18 @@ export function ReadingView({
         }
       >();
       const batch = vs.map(async (v) => {
-        const [texts, xrefs, interlinear] = await Promise.all([
-          getTranslations(v.id),
-          getCrossReferences(v.id),
-          interlinearEnabled
-            ? getInterlinearWords(v.id)
-            : Promise.resolve([] as InterlinearWord[]),
-        ]);
-        map.set(v.id, { texts, xrefs, interlinear });
+        try {
+          const [texts, xrefs, interlinear] = await Promise.all([
+            getTranslations(v.id),
+            getCrossReferences(v.id),
+            interlinearEnabled
+              ? getInterlinearWords(v.id)
+              : Promise.resolve([] as InterlinearWord[]),
+          ]);
+          map.set(v.id, { texts, xrefs, interlinear });
+        } catch (_) {
+          map.set(v.id, { texts: [], xrefs: [], interlinear: [] });
+        }
       });
       await Promise.all(batch);
       if (!cancelled) {
@@ -261,16 +337,20 @@ export function ReadingView({
         setLoading(false);
         if (historyHighlight) {
           setHighlightedVerseId(historyHighlight);
+          requestAnimationFrame(() => scrollToVerse(historyHighlight));
         }
         if (highlightRef.current && map.has(highlightRef.current)) {
-          setHighlightedVerseId(highlightRef.current);
+          const target = highlightRef.current;
           highlightRef.current = null;
+          setHighlightedVerseId(target);
+          requestAnimationFrame(() => scrollToVerse(target));
         }
         if (votdVerseId && map.has(votdVerseId)) {
           if (votdVerseId !== consumedVotdRef.current) {
             consumedVotdRef.current = votdVerseId;
           }
           setHighlightedVerseId(votdVerseId);
+          requestAnimationFrame(() => scrollToVerse(votdVerseId));
         }
       }
     }
@@ -348,15 +428,22 @@ export function ReadingView({
     }
   }, [votdVerseId, bookId, chapter]);
 
-  useEffect(() => {
-    if (!highlightedVerseId) return;
-    const el = document.getElementById(`verse-${highlightedVerseId}`);
+  const scrollToVerse = useCallback((verseId: string) => {
+    const el = document.getElementById(`verse-${verseId}`);
     if (el) {
       el.scrollIntoView({ block: "center", behavior: "smooth" });
     }
-    const timer = setTimeout(() => setHighlightedVerseId(null), 2000);
-    return () => clearTimeout(timer);
-  }, [highlightedVerseId]);
+  }, []);
+
+  useEffect(() => {
+    if (!highlightedVerseId) return;
+    const raf = requestAnimationFrame(() => scrollToVerse(highlightedVerseId));
+    const timer = setTimeout(() => setHighlightedVerseId(null), 4000);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+    };
+  }, [highlightedVerseId, scrollToVerse]);
 
   const handleClearSelection = useCallback(() => {
     setSelectedIds(new Set());
@@ -580,6 +667,17 @@ export function ReadingView({
     });
   }, [selectedList, verses, data, bookId, highlightColors]);
 
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center h-full p-8">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <p className="text-xs text-danger font-medium">Error loading chapter</p>
+          <p className="text-[10px] text-text-tertiary break-all">{loadError}</p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -594,14 +692,18 @@ export function ReadingView({
   return (
     <div className="relative flex flex-col flex-1 min-h-0">
       <div
-        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden touch-pan-y"
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden touch-pan-y overscroll-contain"
         ref={topRef}
         onScroll={handleScroll}
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        style={{ overscrollBehavior: 'contain' }}
       >
+        <div ref={swipeContainerRef}>
         <div className="max-w-6xl mx-auto px-4 py-3 space-y-0.5">
           {verses.map((verse) => {
             const d = data.get(verse.id);
@@ -632,6 +734,7 @@ export function ReadingView({
               />
             );
           })}
+        </div>
         </div>
       </div>
 

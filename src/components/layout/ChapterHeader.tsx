@@ -107,13 +107,13 @@ export function ChapterHeader({
           <button
             type="button"
             onClick={onOpenNav}
-            className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-text-primary truncate shrink-0 hover:text-accent transition-colors duration-150 cursor-pointer"
+            className="flex items-center gap-1 text-lg font-extrabold text-text-primary truncate shrink-0 hover:text-accent transition-colors duration-150 cursor-pointer tracking-tight"
           >
             {bookName} {chapter}
-            <ChevronDown size={12} className="text-text-tertiary" />
+            <ChevronDown size={14} className="text-text-tertiary" />
           </button>
         ) : (
-          <span className="text-xs sm:text-sm font-semibold text-text-primary truncate shrink-0">
+          <span className="text-lg font-extrabold text-text-primary truncate shrink-0 tracking-tight">
             {bookName} {chapter}
           </span>
         )}

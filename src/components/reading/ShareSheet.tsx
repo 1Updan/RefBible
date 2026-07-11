@@ -149,14 +149,14 @@ export function ShareSheet({ reference, verseText, versionLabel, highlightColors
       </div>
 
       <div className="bg-surface-elevated rounded-t-2xl px-4 pt-5 pb-8">
-        <div className="flex justify-center gap-3 overflow-x-auto px-2 pb-2 snap-x snap-mandatory -mx-2 scrollbar-none">
+        <div className="flex justify-center gap-3 flex-wrap px-2">
           {SHARE_OPTIONS.map((s) => (
             <button
               key={s.id}
               type="button"
               onClick={() => handleShare(s)}
               disabled={sharing}
-              className="flex flex-col items-center gap-1.5 snap-start shrink-0 transition-all duration-150 hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex flex-col items-center gap-1.5 transition-all duration-150 hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg"

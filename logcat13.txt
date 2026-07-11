@@ -1,0 +1,1162 @@
+--------- beginning of main
+07-08 21:51:03.438 12990 12990 I adbd    : adbd service requested 'shell,v2,raw:am start -n com.refbible.app/.MainActivity'
+07-08 21:51:03.475  1479  2189 I mtkpower_client: perf_lock_rel, hdl:20407, tid:2189
+07-08 21:51:03.476  1479  2189 I mtkpower_client: perf_cus_lock_hint hint:54, dur:150
+07-08 21:51:03.477  1479  2189 I mtkpower_client: perf_cus_lock_hint, ret_hdl:20449
+--------- beginning of system
+07-08 21:51:03.478  1479  2189 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.refbible.app/.MainActivity} from uid 2000
+07-08 21:51:03.478  1479  2189 I ActivityTaskManager: floatWindow: multiWindowId = 0
+07-08 21:51:03.478   746   828 I libPowerHal: MTKPOWER_HINT_START_ACTIVITY_INNER: cpu_ctrl set cpu freq: 1800000 -1 2000000 -1
+07-08 21:51:03.483  1479  2189 I ActivityTaskManager: TaskLaunchParamsModifier: pkgName = null, isMultiWindowTaskDisplayArea  = false
+07-08 21:51:03.483  1479  2189 I ActivityTaskManager: TaskLaunchParamsModifier: pkgName = null
+07-08 21:51:03.483  1479  2189 I ActivityTaskManager: TaskLaunchParamsModifier: pkgName = null, isMultiWindowTaskDisplayArea  = false
+07-08 21:51:03.483  1479  2189 I ActivityTaskManager: TaskLaunchParamsModifier: pkgName = null
+07-08 21:51:03.483  1479  2189 I ActivityTaskManager: needHookReparentToDefaultDisplay: sourceRecord = null,r = ActivityRecord{6cd70f2 u0 com.refbible.app/.MainActivity} t-1}, tda = null
+07-08 21:51:03.485  1479  2189 I ActivityTaskManager: TaskLaunchParamsModifier: pkgName = null, isMultiWindowTaskDisplayArea  = false
+07-08 21:51:03.485  1479  2189 I ActivityTaskManager: TaskLaunchParamsModifier: pkgName = null
+07-08 21:51:03.486   733   832 I hwcomposer: [HWCDisplay] [Display_0 (type:1)] fps:0.293195,dur:3410.70,max:3410.70,min:3410.70  
+07-08 21:51:03.488  1479  2189 I mtkpower_client: perf_lock_rel, hdl:20449, tid:2189
+07-08 21:51:03.488   746   771 I mtkpower@impl: [setMode] type:5, enabled:1
+07-08 21:51:03.488   746   828 I libPowerHal: MTKPOWER_HINT_START_ACTIVITY_INNER: cpu_ctrl set cpu freq: -1 -1 -1 -1
+07-08 21:51:03.488   746   828 I libPowerHal: [PD] MTKPOWER_HINT_START_ACTIVITY_INNER update cmd:1410000 param:0
+07-08 21:51:03.489   746   828 I libPowerHal: LAUNCH: cpu_ctrl set cpu freq: 1800000 -1 2000000 -1
+07-08 21:51:03.490  1479  2189 I PowerHalWrapper: <amsBoostResume> last:com.transsion.hilauncher, next:com.refbible.app 
+07-08 21:51:03.490  1479  3483 I ActivityManager: isUserAMonkey mUserIsMonkey = false
+07-08 21:51:03.492  3605  4168 I SmartPanel_SmartPanelService: activityCheck pkgName: com.refbible.app, className: com.refbible.app.MainActivity isResume=false isInshow =true isDrawn = false
+07-08 21:51:03.493  1479  3483 I ActivityTaskManager: isControllerAMonkey mController = null,mControllerIsAMonkey = false
+07-08 21:51:03.495  1479  1946 I os.permission: Grant permission: android.permission.MANAGE_ACTIVITY_TASKS to uid: 10302
+07-08 21:51:03.496  1479  3919 I PowerHalWrapper: <amsBoostResume> last:com.transsion.hilauncher, next:com.refbible.app 
+07-08 21:51:03.500  1479  3919 I PowerHalWrapper: amsBoostNotify pid:32599,activity:com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher, package:com.transsion.hilauncher, mProcessCreatePackcom.refbible.app 
+07-08 21:51:03.500  1479  3919 I PowerHalWrapper: state: 0 
+07-08 21:51:03.500  1479  3919 I mtkpower_client: [Legacy][PowerHal_Wrap_notifyAppState] com.transsion.hilauncher/com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher pid=32599 state:0
+07-08 21:51:03.500  1479  3919 I game_scn: collectForegroundAppList packName=com.transsion.hilauncher, actName=com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher, pid=32599, uid=10302, state:PAUSED
+07-08 21:51:03.500  1479  3919 I PowerHalWrapper: amsBoostNotify AMS_BOOST_PROCESS_CREATE_BOOST:false 
+07-08 21:51:03.501   746   828 I libPowerHal: [perfNotifyAppState] pack:com.transsion.hilauncher, act:com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher, state:0, pid:32599, uid:10302, fps:-1
+07-08 21:51:03.501   746   828 I libPowerHal: [PD] scn:292 pack:com.transsion.hilauncher
+07-08 21:51:03.501   746   828 I libPowerHal: [PD] com.transsion.hilauncher update cmd:3408000, param:2
+07-08 21:51:03.501   746   828 I libPowerHal: [PD] (less) /proc/perfmgr/tchbst/user/usrtch set +prefix:touch_opp 2;
+07-08 21:51:03.501   746   828 I libPowerHal: [PD] com.transsion.hilauncher update cmd:3408100 param:500000000
+07-08 21:51:03.501   746   828 I libPowerHal: [PD] (more) /proc/perfmgr/tchbst/user/usrtch set +prefix:duration 500000000;
+07-08 21:51:03.501   746   828 I libPowerHal: [PD] com.transsion.hilauncher update cmd:3408200 param:100000
+07-08 21:51:03.502   746   828 I libPowerHal: [PD] (more) /proc/perfmgr/tchbst/user/usrtch set +prefix:active_time 100000;
+07-08 21:51:03.502  1479  1505 I PowerHalWrapper: amsBoostProcessCreate package:com.refbible.app 
+07-08 21:51:03.507  1479  1506 I mtkpower_client: perf_cus_lock_hint hint:50, dur:1000
+07-08 21:51:03.509  1479  1506 I mtkpower_client: perf_cus_lock_hint, ret_hdl:0
+07-08 21:51:03.509  3605  3605 W SmartPanel_OperateState: show
+07-08 21:51:03.510  3605  3605 I SmartPanel_TouchView: showSliderView mIsGestureNavigationBarOn true return 
+07-08 21:51:03.514   780  1159 W VSyncPredictor: VSyncPredictor::setPeriod current period =16666667
+07-08 21:51:03.514  3954  4287 I SimpleEventAdapt: onActivityEvent get com.transsion.hilauncher, com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher,false
+07-08 21:51:03.514  3954  4287 I SimpleEventAdapt: notifyEvent2  activity_event
+07-08 21:51:03.514  3954  4287 I SimpleEventAdapt: notifyEvent  1
+07-08 21:51:03.517  3954 24310 I CacheManager:  save new data to cache activity_event
+07-08 21:51:03.517  3954 24310 I bsc     : notifyDataChange in activity_event, 1
+07-08 21:51:03.517  3954 24310 I DataServiceImplV2: StandardDataService notifyDataChange  in 
+07-08 21:51:03.518  3954 24311 I DataServiceImplV2: StandardDataService notifyDataChange  curServiceName StandardDataService type:activity_event
+07-08 21:51:03.518  3954 24311 I ApiInvoke: ApiChannel1.2.172: found local channel DataCenter
+07-08 21:51:03.519  3954 24311 I ApiInvoke: ApiChannel1.2.172: found remote channel DataCenter
+07-08 21:51:03.519  3954 24311 I ApiInvoke: ApiRequest1.2.172: channels size , 2
+07-08 21:51:03.521  3954 24311 I ApiInvoke: SubscribeManager1.2.172: copy subscriber size = 12
+07-08 21:51:03.521  3954 24311 I Kolun_AI: SystemEventSubscribe: onPublishData {"type":"activity_event","time":1783543863515,"data":"{\"className\":\"com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher\",\"isResumed\":false,\"packageName\":\"com.transsion.hilauncher\"}","provider":"dc","dc_version":2030200000,"data_version":1,"user_id":0}
+07-08 21:51:03.521  3954 24311 I Kolun_AI: SystemEventSubscribe: publisher.getMatcher() activity_event
+07-08 21:51:03.522   780   848 I BufferQueueDebug: [Splash Screen com.refbible.app#13492](this:0xb400007617756888,id:-1,api:0,p:-1,c:-1) BufferQueue core=(780:/system/bin/surfaceflinger)
+07-08 21:51:03.522  3954 24311 I ApiInvoke: SubscribeManager1.2.172: publishData success host DataCenter#StandardDataService matcher activity_event
+07-08 21:51:03.522  3954 24311 I ApiInvoke: ApiRequest1.2.172: do publishData to local, matcher = activity_event
+07-08 21:51:03.522  1479  1533 I ActivityManager: Start proc 25363:com.refbible.app/u0a344 for next-top-activity {com.refbible.app/com.refbible.app.MainActivity}
+07-08 21:51:03.523  3954 24311 W ApiInvoke: SubscribeBusServerImpl1.2.172: onPublishData, GLOBAL_SUBSCRIBE size 3
+07-08 21:51:03.523  3954 24311 W ApiInvoke: ApiRequest1.2.172: do publishData to remote activity_event
+07-08 21:51:03.524 10808 10823 I ApiInvoke: SubscribeManager1.2.172: copy subscriber size = 11
+07-08 21:51:03.524 10808 10823 I ApiInvoke: SubscribeManager1.2.172: publishData success host DataCenter#StandardDataService matcher activity_event
+07-08 21:51:03.525  3954  4076 I ApiInvoke: SubscribeBusServerImpl1.2.172: onPublishData to {"pid": 10808,"channels": [AssistantChannel]} success 
+07-08 21:51:03.525  3954  4076 I ApiInvoke: SubscribeManager1.2.172: copy subscriber size = 12
+07-08 21:51:03.525  3954  4076 I Kolun_AI: SystemEventSubscribe: onPublishData {"type":"activity_event","time":1783543863515,"data":"{\"className\":\"com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher\",\"isResumed\":false,\"packageName\":\"com.transsion.hilauncher\"}","provider":"dc","dc_version":2030200000,"data_version":1,"user_id":0}
+07-08 21:51:03.525  3954  4076 I Kolun_AI: SystemEventSubscribe: publisher.getMatcher() activity_event
+07-08 21:51:03.525  3954  4076 I ApiInvoke: SubscribeManager1.2.172: publishData success host DataCenter#StandardDataService matcher activity_event
+07-08 21:51:03.525  3954  4076 I ApiInvoke: SubscribeBusServerImpl1.2.172: onPublishData to {"pid": 0,"channels": [CommonChannel]} success 
+07-08 21:51:03.527  1479  1946 W WindowManager: Changing focus from Window{885595e u0 com.transsion.hilauncher/com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher} to null displayId=0 Callers=com.android.server.wm.RootWindowContainer.updateFocusedWindowLocked:524 com.android.server.wm.WindowManagerService.updateFocusedWindowLocked:6379 com.android.server.wm.WindowManagerService.relayoutWindow:2641 com.android.server.wm.Session.relayout:267 
+07-08 21:51:03.530  1479  1537 W libprocessgroup: Failed to open /dev/blkio//cgroup.procs: No such file or directory
+07-08 21:51:03.531  3605  3605 I SmartPanel_OperateState: clear, goto SlideState
+07-08 21:51:03.531  3605  3605 I SmartPanel_TouchView: showSliderView mIsGestureNavigationBarOn true return 
+07-08 21:51:03.538 25363 25363 W main    : type=1400 audit(0.0:85626): avc: denied { read } for name="u:object_r:vendor_memfusion_size_prop:s0" dev="tmpfs" ino=1523 scontext=u:r:untrusted_app:s0:c88,c257,c512,c768 tcontext=u:object_r:vendor_memfusion_size_prop:s0 tclass=file permissive=0 app=com.refbible.app
+07-08 21:51:03.538 25363 25363 W main    : type=1400 audit(0.0:85627): avc: denied { read } for name="u:object_r:vendor_memfusion_state_prop:s0" dev="tmpfs" ino=1524 scontext=u:r:untrusted_app:s0:c88,c257,c512,c768 tcontext=u:object_r:vendor_memfusion_state_prop:s0 tclass=file permissive=0 app=com.refbible.app
+07-08 21:51:03.538 25363 25363 W main    : type=1400 audit(0.0:85628): avc: denied { read } for name="u:object_r:vendor_memfusion_tranlog_prop:s0" dev="tmpfs" ino=1526 scontext=u:r:untrusted_app:s0:c88,c257,c512,c768 tcontext=u:object_r:vendor_memfusion_tranlog_prop:s0 tclass=file permissive=0 app=com.refbible.app
+07-08 21:51:03.538 25363 25363 W main    : type=1400 audit(0.0:85629): avc: denied { read } for name="u:object_r:vendor_memfusion_ui_enable_prop:s0" dev="tmpfs" ino=1527 scontext=u:r:untrusted_app:s0:c88,c257,c512,c768 tcontext=u:object_r:vendor_memfusion_ui_enable_prop:s0 tclass=file permissive=0 app=com.refbible.app
+07-08 21:51:03.542 25363 25363 W main    : type=1400 audit(0.0:85630): avc: denied { read } for name="u:object_r:vendor_uxcompaction_enable_prop:s0" dev="tmpfs" ino=1771 scontext=u:r:untrusted_app:s0:c88,c257,c512,c768 tcontext=u:object_r:vendor_uxcompaction_enable_prop:s0 tclass=file permissive=0 app=com.refbible.app
+07-08 21:51:03.545 25363 25363 I om.refbible.app: Using generational CollectorTypeCC GC.
+07-08 21:51:03.545  1777  1893 W Parcel  : Expecting binder but got null!
+07-08 21:51:03.550  1479  1506 I DreamAnimation:  hookAppTransitSuccess called, and doUnlockAnimation=0  mState=7
+07-08 21:51:03.553  3333  3345 I ogle.android.as: Background young concurrent copying GC freed 3227KB AllocSpace bytes, 0(0B) LOS objects, 44% free, 4124KB/7483KB, paused 6.090ms,67us total 43.843ms
+07-08 21:51:03.553  3333  3345 W ogle.android.as: Reducing the number of considered missed Gc histogram windows from 390 to 100
+07-08 21:51:03.554   780   780 I BufferQueueProducer: [com.transsion.hilauncher/com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher#13483](this:0xb4000076176c54d8,id:-1,api:0,p:-1,c:780) queueBuffer: fps=0.24 dur=12724.85 max=12441.54 min=16.87
+07-08 21:51:03.554  1479  1506 I WindowManager:   isAnimating=false  okToAnimate=true  win=Window{c62c316 u0 Splash Screen com.refbible.app}
+07-08 21:51:03.559 24345 24443 I AdvertisingIdClient: shouldSendLog 741445951
+07-08 21:51:03.559 24345 24443 I AdvertisingIdClient: GetInfoInternal elapse 23ms
+07-08 21:51:03.565  1479  3919 I PowerHalWrapper: amsBoostNotify pid:25363,activity:com.refbible.app.MainActivity, package:com.refbible.app, mProcessCreatePackcom.refbible.app 
+07-08 21:51:03.565  1479  3919 I PowerHalWrapper: state: 1 
+07-08 21:51:03.565  1479  3919 I mtkpower_client: [Legacy][PowerHal_Wrap_notifyAppState] com.refbible.app/com.refbible.app.MainActivity pid=25363 state:1
+07-08 21:51:03.565  1479  3919 I game_scn: collectForegroundAppList packName=com.refbible.app, actName=com.refbible.app.MainActivity, pid=25363, uid=10344, state:RESUMED
+07-08 21:51:03.565  1479  3919 I game_scn: powerNotifyForegroundApp multi_resumed_app_info: pid: 25363, packname: com.refbible.app, actname: com.refbible.app.MainActivity
+07-08 21:51:03.565  1479  3919 I PowerHalWrapper: amsBoostNotify AMS_BOOST_PROCESS_CREATE_BOOST:true 
+07-08 21:51:03.565  3605  4168 I SmartPanel_SmartPanelService: activityCheck pkgName: com.refbible.app, className: com.refbible.app.MainActivity isResume=false isInshow =true isDrawn = false
+07-08 21:51:03.566   746   828 I libPowerHal: [perfNotifyAppState] pack:com.refbible.app, act:com.refbible.app.MainActivity, state:1, pid:25363, uid:10344, fps:-1
+07-08 21:51:03.566  1479  3919 I TranSourceConnectManagerImpl: hookDisplayResumedActivityChanged displayId: 0 packageName: com.refbible.app
+07-08 21:51:03.566   746   828 I libPowerHal: [perfNotifyAppState] foreground:com.refbible.app, pid:25363, uid:10344
+07-08 21:51:03.566   746   828 I UxUtility: notifyForegroundApp pack:com.refbible.app, uid:10344
+07-08 21:51:03.566   746   828 I TouchUtility: notifyAppState error = NULL
+07-08 21:51:03.567  3605  3647 I SmartPanel_SmartPanelService: onTaskFocusChanged taskId: 9  focused: false
+07-08 21:51:03.567   746   770 I mtkpower@impl: [notifyAppState] pc:1, com.transsion.hilauncher => com.refbible.app
+07-08 21:51:03.567  1479  1979 I TranOptimizeRAImpl: Applaunch from com.transsion.hilauncher to com.refbible.app
+07-08 21:51:03.567  3605  3647 I SmartPanel_SmartPanelService: onTaskFocusChanged taskId: 144  focused: true
+07-08 21:51:03.567  1479  1980 I ActivityManager: Applaunch from com.transsion.hilauncher to com.refbible.app
+07-08 21:51:03.570  1479  1507 I mtkpower_client: perf_cus_lock_hint hint:48, dur:137
+07-08 21:51:03.571  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.571  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.571  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.571  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.571  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.571  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.571  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.571  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.571  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.571  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.571  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.571  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.571  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.571  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.572  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.572  1479  1507 I mtkpower_client: perf_cus_lock_hint, ret_hdl:20454
+07-08 21:51:03.572  3954  4287 I SimpleEventAdapt: onActivityEvent get com.refbible.app, com.refbible.app.MainActivity,true
+07-08 21:51:03.572  3954  4287 I SimpleEventAdapt: notifyEvent2  activity_event
+07-08 21:51:03.572  3954  4287 I SimpleEventAdapt: notifyEvent  1
+07-08 21:51:03.572  3954  4287 I SimpleEventAdapt: onAppForegroundEvent get com.transsion.hilauncher, false
+07-08 21:51:03.572  3954  4287 I SimpleEventAdapt: notifyEvent2  app_foreground
+07-08 21:51:03.572  3954  4287 I SimpleEventAdapt: notifyEvent  1
+07-08 21:51:03.572  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.572  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.572  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.572  3954  4287 I SimpleEventAdapt: onAppForegroundEvent get com.refbible.app, true
+07-08 21:51:03.572  3954  4287 I SimpleEventAdapt: notifyEvent2  app_foreground
+07-08 21:51:03.572  3954  4287 I SimpleEventAdapt: notifyEvent  1
+07-08 21:51:03.573  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.573  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.573  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.573  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.574  3954 24310 I CacheManager:  save new data to cache activity_event
+07-08 21:51:03.574  3954 24310 I bsc     : notifyDataChange in activity_event, 1
+07-08 21:51:03.574  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.574  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.574  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.574  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.574  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.574  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.574  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.574  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.574  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.574  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.574  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.574  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.574  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.574  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.574  3954 24310 I DataServiceImplV2: StandardDataService notifyDataChange  in 
+07-08 21:51:03.574  3954 24311 I DataServiceImplV2: StandardDataService notifyDataChange  curServiceName StandardDataService type:activity_event
+07-08 21:51:03.575  3954 24311 I ApiInvoke: ApiChannel1.2.172: found local channel DataCenter
+07-08 21:51:03.575  3954 24310 I CacheManager:  save new data to cache app_foreground
+07-08 21:51:03.575  3954 24310 I bsc     : notifyDataChange in app_foreground, 1
+07-08 21:51:03.575  3954 24311 I ApiInvoke: ApiChannel1.2.172: found remote channel DataCenter
+07-08 21:51:03.575  3954 24311 I ApiInvoke: ApiRequest1.2.172: channels size , 2
+07-08 21:51:03.575  3954 24310 I DataServiceImplV2: StandardDataService notifyDataChange  in 
+07-08 21:51:03.575  3954 24311 I ApiInvoke: SubscribeManager1.2.172: copy subscriber size = 12
+07-08 21:51:03.575  3954 24311 I Kolun_AI: SystemEventSubscribe: onPublishData {"type":"activity_event","time":1783543863573,"data":"{\"className\":\"com.refbible.app.MainActivity\",\"isResumed\":true,\"packageName\":\"com.refbible.app\"}","provider":"dc","dc_version":2030200000,"data_version":1,"user_id":0}
+07-08 21:51:03.575  3954 24311 I Kolun_AI: SystemEventSubscribe: publisher.getMatcher() activity_event
+07-08 21:51:03.575  3954 24311 I ApiInvoke: SubscribeManager1.2.172: publishData success host DataCenter#StandardDataService matcher activity_event
+07-08 21:51:03.575  3954 24311 I ApiInvoke: ApiRequest1.2.172: do publishData to local, matcher = activity_event
+07-08 21:51:03.575  3954 24310 I CacheManager:  save new data to cache app_foreground
+07-08 21:51:03.575  3954 24311 W ApiInvoke: SubscribeBusServerImpl1.2.172: onPublishData, GLOBAL_SUBSCRIBE size 3
+07-08 21:51:03.575  3954 24310 I bsc     : notifyDataChange in app_foreground, 1
+07-08 21:51:03.575  3954 24311 W ApiInvoke: ApiRequest1.2.172: do publishData to remote activity_event
+07-08 21:51:03.575  3954 24310 I DataServiceImplV2: StandardDataService notifyDataChange  in 
+07-08 21:51:03.575  3954 24311 I DataServiceImplV2: StandardDataService notifyDataChange  curServiceName StandardDataService type:app_foreground
+07-08 21:51:03.576  3954 24311 I ApiInvoke: ApiChannel1.2.172: found local channel DataCenter
+07-08 21:51:03.576  3954 24311 I ApiInvoke: ApiChannel1.2.172: found remote channel DataCenter
+07-08 21:51:03.576  3954 24311 I ApiInvoke: ApiRequest1.2.172: channels size , 2
+07-08 21:51:03.576  3954 24311 I ApiInvoke: SubscribeManager1.2.172: copy subscriber size = 12
+07-08 21:51:03.576  3954 24311 I Kolun_AI: SystemEventSubscribe: onPublishData {"type":"app_foreground","time":1783543863574,"data":"{\"isForeground\":false,\"packageName\":\"com.transsion.hilauncher\"}","provider":"dc","dc_version":2030200000,"data_version":1,"user_id":0}
+07-08 21:51:03.576  3954 24311 I Kolun_AI: SystemEventSubscribe: publisher.getMatcher() app_foreground
+07-08 21:51:03.576 10808 10823 I ApiInvoke: SubscribeManager1.2.172: copy subscriber size = 11
+07-08 21:51:03.576  3954 24311 I ApiInvoke: SubscribeManager1.2.172: publishData success host DataCenter#StandardDataService matcher app_foreground
+07-08 21:51:03.576 10808 10823 I ApiInvoke: SubscribeManager1.2.172: publishData success host DataCenter#StandardDataService matcher activity_event
+07-08 21:51:03.576  3954  3954 I Kolun_AI: kj1:onBusEvent AppForegroundEvent   com.transsion.hilauncher, false, kj1
+07-08 21:51:03.576  3954 24311 I ApiInvoke: ApiRequest1.2.172: do publishData to local, matcher = app_foreground
+07-08 21:51:03.576  3954  3954 I Kolun_AI: kj1:checkGameOut  com.transsion.hilauncher, 
+07-08 21:51:03.576  3954 24311 W ApiInvoke: SubscribeBusServerImpl1.2.172: onPublishData, GLOBAL_SUBSCRIBE size 3
+07-08 21:51:03.576  3954  3954 I Kolun_AI: AppPredictManager:onBusEvent com.transsion.hilauncher false
+07-08 21:51:03.576  3954 24311 W ApiInvoke: ApiRequest1.2.172: do publishData to remote app_foreground
+07-08 21:51:03.577  3954 24311 I DataServiceImplV2: StandardDataService notifyDataChange  curServiceName StandardDataService type:app_foreground
+07-08 21:51:03.577  3954 24311 I ApiInvoke: ApiChannel1.2.172: found local channel DataCenter
+07-08 21:51:03.577  3954 24311 I ApiInvoke: ApiChannel1.2.172: found remote channel DataCenter
+07-08 21:51:03.577  3954 24311 I ApiInvoke: ApiRequest1.2.172: channels size , 2
+07-08 21:51:03.577  3954  4245 I Kolun_AI: AppPredictManager:onPackageChanged AppForegroundEvent com.transsion.hilauncher false currentTime 2026-07-08 21:51:03
+07-08 21:51:03.577  3954 24311 I ApiInvoke: SubscribeManager1.2.172: copy subscriber size = 12
+07-08 21:51:03.577  3954 24311 I Kolun_AI: SystemEventSubscribe: onPublishData {"type":"app_foreground","time":1783543863575,"data":"{\"isForeground\":true,\"packageName\":\"com.refbible.app\"}","provider":"dc","dc_version":2030200000,"data_version":1,"user_id":0}
+07-08 21:51:03.577  3954 24311 I Kolun_AI: SystemEventSubscribe: publisher.getMatcher() app_foreground
+07-08 21:51:03.577  3954 24311 I ApiInvoke: SubscribeManager1.2.172: publishData success host DataCenter#StandardDataService matcher app_foreground
+07-08 21:51:03.577  3954  3954 I Kolun_AI: kj1:onBusEvent AppForegroundEvent   com.refbible.app, true, kj1
+07-08 21:51:03.577  3954  3954 I Kolun_AI: kj1:checkGameIn  com.refbible.app, 
+07-08 21:51:03.577  3954 24311 I ApiInvoke: ApiRequest1.2.172: do publishData to local, matcher = app_foreground
+07-08 21:51:03.577  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.577  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.577  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.577  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.577  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.577  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.577  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.577  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.577  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.577  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.577  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.577  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.577  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.577  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.577  3954  3954 I Kolun_AI: AppPredictManager:onBusEvent com.refbible.app true
+07-08 21:51:03.577  3954 24311 W ApiInvoke: SubscribeBusServerImpl1.2.172: onPublishData, GLOBAL_SUBSCRIBE size 3
+07-08 21:51:03.578  3954 24311 W ApiInvoke: ApiRequest1.2.172: do publishData to remote app_foreground
+07-08 21:51:03.578  3954  4076 I ApiInvoke: SubscribeBusServerImpl1.2.172: onPublishData to {"pid": 10808,"channels": [AssistantChannel]} success 
+07-08 21:51:03.578  3954  4076 I ApiInvoke: SubscribeManager1.2.172: copy subscriber size = 12
+07-08 21:51:03.578  3954  4076 I Kolun_AI: SystemEventSubscribe: onPublishData {"type":"activity_event","time":1783543863573,"data":"{\"className\":\"com.refbible.app.MainActivity\",\"isResumed\":true,\"packageName\":\"com.refbible.app\"}","provider":"dc","dc_version":2030200000,"data_version":1,"user_id":0}
+07-08 21:51:03.578  3954  4076 I Kolun_AI: SystemEventSubscribe: publisher.getMatcher() activity_event
+07-08 21:51:03.578  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.578  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.578  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.578  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.578  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.578  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.578  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.578  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.578  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.578  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.578  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.578  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.578  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.578  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.578  3954  4076 I ApiInvoke: SubscribeManager1.2.172: publishData success host DataCenter#StandardDataService matcher activity_event
+07-08 21:51:03.578  3605  4168 I SmartPanel_SmartPanelService: activityCheck pkgName: com.refbible.app, className: com.refbible.app.MainActivity isResume=true isInshow =true isDrawn = false
+07-08 21:51:03.578  3605  3605 W SmartPanel_OperateState: show
+07-08 21:51:03.578  3954  4076 I ApiInvoke: SubscribeBusServerImpl1.2.172: onPublishData to {"pid": 0,"channels": [CommonChannel]} success 
+07-08 21:51:03.578  3605  3605 I SmartPanel_TouchView: showSliderView mIsGestureNavigationBarOn true return 
+07-08 21:51:03.579  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.579  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.579 10808 10823 I ApiInvoke: SubscribeManager1.2.172: copy subscriber size = 11
+07-08 21:51:03.579  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.579  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.579 10808 10823 I ApiInvoke: SubscribeManager1.2.172: publishData success host DataCenter#StandardDataService matcher app_foreground
+07-08 21:51:03.579  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.579  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.579  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.579 10808 10974 I Kolun.EventBusImpl:  dispatchEvent: com.transsion.kolun.assistant.common.components.event.LauncherHomeEvent@d93b6e4
+07-08 21:51:03.580  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.580  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.580  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.580  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.581  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.581  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.581  3954  4245 I Kolun_AI: AppPredictManager:onPackageChanged AppForegroundEvent com.refbible.app true currentTime 2026-07-08 21:51:03
+07-08 21:51:03.581  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.581  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.581  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.581  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.584  3954  4076 I ApiInvoke: SubscribeBusServerImpl1.2.172: onPublishData to {"pid": 10808,"channels": [AssistantChannel]} success 
+07-08 21:51:03.582   748   748 W nvram@1.1-servi: type=1400 audit(0.0:85631): avc: denied { read } for name="atag,boot" dev="sysfs" ino=73 scontext=u:r:mtk_hal_nvramagent:s0 tcontext=u:object_r:sysfs_boot_info:s0 tclass=file permissive=0
+07-08 21:51:03.584  3954  4076 I ApiInvoke: SubscribeManager1.2.172: copy subscriber size = 12
+07-08 21:51:03.584  3954  4076 I Kolun_AI: SystemEventSubscribe: onPublishData {"type":"app_foreground","time":1783543863574,"data":"{\"isForeground\":false,\"packageName\":\"com.transsion.hilauncher\"}","provider":"dc","dc_version":2030200000,"data_version":1,"user_id":0}
+07-08 21:51:03.584  3954  4076 I Kolun_AI: SystemEventSubscribe: publisher.getMatcher() app_foreground
+07-08 21:51:03.584  3954  4076 I ApiInvoke: SubscribeManager1.2.172: publishData success host DataCenter#StandardDataService matcher app_foreground
+07-08 21:51:03.584  3954  3954 I Kolun_AI: kj1:onBusEvent AppForegroundEvent   com.transsion.hilauncher, false, kj1
+07-08 21:51:03.584  3954  3954 I Kolun_AI: kj1:checkGameOut  com.transsion.hilauncher, 
+07-08 21:51:03.584  3954  4076 I ApiInvoke: SubscribeBusServerImpl1.2.172: onPublishData to {"pid": 0,"channels": [CommonChannel]} success 
+07-08 21:51:03.584  3954  3954 I Kolun_AI: AppPredictManager:onBusEvent com.transsion.hilauncher false
+07-08 21:51:03.585  3954  4245 I Kolun_AI: AppPredictManager:onPackageChanged AppForegroundEvent com.transsion.hilauncher false currentTime 2026-07-08 21:51:03
+07-08 21:51:03.585 10808 10823 I ApiInvoke: SubscribeManager1.2.172: copy subscriber size = 11
+07-08 21:51:03.585 10808 10823 I ApiInvoke: SubscribeManager1.2.172: publishData success host DataCenter#StandardDataService matcher app_foreground
+07-08 21:51:03.586  3954  4076 I ApiInvoke: SubscribeBusServerImpl1.2.172: onPublishData to {"pid": 10808,"channels": [AssistantChannel]} success 
+07-08 21:51:03.587  1479  2189 I FloatWindow: hookGetMultiWindowDefaultRectByTask
+07-08 21:51:03.588  2045  2057 I tmw_    : calculateMultiWindowScaleAndLocation111: {100=0.759, 101=130.0, 102=465.0}
+07-08 21:51:03.589  3954  4076 I ApiInvoke: SubscribeManager1.2.172: copy subscriber size = 12
+07-08 21:51:03.589  2045  2057 I tmw_    : calculateMultiWindowScaleAndLocation222: {100=0.759, 101=130.0, 102=465.0}
+07-08 21:51:03.589  3954  4076 I Kolun_AI: SystemEventSubscribe: onPublishData {"type":"app_foreground","time":1783543863575,"data":"{\"isForeground\":true,\"packageName\":\"com.refbible.app\"}","provider":"dc","dc_version":2030200000,"data_version":1,"user_id":0}
+07-08 21:51:03.589  3954  4076 I Kolun_AI: SystemEventSubscribe: publisher.getMatcher() app_foreground
+07-08 21:51:03.589  3954  4076 I ApiInvoke: SubscribeManager1.2.172: publishData success host DataCenter#StandardDataService matcher app_foreground
+07-08 21:51:03.589  3954  3954 I Kolun_AI: kj1:onBusEvent AppForegroundEvent   com.refbible.app, true, kj1
+07-08 21:51:03.589  3954  3954 I Kolun_AI: kj1:checkGameIn  com.refbible.app, 
+07-08 21:51:03.589  3954  4076 I ApiInvoke: SubscribeBusServerImpl1.2.172: onPublishData to {"pid": 0,"channels": [CommonChannel]} success 
+07-08 21:51:03.589  3954  3954 I Kolun_AI: AppPredictManager:onBusEvent com.refbible.app true
+07-08 21:51:03.590  3954  4245 I Kolun_AI: AppPredictManager:onPackageChanged AppForegroundEvent com.refbible.app true currentTime 2026-07-08 21:51:03
+07-08 21:51:03.590 25363 25363 I LoadedApk: No resource references to update in package com.transsion.theme.icon
+07-08 21:51:03.591  3605  3605 I SmartPanel_OperateState: clear, goto SlideState
+07-08 21:51:03.591  3605  3605 I SmartPanel_TouchView: showSliderView mIsGestureNavigationBarOn true return 
+07-08 21:51:03.591  3605  3605 W SmartPanel_OperateState: show
+07-08 21:51:03.591  3605  3605 I SmartPanel_TouchView: showSliderView mIsGestureNavigationBarOn true return 
+07-08 21:51:03.594   780   780 I BufferQueueProducer: [FramebufferSurface](this:0xb4000075c74caaf0,id:-1,api:1,p:780,c:780) queueBuffer: fps=0.35 dur=20068.61 max=19970.40 min=15.59
+07-08 21:51:03.594   748   748 W nvram@1.1-servi: type=1400 audit(0.0:85632): avc: denied { read } for name="atag,boot" dev="sysfs" ino=73 scontext=u:r:mtk_hal_nvramagent:s0 tcontext=u:object_r:sysfs_boot_info:s0 tclass=file permissive=0
+07-08 21:51:03.598  1479  1946 I FloatWindow: hookGetMultiWindowDefaultRectByTask
+07-08 21:51:03.599  1479  3919 I os.permission: Grant permission: android.permission.INTERACT_ACROSS_USERS to uid: 10302
+07-08 21:51:03.601  2045  2057 I tmw_    : calculateMultiWindowScaleAndLocation111: {100=0.759, 101=130.0, 102=465.0}
+07-08 21:51:03.602  2045  2057 I tmw_    : calculateMultiWindowScaleAndLocation222: {100=0.759, 101=130.0, 102=465.0}
+07-08 21:51:03.603  3605  3605 I SmartPanel_OperateState: clear, goto SlideState
+07-08 21:51:03.603  1479  2189 I os.permission: Grant permission: android.permission.MANAGE_ACTIVITY_TASKS to uid: 10302
+07-08 21:51:03.603  3605  3605 I SmartPanel_TouchView: showSliderView mIsGestureNavigationBarOn true return 
+07-08 21:51:03.610   748   748 W nvram@1.1-servi: type=1400 audit(0.0:85633): avc: denied { read } for name="atag,boot" dev="sysfs" ino=73 scontext=u:r:mtk_hal_nvramagent:s0 tcontext=u:object_r:sysfs_boot_info:s0 tclass=file permissive=0
+07-08 21:51:03.614 25363 25381 I libMEOW_gift: open /data/performance/gift/arc.ini
+07-08 21:51:03.614 25363 25381 E QT      : [QT]file does not exist
+07-08 21:51:03.616  1479  3895 I FloatWindow: hookGetMultiWindowDefaultRectByTask
+07-08 21:51:03.617  2045  2057 I tmw_    : calculateMultiWindowScaleAndLocation111: {100=0.759, 101=130.0, 102=465.0}
+07-08 21:51:03.617  2045  2057 I tmw_    : calculateMultiWindowScaleAndLocation222: {100=0.759, 101=130.0, 102=465.0}
+07-08 21:51:03.622   748   748 W nvram@1.1-servi: type=1400 audit(0.0:85634): avc: denied { read } for name="atag,boot" dev="sysfs" ino=73 scontext=u:r:mtk_hal_nvramagent:s0 tcontext=u:object_r:sysfs_boot_info:s0 tclass=file permissive=0
+07-08 21:51:03.629  1479  3895 I FloatWindow: hookGetMultiWindowDefaultRectByTask
+07-08 21:51:03.630  2045  2057 I tmw_    : calculateMultiWindowScaleAndLocation111: {100=0.759, 101=130.0, 102=465.0}
+07-08 21:51:03.631  2045  2057 I tmw_    : calculateMultiWindowScaleAndLocation222: {100=0.759, 101=130.0, 102=465.0}
+07-08 21:51:03.634 25363 25363 W libc    : Access denied finding property "vendor.transsion.scroll_adjust.support"
+07-08 21:51:03.637  1479  1507 I mtkpower_client: perf_cus_lock_hint hint:48, dur:137
+07-08 21:51:03.637  1479  1507 I mtkpower_client: perf_cus_lock_hint, ret_hdl:20455
+07-08 21:51:03.645  1479  2189 I FloatWindow: hookGetMultiWindowDefaultRectByTask
+07-08 21:51:03.646  2045  2057 I tmw_    : calculateMultiWindowScaleAndLocation111: {100=0.759, 101=130.0, 102=465.0}
+07-08 21:51:03.646  2045  2057 I tmw_    : calculateMultiWindowScaleAndLocation222: {100=0.759, 101=130.0, 102=465.0}
+07-08 21:51:03.669  3605  3605 I SmartPanel_SmartPanelService: onTaskFocusChanged isSplitScreen: false
+07-08 21:51:03.678  3605  3605 I SmartPanel_SmartPanelService: checkAndHandleAPP curosr: count = 0
+07-08 21:51:03.679  3605  3605 I SmartPanel_SmartPanelService: checkVideoApp curosr: count = 0
+07-08 21:51:03.683 25363 25363 I MSYNC3-VariableRefreshRate: Variable refreshrate is disabled
+07-08 21:51:03.684  3653  4280 I MagicView: topActivity str = com.refbible.app/com.refbible.app.MainActivity
+07-08 21:51:03.686  1479  2189 I InputMethodManagerService: [InputMethodManagerService addClient] have add to mClients, client=android.os.BinderProxy@7099057, callerUid=10344, callerPid=25363
+07-08 21:51:03.687 25363 25363 I SurfaceFactory: [static] sSurfaceFactory = com.mediatek.view.impl.SurfaceFactoryImpl@e9c785f
+07-08 21:51:03.688 25363 25393 I PowerHalWrapper: PowerHalWrapper.getInstance 
+07-08 21:51:03.690 25754  6375 I native  : I0000 00:00:1783543863.690282    6375 soda_impl.cc:1961] Adding hotword timeout event
+07-08 21:51:03.690 25754  6376 I eldn    : Hotword timeout event!
+07-08 21:51:03.691 25754  6376 I eldn    : Not DEFAULT_DSP timeout event. Call the onHotwordTimeout callback.
+07-08 21:51:03.691 25754  6376 I elft    : (REDACTED) Hotword score : %f, Hotword model id : %s.
+07-08 21:51:03.691 25754  6376 I elft    : (REDACTED) Timeout reason %s, Coarse channel index %d.
+07-08 21:51:03.691 25754  6376 I ekwr    : HDM. Not handling the timeoutevent with the timeout reason that is not DEFAULT_DSP for now.
+07-08 21:51:03.699  1479  1611 I BaseFilesVerify: Base File verify start
+07-08 21:51:03.700  1479  1611 W BaseXMLFilesVerify: isGrammarAndSemanticsLegal file = /data/system/users/0/settings_global.xml
+07-08 21:51:03.701  1479  1611 W BaseXMLFilesVerify: format is normal
+07-08 21:51:03.701  1479  1611 W BaseXMLFilesVerify: verifyRuleGrammarFormat verifyRuleresult :true
+07-08 21:51:03.706  1479  1611 W BaseXMLFilesVerify: isGrammarAndSemanticsLegal file = /data/system/users/0/settings_global.xmlsecnew.bak
+07-08 21:51:03.706  1479  1611 W BaseXMLFilesVerify: format is normal
+07-08 21:51:03.706  1479  1611 W BaseXMLFilesVerify: verifyRuleGrammarFormat verifyRuleresult :true
+07-08 21:51:03.711   746   828 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:20454
+07-08 21:51:03.715   780  1225 I BufferQueueDebug: [com.refbible.app/com.refbible.app.MainActivity#13499](this:0xb400007617703f38,id:-1,api:0,p:-1,c:-1) BufferQueue core=(780:/system/bin/surfaceflinger)
+07-08 21:51:03.717  1479  2189 E WindowManager: isFocusOnThunderbackWindow false mFocusMultiWindowId: -1 newFocus: 0 thunderback: false
+07-08 21:51:03.717  1479  2189 W WindowManager: Changing focus from null to Window{f4173b0 u0 com.refbible.app/com.refbible.app.MainActivity} displayId=0 Callers=com.android.server.wm.RootWindowContainer.updateFocusedWindowLocked:524 com.android.server.wm.WindowManagerService.updateFocusedWindowLocked:6379 com.android.server.wm.WindowManagerService.relayoutWindow:2641 com.android.server.wm.Session.relayout:267 
+07-08 21:51:03.720  1479  2189 I WindowManager: Relayout Window{f4173b0 u0 com.refbible.app/com.refbible.app.MainActivity}: oldVis=4 newVis=0 focusMayChange = true requestedWidth = 1080 requestedHeight = 2460 outFrames = ClientWindowFrames{frame=[0,0][1080,2460] display=[0,0][1080,2460] parentFrame=[0,0][0,0] parentClippedByDisplayCutout=false} outSurfaceControl = Surface(name=com.refbible.app/com.refbible.app.MainActivity)/@0xb4266e3
+07-08 21:51:03.723   780   848 W ServiceManager: Permission failure: android.permission.ACCESS_SURFACE_FLINGER from uid=10344 pid=0
+07-08 21:51:03.724 25363 25363 E FBI     : Can't load library: dlopen failed: library "libmagtsync.so" not found
+07-08 21:51:03.724   780   848 W ServiceManager: Permission failure: android.permission.ROTATE_SURFACE_FLINGER from uid=10344 pid=0
+07-08 21:51:03.724  1479  3895 I FloatWindow: hookGetMultiWindowDefaultRectByTask
+07-08 21:51:03.724   780   848 W ServiceManager: Permission failure: android.permission.INTERNAL_SYSTEM_WINDOW from uid=10344 pid=0
+07-08 21:51:03.725 25363 25363 I config_debug: updateDecorCaptionStatus: {0.85001 621mcc50mnc [en_US] ldltr sw360dp w360dp h784dp 480dpi nrml long port night finger -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2460) mAppBounds=Rect(0, 108 - 1080, 2460) mMaxBounds=Rect(0, 0 - 1080, 2460) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mMultiWindowMode=normal mMultiWindowId=0 mWindowResiable=6 mInLargeScreen=-1 mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0 mDisplayUniqueId=0} s.1 fontWeightAdjustment=0} fromMultiWindow: true
+07-08 21:51:03.729   490   490 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device VINTF manifest.
+07-08 21:51:03.730  2045  2057 I tmw_    : calculateMultiWindowScaleAndLocation111: {100=0.759, 101=130.0, 102=465.0}
+07-08 21:51:03.730  2045  2057 I tmw_    : calculateMultiWindowScaleAndLocation222: {100=0.759, 101=130.0, 102=465.0}
+07-08 21:51:03.730 25363 25379 E OpenGLRenderer: Device claims wide gamut support, cannot find matching config, error = EGL_SUCCESS
+07-08 21:51:03.730 25363 25379 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+07-08 21:51:03.736 25363 25379 W OpenGLRenderer: ShaderCache::tranMaxTotalSize is 1048576
+07-08 21:51:03.738   780   849 E HWComposer: getSupportedContentTypes: getSupportedContentTypes failed for display 0: Unsupported (8)
+07-08 21:51:03.745   489   489 I servicemanager: Could not find android.hardware.graphics.allocator.IAllocator/default in the VINTF manifest.
+07-08 21:51:03.753   780   780 I ClientCache: add: Cache owner=0xb400007507510190
+07-08 21:51:03.754 25363 25379 W Parcel  : Expecting binder but got null!
+07-08 21:51:03.755 25363 25363 W OnBackInvokedCallback: OnBackInvokedCallback is not enabled for the application.
+07-08 21:51:03.755 25363 25363 W OnBackInvokedCallback: Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+07-08 21:51:03.760  3605  4168 I SmartPanel_SmartPanelService: onWindowsDrawn pkgName: com.refbible.app, className: com.refbible.app.MainActivity launchState=1 windowsDrawnDelayMs =282
+07-08 21:51:03.763 25363 25363 I WebViewFactory: Loading com.google.android.webview version 149.0.7827.159 (code 782715903)
+07-08 21:51:03.763   746   771 I mtkpower@impl: [setMode] type:5, enabled:0
+07-08 21:51:03.763  1479  1946 I PowerHalWrapper: amsBoostNotify pid:32599,activity:com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher, package:com.transsion.hilauncher, mProcessCreatePackcom.refbible.app 
+07-08 21:51:03.763  1479  1946 I PowerHalWrapper: state: 0 
+07-08 21:51:03.763   746   828 I libPowerHal: [PD] LAUNCH update cmd:1408400 param:0
+07-08 21:51:03.763  1479  1946 I mtkpower_client: [Legacy][PowerHal_Wrap_notifyAppState] com.transsion.hilauncher/com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher pid=32599 state:0
+07-08 21:51:03.763  1479  1502 I ActivityTaskManager: Displayed com.refbible.app/.MainActivity: +282ms
+07-08 21:51:03.763  1479  1946 I game_scn: collectForegroundAppList packName=com.transsion.hilauncher, actName=com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher, pid=32599, uid=10302, state:PAUSED
+07-08 21:51:03.763  1479  1946 I game_scn: powerNotifyForegroundApp multi_resumed_app_info: pid: 25363, packname: com.refbible.app, actname: com.refbible.app.MainActivity
+07-08 21:51:03.763  1479  1946 I PowerHalWrapper: amsBoostNotify AMS_BOOST_PROCESS_CREATE_BOOST:true 
+07-08 21:51:03.763  1479  1946 I PowerHalWrapper: amsBoostStop AMS_BOOST_PACK_SWITCH:true, AMS_BOOST_ACT_SWITCH:false, AMS_BOOST_PROCESS_CREATE:true 
+07-08 21:51:03.764   746   828 I libPowerHal: [perfNotifyAppState] pack:com.transsion.hilauncher, act:com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher, state:0, pid:32599, uid:10302, fps:-1
+07-08 21:51:03.764   746   770 I mtkpower@impl: [mtkPowerHint] hint:22, hold:500, ext:0, ext_hold:0
+07-08 21:51:03.764   746   770 I mtkpower@impl: [mtkPowerHint] hint:21, hold:6000, ext:30, ext_hold:35000
+07-08 21:51:03.770  1479  1506 I mtkpower_client: perf_cus_lock_hint hint:50, dur:1000
+07-08 21:51:03.771  3605  4168 I SmartPanel_SmartPanelService: ASP pkgName: com.transsion.hilauncher  className = com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher
+07-08 21:51:03.771  1479  1506 I mtkpower_client: perf_cus_lock_hint, ret_hdl:0
+07-08 21:51:03.775   746   828 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:20455
+07-08 21:51:03.785  3605  3605 I SmartPanel_SmartPanelService: checkVideoApp curosr: count = 0
+07-08 21:51:03.787  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.787  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.787  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.787   780   780 I BufferQueueDebug: [com.transsion.hilauncher/com.android.quickstep.src.com.android.launcher3.uioverrides.QuickstepLauncher#13483](this:0xb4000076176c54d8,id:-1,api:0,p:-1,c:780) onDestructor()
+07-08 21:51:03.787  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.787  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.787  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.788  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.788 24501 24520 E phonemaster_log: ProcessManagerImpl: IProcessObserver onForegroundActivitiesChanged fail
+07-08 21:51:03.788  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.788  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.788  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.788  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.788  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.788 24501 24516 E phonemaster_log: ProcessManagerImpl: IProcessObserver onForegroundActivitiesChanged fail
+07-08 21:51:03.788  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.788  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.788  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.789  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.789  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.789  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.789  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.789  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.789  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.789  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.789  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.790  1479  1503 E TranActivityManager: TranProcessObserver # onForegroundActivitiesChanged
+07-08 21:51:03.790  1479  1503 E TranActivityManager: android.os.DeadObjectException
+07-08 21:51:03.790  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.790  1479  1503 E TranActivityManager: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.790  1479  1503 E TranActivityManager: 	at com.transsion.hubsdk.app.ITranProcessObserver$Stub$Proxy.onForegroundActivitiesChanged(ITranProcessObserver.java:131)
+07-08 21:51:03.790  1479  1503 E TranActivityManager: 	at com.transsion.hubcore.server.am.TranActivityManagerService$TranProcessObserver.onForegroundActivitiesChanged(TranActivityManagerService.java:536)
+07-08 21:51:03.790  1479  1503 E TranActivityManager: 	at com.android.server.am.ProcessList.dispatchProcessesChanged(ProcessList.java:4687)
+07-08 21:51:03.790  1479  1503 E TranActivityManager: 	at com.android.server.am.ActivityManagerService$UiHandler.handleMessage(ActivityManagerService.java:1830)
+07-08 21:51:03.790  1479  1503 E TranActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+07-08 21:51:03.790  1479  1503 E TranActivityManager: 	at android.os.Looper.loopOnce(Looper.java:204)
+07-08 21:51:03.790  1479  1503 E TranActivityManager: 	at android.os.Looper.loop(Looper.java:291)
+07-08 21:51:03.790  1479  1503 E TranActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-08 21:51:03.790  1479  1503 E TranActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+07-08 21:51:03.790  1479  1503 E TranActivityManager: 	at com.android.server.UiThread.run(UiThread.java:47)
+07-08 21:51:03.792 24501 24520 W System.err: android.os.DeadObjectException
+07-08 21:51:03.792 24501 24520 W System.err: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.792 24501 24520 W System.err: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.792 24501 24520 W System.err: 	at q.e$a$a.onForegroundActivitiesChanged(SourceFile:6)
+07-08 21:51:03.792 24501 24520 W System.err: 	at com.transsion.phonemanager.process.ProcessManagerImpl$a.onForegroundActivitiesChanged(SourceFile:3)
+07-08 21:51:03.792 24501 24520 W System.err: 	at android.app.IProcessObserver$Stub.onTransact(IProcessObserver.java:105)
+07-08 21:51:03.792 24501 24520 W System.err: 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 21:51:03.792 24501 24520 W System.err: 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 21:51:03.792 24501 24516 W System.err: android.os.DeadObjectException
+07-08 21:51:03.792 24501 24516 W System.err: 	at android.os.BinderProxy.transactNative(Native Method)
+07-08 21:51:03.792 24501 24516 W System.err: 	at android.os.BinderProxy.transact(BinderProxy.java:647)
+07-08 21:51:03.792 24501 24516 W System.err: 	at q.e$a$a.onForegroundActivitiesChanged(SourceFile:6)
+07-08 21:51:03.793 24501 24516 W System.err: 	at com.transsion.phonemanager.process.ProcessManagerImpl$a.onForegroundActivitiesChanged(SourceFile:3)
+07-08 21:51:03.793 24501 24516 W System.err: 	at android.app.IProcessObserver$Stub.onTransact(IProcessObserver.java:105)
+07-08 21:51:03.793 24501 24516 W System.err: 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 21:51:03.793 24501 24516 W System.err: 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 21:51:03.795  3605  3605 I SmartPanel_SmartPanelService: checkAndHandleAPP curosr: count = 0
+07-08 21:51:03.796 25363 25363 I cr_WVCFactoryProvider: version=149.0.7827.159 (782715903) minSdkVersion=29 multiprocess=true packageId=127 splits=<none>
+07-08 21:51:03.805 25363 25415 I chromium: [0708/215103.805020:INFO:android_webview/browser/variations/variations_seed_loader.cc:67] Failed to open file for reading.: No such file or directory (2)
+07-08 21:51:03.805 25363 25386 I RustStdoutStderr: [0708/215103.805020:INFO:android_webview/browser/variations/variations_seed_loader.cc:67] Failed to open file for reading.: No such file or directory (2)
+07-08 21:51:03.805 25363 25415 I chromium: [0708/215103.805789:INFO:android_webview/browser/variations/variations_seed_loader.cc:67] Failed to open file for reading.: No such file or directory (2)
+07-08 21:51:03.805 25363 25386 I RustStdoutStderr: [0708/215103.805789:INFO:android_webview/browser/variations/variations_seed_loader.cc:67] Failed to open file for reading.: No such file or directory (2)
+07-08 21:51:03.821 25363 25363 I cr_LibraryLoader: Successfully loaded native library
+07-08 21:51:03.823 25363 25363 I cr_CachingUmaRecorder: Flushed 47 samples from 22 histograms, 0 samples were dropped.
+07-08 21:51:03.827 25363 25363 I cr_ChildProcLH: ScopedServiceBindingBatch.tryActivate: false
+07-08 21:51:03.828 25363 25363 I cr_CombinedPProvider: #registerProvider() provider:WV.wk@842fe10 isPolicyCacheEnabled:false policyProvidersSize:0
+07-08 21:51:03.828 25363 25363 I cr_PolicyProvider: #setManagerAndSource() 0
+07-08 21:51:03.830 25363 25414 I cr_policy: registerReceiver succeeded after 1ms
+07-08 21:51:03.830 25363 25363 I cr_DisplayManager: Is Display Topology available: false
+07-08 21:51:03.849  1479  1533 I ActivityManager: Start proc 25420:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i432 for  {com.refbible.app/org.chromium.content.app.SandboxedProcessService0:0}
+07-08 21:51:03.850 25363 25363 I cr_CombinedPProvider: #linkNativeInternal() 1
+07-08 21:51:03.851 25363 25363 I cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+07-08 21:51:03.851 25420 25420 E libc    : SetHeapTaggingLevel: re-enabling tagging after it was disabled is not supported
+07-08 21:51:03.851 25363 25363 I cr_PolicyProvider: #notifySettingsAvailable() 0
+07-08 21:51:03.851 25363 25363 I cr_CombinedPProvider: #onSettingsAvailable() 0
+07-08 21:51:03.851 25363 25363 I cr_CombinedPProvider: #flushPolicies()
+07-08 21:51:03.857 25420 25420 I ocessService0:0: Using generational CollectorTypeCC GC.
+07-08 21:51:03.872 25363 25427 W chromium: [WARNING:net/dns/dns_config_service_android.cc:69] Failed to read DnsConfig.
+07-08 21:51:03.872 25363 25386 I RustStdoutStderr: [WARNING:net/dns/dns_config_service_android.cc:69] Failed to read DnsConfig.
+07-08 21:51:03.880 25363 25363 W chromium: [WARNING:android_webview/browser/network_service/net_helpers.cc:137] HTTP Cache size is: 20971520
+07-08 21:51:03.880 25363 25386 I RustStdoutStderr: [WARNING:android_webview/browser/network_service/net_helpers.cc:137] HTTP Cache size is: 20971520
+07-08 21:51:03.900 25420 25420 I LoadedApk: No resource references to update in package com.transsion.theme.icon
+07-08 21:51:03.902 25420 25420 I cr_WebViewApkApp: version=149.0.7827.159 (782715903) minSdkVersion=29 processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 splits=<none>
+07-08 21:51:03.909 25420 25420 I cr_ChildProcessService: Creating new ChildProcessService pid=25420
+07-08 21:51:03.953  1479  3919 I WindowManager:   isAnimating=false  okToAnimate=true  win=Window{c62c316 u0 Splash Screen com.refbible.app}
+07-08 21:51:03.960  1479  2189 I WindowManager:   onAnimationFinished on win=Window{f4173b0 u0 com.refbible.app/com.refbible.app.MainActivity}
+07-08 21:51:03.960  1479  2189 W InputManager-JNI: Input channel object 'c62c316 Splash Screen com.refbible.app (client)' was disposed without first being removed with the input manager!
+07-08 21:51:03.964 25363 25363 I cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+07-08 21:51:03.964 25363 25363 I cr_PolicyProvider: #notifySettingsAvailable() 0
+07-08 21:51:03.964 25363 25363 I cr_CombinedPProvider: #onSettingsAvailable() 0
+07-08 21:51:03.964 25363 25363 I cr_CombinedPProvider: #flushPolicies()
+07-08 21:51:03.967 25363 25454 I CameraManagerGlobal: Connecting to camera service
+07-08 21:51:03.970  1479  1507 I mtkpower_client: perf_cus_lock_hint hint:48, dur:75
+07-08 21:51:03.971  1479  1507 I mtkpower_client: perf_cus_lock_hint, ret_hdl:20459
+07-08 21:51:03.983 25363 25363 W libc    : Access denied finding property "vendor.debug.forcibly_enable_mtk_ray_tracing"
+07-08 21:51:04.023 25363 25438 W cr_media: BLUETOOTH_CONNECT permission is missing.
+07-08 21:51:04.024 25363 25438 W cr_media: getBluetoothAdapter() requires BLUETOOTH permission
+07-08 21:51:04.024 25363 25438 W cr_media: registerBluetoothIntentsIfNeeded: Requires BLUETOOTH permission
+07-08 21:51:04.025 25363 25372 I libPerfCtl: xgfNotifyBufferQuota ret=-1
+07-08 21:51:04.028 25420 25451 I cr_LibraryLoader: Successfully loaded native library
+07-08 21:51:04.030 25420 25451 I cr_CachingUmaRecorder: Flushed 2 samples from 2 histograms, 0 samples were dropped.
+07-08 21:51:04.031   763  8750 D APM_AudioPolicyManager: listAudioPorts mAvailableInputDevices 0x80000004, 0x80000040, 0x80000080, 0x80000100, 0x80002000, 0x90000000
+07-08 21:51:04.031 25420 25451 W chromium: [WARNING:content/app/android/content_main_android.cc:82] android_setCpu already initialized
+07-08 21:51:04.033   763  8750 D APM_AudioPolicyManager: listAudioPorts mAvailableInputDevices 0x80000004, 0x80000040, 0x80000080, 0x80000100, 0x80002000, 0x90000000
+07-08 21:51:04.039  1479  3919 I FloatWindow: hookInputMethodShown inputShown: false
+07-08 21:51:04.039  1479  1537 W libprocessgroup: Failed to open /dev/blkio//cgroup.procs: No such file or directory
+07-08 21:51:04.040  1479  3919 I TranSourceConnectManagerImpl: hookInputMethodShown inputShown: false
+07-08 21:51:04.040  1479  3919 I input_debug: package: com.refbible.app isPassWordInput: false inputType: 0 mMethodMap: true isKeyguardShowing: false enable: 0 isSplitScreen: false
+07-08 21:51:04.040  2045  2091 I MultiWindowManager: manager notifyInputMethodShow: false
+07-08 21:51:04.040  2045  2091 I tmw_    : notifyInputMethodShow: false ignoreSame: true mFocusOnMultiDisplay: false
+07-08 21:51:04.046   746   828 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:20459
+07-08 21:51:04.051  1479  2189 E TranSecureKeyboardManagerImpl: inputTarget = Window{f4173b0 u0 com.refbible.app/com.refbible.app.MainActivity}
+07-08 21:51:04.051  2562  2562 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():2259 
+07-08 21:51:04.058 25420 25451 W chromium: [WARNING:content/child/runtime_features.cc:546] Fenced frames cannot be enabled in this configuration. Use --enable-features=FencedFrames instead.
+07-08 21:51:04.058 25420 25451 W chromium: [WARNING:content/child/runtime_features.cc:571] Topics cannot be enabled in this configuration. Use --enable-features=BrowsingTopics in addition.
+07-08 21:51:04.058 25420 25451 W chromium: [WARNING:content/child/runtime_features.cc:592] SharedStorage cannot be enabled in this configuration. Use --enable-features=SharedStorageAPI in addition.
+07-08 21:51:04.059  2562  2562 I Module  : DeviceLockedStatusModuleProvider$Module.updateDeviceLockedStatus():103 repeatCheckTimes = 0, locked = false
+07-08 21:51:04.060  2562  2562 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1446 onStartInput(EditorInfo{EditorInfo{packageName=com.refbible.app, inputType=0, inputTypeString=NULL, enableLearning=false, autoCorrection=false, autoComplete=false, imeOptions=0, privateImeOptions=null, actionName=UNSPECIFIED, actionLabel=null, initialSelStart=-1, initialSelEnd=-1, initialCapsMode=0, label=null, fieldId=-1, fieldName=null, extras=null, hintText=null, hintLocales=[]}}, false)
+07-08 21:51:04.061  2562  2562 W AndroidIME: LatinIMEBase.updateInputViewCoverNavigation():327 Null input view, cannot update padding!
+07-08 21:51:04.062  2562  2562 I Module  : DeviceLockedStatusModuleProvider$Module.updateDeviceLockedStatus():103 repeatCheckTimes = 1, locked = false
+07-08 21:51:04.066 25420 25465 I chromium: [INFO:third_party/skia/src/ports/SkFontMgr_android_parser.cpp:724] [SkFontMgr Android Parser] '/product/etc/fonts_customization.xml' could not be opened
+07-08 21:51:04.066 25420 25465 I chromium: 
+07-08 21:51:04.067  1479  1506 I WindowManager:   onAnimationFinished on win=Window{c62c316 u0 Splash Screen com.refbible.app}
+07-08 21:51:04.072   780   780 I BufferQueueDebug: [Splash Screen com.refbible.app#13492](this:0xb400007617756888,id:-1,api:0,p:-1,c:780) onDestructor()
+07-08 21:51:04.084  6120 23663 I FontLog : (REDACTED) Received query %s, URI %s
+07-08 21:51:04.084  6120 23663 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-08 21:51:04.085  6120 23663 I FontLog : (REDACTED) Font PFD returned from cache for %s
+07-08 21:51:04.085  6120 23663 I FontLog : (REDACTED) Fetch %s end status %s
+07-08 21:51:04.090  6120 23663 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-08 21:51:04.095  6120 23663 I FontLog : (REDACTED) Received query %s, URI %s
+07-08 21:51:04.095  6120 23663 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-08 21:51:04.098  6120 23663 I FontLog : (REDACTED) Fetch %s end status %s
+07-08 21:51:04.100  6120 23663 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-08 21:51:04.105  6120 23663 I FontLog : (REDACTED) Received query %s, URI %s
+07-08 21:51:04.106  6120 23663 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-08 21:51:04.107  6120 23663 I FontLog : (REDACTED) Font PFD returned from cache for %s
+07-08 21:51:04.108  6120 23663 I FontLog : (REDACTED) Fetch %s end status %s
+07-08 21:51:04.112  6120 23663 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-08 21:51:04.115  6120 23663 I FontLog : (REDACTED) Received query %s, URI %s
+07-08 21:51:04.115  6120 23663 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-08 21:51:04.117  6120 23663 I FontLog : (REDACTED) Font PFD returned from cache for %s
+07-08 21:51:04.117  6120 23663 I FontLog : (REDACTED) Fetch %s end status %s
+07-08 21:51:04.120  6120 23663 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-08 21:51:04.125  6120 23663 I FontLog : (REDACTED) Received query %s, URI %s
+07-08 21:51:04.126  6120 23663 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-08 21:51:04.127  6120 23663 I FontLog : (REDACTED) Font PFD returned from cache for %s
+07-08 21:51:04.127  6120 23663 I FontLog : (REDACTED) Fetch %s end status %s
+07-08 21:51:04.131  6120 23663 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-08 21:51:04.159 25363 25448 W AudioCapabilities: Unsupported mime audio/x-adpcm-dvi-ima
+07-08 21:51:04.159 25363 25448 W AudioCapabilities: Unsupported mime audio/x-adpcm-dvi-ima
+07-08 21:51:04.159 25363 25448 W AudioCapabilities: Unsupported mime audio/x-adpcm-ms
+07-08 21:51:04.160 25363 25448 W AudioCapabilities: Unsupported mime audio/x-adpcm-ms
+07-08 21:51:04.160 25363 25448 W AudioCapabilities: Unsupported mime audio/alac
+07-08 21:51:04.160 25363 25448 W AudioCapabilities: Unsupported mime audio/alac
+07-08 21:51:04.161 25363 25448 W AudioCapabilities: Unsupported mime audio/ape
+07-08 21:51:04.161 25363 25448 W AudioCapabilities: Unsupported mime audio/ape
+07-08 21:51:04.167 25363 25448 W VideoCapabilities: Unrecognized profile/level 32768/256 for video/mp4v-es
+07-08 21:51:04.167 25363 25448 W VideoCapabilities: Unrecognized profile/level 32768/256 for video/mp4v-es
+07-08 21:51:04.184  6120 23663 I FontLog : (REDACTED) Received query %s, URI %s
+07-08 21:51:04.184  6120 23663 I FontLog : (REDACTED) Query [%s] resolved to %s
+07-08 21:51:04.185  6120 23663 I FontLog : (REDACTED) Fetch %s end status %s
+07-08 21:51:04.188  6120 23663 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-08 21:51:04.193  6120 23663 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+07-08 21:51:04.223  1479  1504 I BaseFilesVerify: Base File verify start
+07-08 21:51:04.223  1479  1504 W BaseFilesVerify: notification_policy.xmlis not in fileProtect list,can not protect this file
+07-08 21:51:04.236 25363 25458 I mali    : [DebugProp] GPU Debug-Mechanism Disable !
+07-08 21:51:04.265   746   828 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:20456
+07-08 21:51:04.386 25363 25379 E GPUAUX  : [AUX]GuiExtAuxCheckAuxPath:670: Null anb
+07-08 21:51:04.387 25363 25379 E GPUAUX  : [AUX]GuiExtAuxCheckAuxPath:670: Null anb
+07-08 21:51:04.387 25363 25379 E GPUAUX  : [AUX]GuiExtAuxCheckAuxPath:670: Null anb
+07-08 21:51:04.387 25363 25379 E GPUAUX  : [AUX]GuiExtAuxCheckAuxPath:670: Null anb
+07-08 21:51:04.471 25363 25379 E GPUAUX  : [AUX]GuiExtAuxCheckAuxPath:670: Null anb
+07-08 21:51:04.471 25363 25379 E GPUAUX  : [AUX]GuiExtAuxCheckAuxPath:670: Null anb
+07-08 21:51:04.471 25363 25379 E GPUAUX  : [AUX]GuiExtAuxCheckAuxPath:670: Null anb
+07-08 21:51:04.471 25363 25379 E GPUAUX  : [AUX]GuiExtAuxCheckAuxPath:670: Null anb
+07-08 21:51:04.471 25363 25379 E GPUAUX  : [AUX]GuiExtAuxCheckAuxPath:670: Null anb
+07-08 21:51:04.472 25363 25379 E GPUAUX  : [AUX]GuiExtAuxCheckAuxPath:670: Null anb
+07-08 21:51:04.539   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:61
+07-08 21:51:04.539   746   803 I libPerfCtl: xgfGetFPS pid:25363 fps:-1
+07-08 21:51:04.539   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:67
+07-08 21:51:04.587   733   832 I hwcomposer: [HWCDisplay] [Display_0 (type:1)] fps:36.329540,dur:1101.03,max:299.82,min:3.10  
+07-08 21:51:04.765  1479  1623 I mtkpower_client: perf_lock_acq, hdl:20291, dur:3000, num:2, tid:1623
+07-08 21:51:04.766  1479  1623 I mtkpower_client: ret_hdl:20460
+07-08 21:51:04.766  1479  1623 I mtkpower_client: perf_lock_rel, hdl:20460, tid:1623
+07-08 21:51:04.766   746   828 I SbeHandle: end_default_hold_time HindID : 21
+07-08 21:51:04.766   746   828 I libPowerHal: [disableScenarioByHintId] Disable HindID : 21
+07-08 21:51:04.766   746   828 I libPowerHal: [disableScenarioByHintId] disableScenarioByHintId: HindID : 21
+07-08 21:51:04.767   746   828 I SbeHandle: end_default_hold_time HindID : 21
+07-08 21:51:04.767   746   828 I libPowerHal: [disableScenarioByHintId] Disable HindID : 21
+07-08 21:51:04.767   746   828 I libPowerHal: [PD] system_server update ONESHOT cmd:3410300 param:21
+07-08 21:51:04.769   780   780 I BufferQueueProducer: [com.refbible.app/com.refbible.app.MainActivity#13499](this:0xb400007617703f38,id:-1,api:0,p:-1,c:780) queueBuffer: fps=15.76 dur=1015.55 max=299.84 min=16.55
+07-08 21:51:05.145 24534 24884 I Finsky  : [175] Successfully collected the device disk space info.
+07-08 21:51:05.181 24534 24534 I Finsky  : [2] setup::RES: shouldRecoverRestoredPackages: versionCodeSystem 83501510
+07-08 21:51:05.184 24534 24534 I Finsky  : [2] Detected restoreservicev2://recovery not needed, will not run
+07-08 21:51:05.259 24534 24745 I Finsky  : [157] registerListener
+07-08 21:51:05.262 24534 24745 I Finsky  : [157] DSC: reviveDownloads()
+07-08 21:51:05.266 24534 24745 I Finsky  : [157] Initialized AssetModuleDownloader.
+07-08 21:51:05.266 24797 24849 I Finsky:background: [136] DS: reviveDownloads()
+07-08 21:51:05.281 24534 24653 I Finsky  : [137] Initializing the instant apps module.
+07-08 21:51:05.287 24797 25495 I Finsky:background: [169] DS::IDC: updateWith: <846:SUCCEEDED>
+07-08 21:51:05.287 24797 25495 I Finsky:background: [169] DS::IDC: All invisible downloads are finished.
+07-08 21:51:05.287 24797 25495 I Finsky:background: [169] DS::ISM: Stopping invisible download job
+07-08 21:51:05.302  1981  1981 I TranTele/TranPhoneInterfaceManagerEx: [getPTWhiteList]
+07-08 21:51:05.303  1981  1981 I TranTele/TranPhoneInterfaceManagerEx: [getPtPolicyforSlotIndex]
+07-08 21:51:05.303  1981  1981 I TranTele/TranPhoneInterfaceManagerEx: [getPTWhiteList]
+07-08 21:51:05.303  1981  1981 I TranTele/TranPhoneInterfaceManagerEx: [getPtPolicyforSlotIndex]
+07-08 21:51:05.309 24534 24663 W Finsky  : [140] PreloadClasses: Unable to load [androidx.navigation.NavControllerViewModel, androidx.navigation.NavControllerViewModel$Companion]
+07-08 21:51:05.319 24534 24745 I Finsky  : [157] Skipped download state update for download 91 on initialize. java.util.concurrent.ExecutionException: com.google.android.finsky.assetmoduleserviceutils.AssetModuleException: Session not found.
+07-08 21:51:05.336  6120 23663 W DeviceStateUtils: Active network is null
+07-08 21:51:05.337  6120 23663 W Auth    : [TokenResponseCallback] TokenResponse failed with exception [CONTEXT service_id=343 ]
+07-08 21:51:05.337  6120 23663 W Auth    : czuh: Failed to process request
+07-08 21:51:05.337  6120 23663 W Auth    : 	at czuo.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):23)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at czyl.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):15)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):82)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at lhn.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):19)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at czxq.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):6)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at ccez.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at agnz.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):13)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at agnz.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):130)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at aovq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):28)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):170)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):47)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at ahjr.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):745)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at ahjq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):151)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at aawh.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):829)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at ahdd.getAuthToken(:com.google.android.gms@262434029@26.24.34 (190400-938041327):411)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at android.accounts.AbstractAccountAuthenticator$Transport.getAuthToken(AbstractAccountAuthenticator.java:246)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:242)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at cpdj.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at ccit.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):169)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 21:51:05.337  6120 23663 W Auth    : 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 21:51:05.337  6120 23663 W Auth    : Caused by: czxm: Connectivity error
+07-08 21:51:05.337  6120 23663 W Auth    : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):76)
+07-08 21:51:05.337  6120 23663 W Auth    : 	... 20 more
+07-08 21:51:05.337  6120 23663 W Auth    : Caused by: java.io.IOException
+07-08 21:51:05.337  6120 23663 W Auth    : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):73)
+07-08 21:51:05.337  6120 23663 W Auth    : 	... 20 more
+07-08 21:51:05.338  6120 23663 E AuthPII : [RequestTokenManager] getToken() -> NETWORK_ERROR. App: com.android.vending, Service: oauth2:https://www.googleapis.com/auth/googleplay
+07-08 21:51:05.338  6120 23663 E AuthPII : bjap: Error when calling server using GmsNetworkStack.
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):1542)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjr.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):745)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):151)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at aawh.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):829)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahdd.getAuthToken(:com.google.android.gms@262434029@26.24.34 (190400-938041327):411)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at android.accounts.AbstractAccountAuthenticator$Transport.getAuthToken(AbstractAccountAuthenticator.java:246)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:242)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at cpdj.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ccit.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):169)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 21:51:05.338  6120 23663 E AuthPII : Caused by: bjap: Error requesting token.
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):212)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):47)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	... 12 more
+07-08 21:51:05.338  6120 23663 E AuthPII : Caused by: java.util.concurrent.ExecutionException: czuh: Failed to process request
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at hmrc.j(:com.google.android.gms@262434029@26.24.34 (190400-938041327):21)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at hmrl.u(:com.google.android.gms@262434029@26.24.34 (190400-938041327):110)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):197)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	... 13 more
+07-08 21:51:05.338  6120 23663 E AuthPII : Caused by: czuh: Failed to process request
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at czuo.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):23)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at czyl.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):15)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):82)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at lhn.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):19)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at czxq.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):6)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ccez.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at agnz.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):13)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at agnz.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):130)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at aovq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):28)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):170)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	... 13 more
+07-08 21:51:05.338  6120 23663 E AuthPII : Caused by: czxm: Connectivity error
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):76)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	... 20 more
+07-08 21:51:05.338  6120 23663 E AuthPII : Caused by: java.io.IOException
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):73)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	... 20 more
+07-08 21:51:05.338  6120 23663 E AuthPII : Message is Error when calling server using GmsNetworkStack.
+07-08 21:51:05.338  6120 23663 E AuthPII : bjap: Error when calling server using GmsNetworkStack.
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):1542)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjr.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):745)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):151)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at aawh.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):829)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahdd.getAuthToken(:com.google.android.gms@262434029@26.24.34 (190400-938041327):411)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at android.accounts.AbstractAccountAuthenticator$Transport.getAuthToken(AbstractAccountAuthenticator.java:246)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:242)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at cpdj.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ccit.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):169)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 21:51:05.338  6120 23663 E AuthPII : Caused by: bjap: Error requesting token.
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):212)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjt.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):47)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	... 12 more
+07-08 21:51:05.338  6120 23663 E AuthPII : Caused by: java.util.concurrent.ExecutionException: czuh: Failed to process request
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at hmrc.j(:com.google.android.gms@262434029@26.24.34 (190400-938041327):21)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at hmrl.u(:com.google.android.gms@262434029@26.24.34 (190400-938041327):110)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):197)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	... 13 more
+07-08 21:51:05.338  6120 23663 E AuthPII : Caused by: czuh: Failed to process request
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at czuo.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):23)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at czyl.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):15)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):82)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at lhn.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):19)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at czxq.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):6)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ccez.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at agnz.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):13)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at agnz.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):130)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at aovq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):28)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at ahjt.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):170)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	... 13 more
+07-08 21:51:05.338  6120 23663 E AuthPII : Caused by: czxm: Connectivity error
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):76)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	... 20 more
+07-08 21:51:05.338  6120 23663 E AuthPII : Caused by: java.io.IOException
+07-08 21:51:05.338  6120 23663 E AuthPII : 	at czxj.a(:com.google.android.gms@262434029@26.24.34 (190400-938041327):73)
+07-08 21:51:05.338  6120 23663 E AuthPII : 	... 20 more
+07-08 21:51:05.338  6120 23663 I Auth    : (REDACTED) [GetToken] GetToken failed for app=%s with non recoverable status code: %s 
+07-08 21:51:05.338  6120 23663 W Auth    : [ChimeraGetToken] exception while trying to fetch auth tokens for app=com.google.android.gsf, scope=oauth2:https://www.googleapis.com/auth/googleplay [CONTEXT service_id=153 ]
+07-08 21:51:05.338  6120 23663 W Auth    : ahjl: GetToken failed with status code: NetworkError
+07-08 21:51:05.338  6120 23663 W Auth    : 	at ahjq.b(:com.google.android.gms@262434029@26.24.34 (190400-938041327):359)
+07-08 21:51:05.338  6120 23663 W Auth    : 	at aawh.d(:com.google.android.gms@262434029@26.24.34 (190400-938041327):829)
+07-08 21:51:05.338  6120 23663 W Auth    : 	at ahdd.getAuthToken(:com.google.android.gms@262434029@26.24.34 (190400-938041327):411)
+07-08 21:51:05.338  6120 23663 W Auth    : 	at android.accounts.AbstractAccountAuthenticator$Transport.getAuthToken(AbstractAccountAuthenticator.java:246)
+07-08 21:51:05.338  6120 23663 W Auth    : 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:242)
+07-08 21:51:05.338  6120 23663 W Auth    : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 21:51:05.338  6120 23663 W Auth    : 	at cpdj.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):12)
+07-08 21:51:05.338  6120 23663 W Auth    : 	at android.os.Binder.transact(Binder.java:1165)
+07-08 21:51:05.338  6120 23663 W Auth    : 	at ccit.onTransact(:com.google.android.gms@262434029@26.24.34 (190400-938041327):169)
+07-08 21:51:05.338  6120 23663 W Auth    : 	at android.os.Binder.execTransactInternal(Binder.java:1286)
+07-08 21:51:05.338  6120 23663 W Auth    : 	at android.os.Binder.execTransact(Binder.java:1245)
+07-08 21:51:05.339  6120 23663 W GLSActivity: [GmsAccountAuthenticatorImpl] error status while fetching token:NetworkError
+07-08 21:51:05.340 24534 24884 E Finsky  : [175] Get authentication token failed with error java.util.concurrent.ExecutionException: com.android.volley.AuthFailureError: Error while retrieving auth token
+07-08 21:51:05.514 32599 24425 I FA      : Application backgrounded at: timestamp_millis: 1783543863512
+07-08 21:51:05.538  1479  1504 I BaseFilesVerify: Base File verify start
+07-08 21:51:05.538  1479  1504 W BaseFilesVerify: notification_policy.xmlis not in fileProtect list,can not protect this file
+07-08 21:51:05.539   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 21:51:05.540   746   803 I libPerfCtl: xgfGetFPS pid:25363 fps:61
+07-08 21:51:05.540   746   803 I libPowerHal: [updateFPS] pid(25363) : -1 => 60
+07-08 21:51:05.540   746   828 I libPowerHal: [perfNotifyAppState] pack:com.refbible.app, act:com.refbible.app.MainActivity, state:5, pid:25363, uid:10344, fps:60
+07-08 21:51:05.540   746   828 I UxUtility: notifyForegroundApp pack:com.refbible.app, uid:10344
+07-08 21:51:05.541   746   828 I TouchUtility: notifyAppState error = NULL
+07-08 21:51:05.541   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 21:51:05.603   733   832 I hwcomposer: [HWCDisplay] [Display_0 (type:1)] fps:60.074066,dur:1015.41,max:17.14,min:16.27  
+07-08 21:51:05.785   780   780 I BufferQueueProducer: [com.refbible.app/com.refbible.app.MainActivity#13499](this:0xb400007617703f38,id:-1,api:0,p:-1,c:780) queueBuffer: fps=60.06 dur=1015.69 max=16.89 min=16.53
+07-08 21:51:06.362  1479  1533 I ActivityManager: Start proc 25497:com.google.android.webview:webview_service/u0a126 for service {com.google.android.webview/org.chromium.android_webview.services.VariationsSeedServer}
+07-08 21:51:06.374 25497 25497 W main    : type=1400 audit(0.0:85642): avc: denied { read } for name="u:object_r:vendor_memfusion_size_prop:s0" dev="tmpfs" ino=1523 scontext=u:r:untrusted_app:s0:c126,c256,c512,c768 tcontext=u:object_r:vendor_memfusion_size_prop:s0 tclass=file permissive=0 app=com.google.android.webview
+07-08 21:51:06.374 25497 25497 W main    : type=1400 audit(0.0:85643): avc: denied { read } for name="u:object_r:vendor_memfusion_state_prop:s0" dev="tmpfs" ino=1524 scontext=u:r:untrusted_app:s0:c126,c256,c512,c768 tcontext=u:object_r:vendor_memfusion_state_prop:s0 tclass=file permissive=0 app=com.google.android.webview
+07-08 21:51:06.374 25497 25497 W main    : type=1400 audit(0.0:85644): avc: denied { read } for name="u:object_r:vendor_memfusion_tranlog_prop:s0" dev="tmpfs" ino=1526 scontext=u:r:untrusted_app:s0:c126,c256,c512,c768 tcontext=u:object_r:vendor_memfusion_tranlog_prop:s0 tclass=file permissive=0 app=com.google.android.webview
+07-08 21:51:06.374 25497 25497 W main    : type=1400 audit(0.0:85645): avc: denied { read } for name="u:object_r:vendor_memfusion_ui_enable_prop:s0" dev="tmpfs" ino=1527 scontext=u:r:untrusted_app:s0:c126,c256,c512,c768 tcontext=u:object_r:vendor_memfusion_ui_enable_prop:s0 tclass=file permissive=0 app=com.google.android.webview
+07-08 21:51:06.374 25497 25497 W main    : type=1400 audit(0.0:85646): avc: denied { read } for name="u:object_r:vendor_uxcompaction_enable_prop:s0" dev="tmpfs" ino=1771 scontext=u:r:untrusted_app:s0:c126,c256,c512,c768 tcontext=u:object_r:vendor_uxcompaction_enable_prop:s0 tclass=file permissive=0 app=com.google.android.webview
+07-08 21:51:06.378 25497 25497 I webview_service: Using generational CollectorTypeCC GC.
+07-08 21:51:06.418 25497 25497 I LoadedApk: No resource references to update in package com.transsion.theme.icon
+07-08 21:51:06.420 25497 25497 I cr_WebViewApkApp: version=149.0.7827.159 (782715903) minSdkVersion=29 processName=com.google.android.webview:webview_service splits=<none>
+07-08 21:51:06.447  1479  1537 W libprocessgroup: Failed to open /dev/blkio/background/cgroup.procs: No such file or directory
+07-08 21:51:06.493  1479  3477 I BaseFilesVerify: Base File verify start
+07-08 21:51:06.493  1479  3477 W BaseFilesVerify: 144_task.xmlis not in fileProtect list,can not protect this file
+07-08 21:51:06.540   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 21:51:06.540   746   803 I libPerfCtl: xgfGetFPS pid:25363 fps:60
+07-08 21:51:06.540   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 21:51:06.619   733   832 I hwcomposer: [HWCDisplay] [Display_0 (type:1)] fps:60.044624,dur:1015.91,max:16.96,min:16.38  
+07-08 21:51:06.801   780   780 I BufferQueueProducer: [com.refbible.app/com.refbible.app.MainActivity#13499](this:0xb400007617703f38,id:-1,api:0,p:-1,c:780) queueBuffer: fps=60.03 dur=1016.10 max=16.84 min=16.45
+07-08 21:51:07.540   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 21:51:07.540   746   803 I libPerfCtl: xgfGetFPS pid:25363 fps:60
+07-08 21:51:07.540   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 21:51:07.635   733   832 I hwcomposer: [HWCDisplay] [Display_0 (type:1)] fps:60.045662,dur:1015.89,max:16.82,min:16.50  
+07-08 21:51:07.739  1479  1479 I MWN     : onSignalStrengthsChanged...
+07-08 21:51:07.740  1479  1479 I MWN     : network type was unavailable.
+07-08 21:51:07.740  1479  1479 I MWN     : Write 3 to node. type=unknown mSimExist=true mFlightMode=false
+07-08 21:51:07.740  1479  1479 I MWN     : write the value:3 to node successfully.
+07-08 21:51:07.817   780   780 I BufferQueueProducer: [com.refbible.app/com.refbible.app.MainActivity#13499](this:0xb400007617703f38,id:-1,api:0,p:-1,c:780) queueBuffer: fps=60.04 dur=1015.99 max=16.79 min=16.56
+07-08 21:51:07.944  1479  1669 W ActivityManager: Receiver with filter android.content.IntentFilter@9b6953e already registered for pid 1479, callerPackage is android
+07-08 21:51:07.944  1479  1669 W ActivityManager: Receiver with filter android.content.IntentFilter@2a9f9f already registered for pid 1479, callerPackage is android
+07-08 21:51:08.540   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 21:51:08.540   746   803 I libPerfCtl: xgfGetFPS pid:25363 fps:60
+07-08 21:51:08.540   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 21:51:08.651   733   832 I hwcomposer: [HWCDisplay] [Display_0 (type:1)] fps:60.038754,dur:1016.01,max:16.80,min:16.47  
+07-08 21:51:08.833   780   780 I BufferQueueProducer: [com.refbible.app/com.refbible.app.MainActivity#13499](this:0xb400007617703f38,id:-1,api:0,p:-1,c:780) queueBuffer: fps=60.05 dur=1015.86 max=16.76 min=16.45
+07-08 21:51:08.968 25754  6375 I native  : I0000 00:00:1783543868.967918    6375 soda_async_impl.cc:1424] Current audio timestamp: 1783543868844006
+07-08 21:51:09.007 25754 25783 I elcn    : (REDACTED) #onAudioData: %s bytes, getAudioReadSize %s
+07-08 21:51:09.540   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 21:51:09.540   746   803 I libPerfCtl: xgfGetFPS pid:25363 fps:59
+07-08 21:51:09.540   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 21:51:09.667   733   832 I hwcomposer: [HWCDisplay] [Display_0 (type:1)] fps:59.048752,dur:1016.11,max:33.39,min:16.47  
+07-08 21:51:09.766   746   828 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:20457
+07-08 21:51:09.849   780   780 I BufferQueueProducer: [com.refbible.app/com.refbible.app.MainActivity#13499](this:0xb400007617703f38,id:-1,api:0,p:-1,c:780) queueBuffer: fps=59.06 dur=1015.97 max=33.32 min=16.50
+07-08 21:51:10.540   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 21:51:10.540   746   803 I libPerfCtl: xgfGetFPS pid:25363 fps:60
+07-08 21:51:10.540   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 21:51:10.682   733   832 I hwcomposer: [HWCDisplay] [Display_0 (type:1)] fps:60.054905,dur:1015.74,max:16.87,min:16.51  
+07-08 21:51:10.865   780   780 I BufferQueueProducer: [com.refbible.app/com.refbible.app.MainActivity#13499](this:0xb400007617703f38,id:-1,api:0,p:-1,c:780) queueBuffer: fps=60.05 dur=1015.89 max=16.81 min=16.55
+07-08 21:51:10.948  1017  1017 I thermal_repeater: [recvMdThermalInfo] ret=29, strLen=127,  3, 39, -50, -28401, 32767, 0
+07-08 21:51:11.540   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 21:51:11.540   746   803 I libPerfCtl: xgfGetFPS pid:25363 fps:60
+07-08 21:51:11.540   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 21:51:11.698   733   832 I hwcomposer: [HWCDisplay] [Display_0 (type:1)] fps:60.044479,dur:1015.91,max:16.86,min:16.51  
+07-08 21:51:11.881   780   780 I BufferQueueProducer: [com.refbible.app/com.refbible.app.MainActivity#13499](this:0xb400007617703f38,id:-1,api:0,p:-1,c:780) queueBuffer: fps=60.04 dur=1016.01 max=16.80 min=16.53
+07-08 21:51:12.540   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 21:51:12.540   746   803 I libPerfCtl: xgfGetFPS pid:25363 fps:60
+07-08 21:51:12.540   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 21:51:12.714   733   832 I hwcomposer: [HWCDisplay] [Display_0 (type:1)] fps:60.040585,dur:1015.98,max:16.87,min:16.42  
+07-08 21:51:12.858  1479  1479 I MWN     : onSignalStrengthsChanged...
+07-08 21:51:12.859  1479  1479 I MWN     : network type was unavailable.
+07-08 21:51:12.859  1479  1479 I MWN     : Write 3 to node. type=unknown mSimExist=true mFlightMode=false
+07-08 21:51:12.859  1479  1479 I MWN     : write the value:3 to node successfully.
+07-08 21:51:12.897   780   780 I BufferQueueProducer: [com.refbible.app/com.refbible.app.MainActivity#13499](this:0xb400007617703f38,id:-1,api:0,p:-1,c:780) queueBuffer: fps=60.04 dur=1016.04 max=16.92 min=16.44
+07-08 21:51:13.540   746   803 I libPerfCtl: xgfGetFPS pid:1777 fps:-1
+07-08 21:51:13.540   746   803 I libPerfCtl: xgfGetFPS pid:25363 fps:59
+07-08 21:51:13.540   746   803 I libPerfCtl: xgfGetFPS pid:32599 fps:-1
+07-08 21:51:13.730   733   832 I hwcomposer: [HWCDisplay] [Display_0 (type:1)] fps:59.051006,dur:1016.07,max:33.42,min:16.47  
+07-08 21:51:13.912   780   780 I BufferQueueProducer: [com.refbible.app/com.refbible.app.MainActivity#13499](this:0xb400007617703f38,id:-1,api:0,p:-1,c:780) queueBuffer: fps=59.07 dur=1015.83 max=33.40 min=16.52
+07-08 21:51:13.973 12990 12990 I adbd    : adbd service requested 'shell,v2:export ANDROID_LOG_TAGS=''; exec logcat '-d''

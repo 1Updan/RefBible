@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, AlertCircle, BookText, Volume2, VolumeX } from 'lucide-react'
+import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, AlertCircle, BookText, Volume2, VolumeX, Search } from 'lucide-react'
 import { useNavigation } from '@/hooks/useNavigation'
 import { useNetworkState } from '@/hooks/useNetworkState'
-import { getCrossReferences, getTranslations, saveNote, getNotes, getAllNotes, deleteNote, getStrongsEntry, getInterlinearWords, getUserCrossReferences, addCustomCrossReference, removeCustomCrossReference } from '@/lib/db'
+import { getCrossReferences, getTranslations, saveNote, getNotes, getAllNotes, deleteNote, getStrongsEntry, getInterlinearWords, getUserCrossReferences, addCustomCrossReference, removeCustomCrossReference, searchVerses } from '@/lib/db'
 import { formatVerseId, parseOsisId, parseReference, verseIdFromBookChapterVerse } from '@/lib/utils'
+import type { SearchResult } from '@/lib/db'
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { getBook } from '@/data/books'
@@ -26,7 +27,12 @@ function CrossRefsTab() {
   const [addError, setAddError] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [searching, setSearching] = useState(false)
+  const [showSearchResults, setShowSearchResults] = useState(false)
   const addInputRef = useRef<HTMLInputElement>(null)
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const resultsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const target = crossRefTarget?.verseId
@@ -56,28 +62,66 @@ function CrossRefsTab() {
     return () => { cancelled = true }
   }, [crossRefTarget, refreshKey])
 
-  const handleAdd = useCallback(async () => {
-    setAddError(null)
-    const target = crossRefTarget?.verseId
-    if (!target) return
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
     const trimmed = addInput.trim()
-    if (!trimmed) {
-      setAddError('Enter a verse reference.')
+    if (trimmed.length < 2) {
+      setSearchResults([])
+      setShowSearchResults(false)
       return
     }
     const parsed = parseReference(trimmed)
-    if (!parsed) {
-      setAddError('Could not parse. Try e.g. "Romans 1:1"')
+    if (parsed && parsed.verse) {
+      setSearchResults([])
+      setShowSearchResults(false)
       return
     }
-    if (!parsed.verse) {
-      setAddError('Include a verse number, e.g. "Romans 1:1"')
+    searchTimerRef.current = setTimeout(async () => {
+      setSearching(true)
+      try {
+        const results = await searchVerses(trimmed, ['KJV'])
+        setSearchResults(results.slice(0, 20))
+        setShowSearchResults(results.length > 0)
+      } catch {
+        setSearchResults([])
+      } finally {
+        setSearching(false)
+      }
+    }, 300)
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    }
+  }, [addInput])
+
+  const handleAdd = useCallback(async (targetIdOverride?: string) => {
+    setAddError(null)
+    setShowSearchResults(false)
+    const target = crossRefTarget?.verseId
+    if (!target) return
+    const trimmed = addInput.trim()
+    if (!trimmed && !targetIdOverride) {
+      setAddError('Enter a verse reference.')
       return
     }
-    const targetId = verseIdFromBookChapterVerse(parsed.bookId, parsed.chapter, parsed.verse)
-    if (!targetId) {
-      setAddError('Could not build verse ID.')
-      return
+    let targetId: string
+    if (targetIdOverride) {
+      targetId = targetIdOverride
+    } else {
+      const parsed = parseReference(trimmed)
+      if (!parsed) {
+        setAddError('Could not parse. Try e.g. "Romans 1:1"')
+        return
+      }
+      if (!parsed.verse) {
+        setAddError('Include a verse number, e.g. "Romans 1:1"')
+        return
+      }
+      const id = verseIdFromBookChapterVerse(parsed.bookId, parsed.chapter, parsed.verse)
+      if (!id) {
+        setAddError('Could not build verse ID.')
+        return
+      }
+      targetId = id
     }
     setAdding(true)
     try {
@@ -95,6 +139,17 @@ function CrossRefsTab() {
     setRefreshKey((n) => n + 1)
   }, [])
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (resultsRef.current && !resultsRef.current.contains(e.target as Node) &&
+          addInputRef.current && !addInputRef.current.contains(e.target as Node)) {
+        setShowSearchResults(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   if (!crossRefTarget) {
     return <p className="text-xs text-text-tertiary px-1 py-4 text-center">Select a verse to see cross references</p>
   }
@@ -105,24 +160,57 @@ function CrossRefsTab() {
         For <span className="font-semibold text-text-primary">{crossRefTarget.reference}</span>
       </p>
 
-      <div className="flex items-center gap-1">
-        <input
-          ref={addInputRef}
-          type="text"
-          value={addInput}
-          onChange={(e) => { setAddInput(e.target.value); setAddError(null) }}
-          onKeyDown={(e) => { if (e.key === 'Enter') handleAdd() }}
-          placeholder="Add a ref, e.g. Romans 1:1"
-          className="flex-1 px-2 py-1.5 text-xs rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
-        />
-        <button
-          type="button"
-          onClick={handleAdd}
-          disabled={adding || !addInput.trim()}
-          className="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer shrink-0"
-        >
-          {adding ? 'Adding\u2026' : 'Add'}
-        </button>
+      <div className="relative">
+        <div className="flex items-center gap-1">
+          <div className="relative flex-1">
+            <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
+            <input
+              ref={addInputRef}
+              type="text"
+              value={addInput}
+              onChange={(e) => { setAddInput(e.target.value); setAddError(null) }}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleAdd() }}
+              onFocus={() => { if (searchResults.length > 0) setShowSearchResults(true) }}
+              placeholder="Search or type a ref, e.g. Romans 1:1"
+              className="w-full pl-6 pr-2 py-1.5 text-xs rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => handleAdd()}
+            disabled={adding || !addInput.trim()}
+            className="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer shrink-0"
+          >
+            {adding ? 'Adding\u2026' : 'Add'}
+          </button>
+        </div>
+        {showSearchResults && (
+          <div
+            ref={resultsRef}
+            className="absolute z-50 left-0 right-12 mt-1 max-h-48 overflow-y-auto rounded-lg bg-surface-elevated border border-border shadow-lg"
+          >
+            {searching ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="w-3 h-3 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              searchResults.map((r) => {
+                const book = getBook(r.book_id)
+                return (
+                  <button
+                    key={r.verse_id}
+                    type="button"
+                    onClick={() => handleAdd(r.verse_id)}
+                    className="w-full text-left px-2.5 py-2 text-xs hover:bg-surface-hover transition-colors duration-100 cursor-pointer border-b border-border last:border-b-0"
+                  >
+                    <span className="font-semibold text-accent">{book?.name ?? 'Unknown'} {r.chapter_num}:{r.verse_num}</span>
+                    <p className="text-text-secondary mt-0.5 leading-relaxed line-clamp-2">{r.text_data}</p>
+                  </button>
+                )
+              })
+            )}
+          </div>
+        )}
       </div>
       {addError && (
         <p className="text-[10px] text-danger px-1">{addError}</p>
