@@ -23,6 +23,7 @@ interface SettingsPanelProps {
   selectedVoiceUri: string
   onChangeVoice: (uri: string) => void
   onVotdNavigate: () => void
+  onVersionsChanged?: () => void
 }
 
 const THEMES: { value: Theme; label: string; icon: typeof Sun }[] = [
@@ -63,12 +64,15 @@ export function SettingsPanel({
   selectedVoiceUri,
   onChangeVoice,
   onVotdNavigate,
+  onVersionsChanged,
 }: SettingsPanelProps) {
   const [openTranslations, toggleTranslations] = useSectionState('translations')
   const [openAudio, toggleAudio] = useSectionState('audio')
   const [installed, setInstalled] = useState<Set<string>>(new Set())
   const [downloading, setDownloading] = useState<string | null>(null)
+  const [downloadProgress, setDownloadProgress] = useState<{ current: number; total: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
   const [expandedLangs, setExpandedLangs] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem('refbible:expanded-langs')
@@ -92,20 +96,31 @@ export function SettingsPanel({
 
   const handleDownload = async (code: string) => {
     setDownloading(code)
+    setDownloadProgress(null)
     setError(null)
+    abortRef.current = new AbortController()
     try {
-      await downloadAndInstall(code)
+      await downloadAndInstall(code, setDownloadProgress, abortRef.current.signal)
       await refreshInstalled()
+      onVersionsChanged?.()
     } catch (e) {
+      if ((e as Error).name === 'AbortError') return
       setError(e instanceof Error ? e.message : String(e))
     } finally {
       setDownloading(null)
+      setDownloadProgress(null)
+      abortRef.current = null
     }
+  }
+
+  const handleCancelDownload = () => {
+    abortRef.current?.abort()
   }
 
   const handleDelete = async (code: string) => {
     await removeTranslation(code)
     await refreshInstalled()
+    onVersionsChanged?.()
   }
 
   const toggleLang = (name: string) => {
@@ -270,7 +285,9 @@ export function SettingsPanel({
                           version={v}
                           installed={installed.has(v.code)}
                           downloading={downloading === v.code}
+                          downloadProgress={downloading === v.code ? downloadProgress : null}
                           onDownload={() => handleDownload(v.code)}
+                          onCancel={handleCancelDownload}
                           onDelete={() => handleDelete(v.code)}
                         />
                       ))}
@@ -452,15 +469,23 @@ function VersionRow({
   version,
   installed,
   downloading,
+  downloadProgress,
   onDownload,
+  onCancel,
   onDelete,
 }: {
   version: VersionMeta
   installed: boolean
   downloading: boolean
+  downloadProgress: { current: number; total: number } | null
   onDownload: () => void
+  onCancel: () => void
   onDelete: () => void
 }) {
+  const pct = downloadProgress
+    ? Math.round((downloadProgress.current / downloadProgress.total) * 100)
+    : 0
+
   return (
     <div className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-surface-hover transition-colors duration-150">
       <div className="flex flex-col min-w-0">
@@ -485,19 +510,33 @@ function VersionRow({
             <Trash2 size={13} />
             Delete
           </button>
+        ) : downloading ? (
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <div className="w-20 h-1.5 bg-border rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-accent rounded-full transition-all duration-300"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <span className="text-[10px] font-medium text-text-secondary tabular-nums w-8 text-right">{pct}%</span>
+            </div>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-danger hover:bg-danger/10 rounded-lg transition-all duration-150 cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
         ) : (
           <button
             type="button"
             onClick={onDownload}
-            disabled={downloading}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-accent hover:bg-accent/10 rounded-lg transition-all duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-accent hover:bg-accent/10 rounded-lg transition-all duration-150 cursor-pointer"
           >
-            {downloading ? (
-              <span className="w-3 h-3 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Download size={13} />
-            )}
-            {downloading ? 'Downloading…' : 'Download'}
+            <Download size={13} />
+            Download
           </button>
         )}
       </div>

@@ -27,8 +27,6 @@ interface ChapterHeaderProps {
   onSpeak: () => void
   onStop: () => void
   onOpenNav?: () => void
-  interlinearEnabled?: boolean
-  onToggleInterlinear?: () => void
 }
 
 export function ChapterHeader({
@@ -53,8 +51,6 @@ export function ChapterHeader({
   onSpeak,
   onStop,
   onOpenNav,
-  interlinearEnabled,
-  onToggleInterlinear,
 }: ChapterHeaderProps) {
   const [open, setOpen] = useState(false)
   const [searchInput, setSearchInput] = useState('')
@@ -290,7 +286,12 @@ export function ChapterHeader({
             <button
               type="button"
               onClick={() => onTogglePanel('search')}
-              className="p-1 rounded-md text-text-tertiary hover:text-text-primary hover:bg-surface transition-all duration-150 cursor-pointer"
+              className={clsx(
+                'p-1 rounded-md transition-all duration-150 cursor-pointer',
+                activePanel === 'search'
+                  ? 'bg-accent-light text-accent'
+                  : 'text-text-tertiary hover:text-text-primary hover:bg-surface',
+              )}
               aria-label="Search"
             >
               <Search size={15} />
@@ -317,17 +318,6 @@ export function ChapterHeader({
                 <div className="space-y-0.5 py-1">
                   <button
                     type="button"
-                    onClick={() => { onTogglePanel('crossrefs'); setMobileMenuOpen(false) }}
-                    className={clsx(
-                      'w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors duration-100 cursor-pointer text-left',
-                      activePanel === 'study' && studyTab === 'crossrefs' ? 'text-accent bg-accent/10' : 'text-text-primary hover:bg-surface',
-                    )}
-                  >
-                    <Crosshair size={14} />
-                    Cross References
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => { onTogglePanel('bookmarks'); setMobileMenuOpen(false) }}
                     className={clsx(
                       'w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors duration-100 cursor-pointer text-left',
@@ -348,26 +338,14 @@ export function ChapterHeader({
                   </button>
                   <button
                     type="button"
-                    onClick={() => { onToggleInterlinear?.(); setMobileMenuOpen(false) }}
+                    onClick={() => { onTogglePanel('settings'); setMobileMenuOpen(false) }}
                     className={clsx(
                       'w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors duration-100 cursor-pointer text-left',
-                      interlinearEnabled ? 'text-accent bg-accent/10' : 'text-text-primary hover:bg-surface',
+                      activePanel === 'settings' ? 'text-accent bg-accent/10' : 'text-text-primary hover:bg-surface',
                     )}
                   >
-                    <BookOpen size={14} />
-                    Interlinear
-                    {interlinearEnabled && <Check size={12} className="ml-auto text-accent" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { onTogglePanel('ai'); setMobileMenuOpen(false) }}
-                    className={clsx(
-                      'w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors duration-100 cursor-pointer text-left',
-                      activePanel === 'study' && studyTab === 'ai' ? 'text-accent bg-accent/10' : 'text-text-primary hover:bg-surface',
-                    )}
-                  >
-                    <Sparkles size={14} />
-                    AI
+                    <Settings size={14} />
+                    Settings
                   </button>
                 </div>
 

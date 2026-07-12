@@ -11,6 +11,7 @@ import {
   getInterlinearWords,
 } from "@/lib/db";
 import { useNavigation } from "@/hooks/useNavigation";
+import type { AiTarget } from "@/contexts/navigation";
 import { getBook } from "@/data/books";
 import { parseOsisId } from "@/lib/utils";
 import type {
@@ -27,15 +28,14 @@ interface ReadingViewProps {
   fontSize: number;
   bookmarks: Set<string>;
   isDesktop: boolean;
-  isOnline: boolean;
   interlinearEnabled: boolean;
   interlinearLanguages: readonly ("hebrew" | "greek")[];
-  onToggleInterlinear: () => void;
   onToggleBookmark: (verseId: string) => void;
   onOpenNote: (verseId: string) => void;
   onChapterText?: (text: string) => void;
   onChapterVerses?: (verses: string[]) => void;
   onSelectionVerse?: (verseNum: number | null) => void;
+  aiVerseRef?: React.MutableRefObject<AiTarget | null>;
   onSwipePrev?: () => void;
   onSwipeNext?: () => void;
   onControlsVisibleChange?: (visible: boolean) => void;
@@ -54,10 +54,8 @@ export function ReadingView({
   fontSize,
   bookmarks,
   isDesktop,
-  isOnline,
   interlinearEnabled,
   interlinearLanguages,
-  onToggleInterlinear,
   onToggleBookmark,
   onOpenNote,
   onChapterText,
@@ -72,14 +70,12 @@ export function ReadingView({
   onHighlightVerse,
   onRemoveHighlight,
   onHighlightColorChange,
+  aiVerseRef,
 }: ReadingViewProps) {
   const {
     openCrossReferences,
     setCrossRefTarget,
-    setStudyTab,
-    setActivePanel,
     navigateTo,
-    setAiTarget,
     pendingRange,
     setPendingRange,
     activePanel,
@@ -541,6 +537,28 @@ export function ReadingView({
     [selectedList, bookmarks],
   );
 
+  useEffect(() => {
+    if (!aiVerseRef) return;
+    if (selectedList.length === 0) {
+      aiVerseRef.current = null;
+      return;
+    }
+    const firstId = selectedList[0];
+    const v = verses.find((x) => x.id === firstId);
+    const d = data.get(firstId);
+    if (!v || !d) return;
+    const book = getBook(bookId);
+    const firstText = d.texts.find((t) => t.translation_code === "KJV") ?? d.texts[0];
+    aiVerseRef.current = {
+      verseId: firstId,
+      bookId,
+      chapter,
+      verseNum: v.verse_num,
+      reference: `${book?.name ?? "John"} ${chapter}:${v.verse_num}`,
+      text: firstText?.text_data ?? "",
+    };
+  }, [selectedList, verses, data, bookId, chapter, aiVerseRef]);
+
   const handleActionBookmark = useCallback(() => {
     for (const id of selectedList) onToggleBookmark(id);
   }, [selectedList, onToggleBookmark]);
@@ -548,51 +566,6 @@ export function ReadingView({
   const handleActionNote = useCallback(() => {
     if (selectedList.length === 1) onOpenNote(selectedList[0]);
   }, [selectedList, onOpenNote]);
-
-  const handleActionCrossRefs = useCallback(() => {
-    if (selectedList.length === 1) {
-      const v = verses.find((x) => x.id === selectedList[0]);
-      if (!v) return;
-      const book = getBook(bookId);
-      openCrossReferences({
-        verseId: selectedList[0],
-        bookId: v.book_id,
-        chapter: v.chapter_num,
-        reference: `${book?.name ?? "John"} ${chapter}:${v.verse_num}`,
-      });
-    }
-  }, [selectedList, verses, bookId, chapter, openCrossReferences]);
-
-  const handleActionAi = useCallback(() => {
-    if (selectedList.length === 1) {
-      const verseId = selectedList[0];
-      const v = verses.find((x) => x.id === verseId);
-      const d = data.get(verseId);
-      if (!v || !d) return;
-      const book = getBook(bookId);
-      const firstText =
-        d.texts.find((t) => t.translation_code === "KJV") ?? d.texts[0];
-      setAiTarget({
-        verseId,
-        bookId: v.book_id,
-        chapter: v.chapter_num,
-        verseNum: v.verse_num,
-        reference: `${book?.name ?? "John"} ${chapter}:${v.verse_num}`,
-        text: firstText?.text_data ?? "",
-      });
-      setStudyTab("ai");
-      setActivePanel("study");
-    }
-  }, [
-    selectedList,
-    verses,
-    data,
-    bookId,
-    chapter,
-    setStudyTab,
-    setActivePanel,
-    setAiTarget,
-  ]);
 
   const [shareVerse, setShareVerse] = useState<{
     reference: string;
@@ -611,15 +584,15 @@ export function ReadingView({
 
   const handleHighlightColorSelect = useCallback(
     (color: HighlightColorId | null) => {
-      if (color && onHighlightVerse) {
-        for (const verseId of selectedIds) {
-          onHighlightVerse(verseId, color);
-        }
+      const c = color !== null ? color : (activeHighlightColor ?? undefined);
+      if (!c) return;
+      for (const verseId of selectedIds) {
+        onHighlightVerse?.(verseId, c);
       }
       setHighlightActive(false);
       onHighlightColorChange?.(null);
     },
-    [selectedIds, onHighlightVerse, onHighlightColorChange],
+    [selectedIds, activeHighlightColor, onHighlightVerse, onHighlightColorChange],
   );
 
   const handleEraseSelection = useCallback(() => {
@@ -742,17 +715,12 @@ export function ReadingView({
         <VerseActionBar
           selectedCount={selectedIds.size}
           isDesktop={isDesktop}
-          isOnline={isOnline}
           allBookmarked={allBookmarked}
           onToggleBookmark={handleActionBookmark}
           onAddNote={handleActionNote}
-          onCrossReferences={handleActionCrossRefs}
-          onAiCommentary={handleActionAi}
           onClearSelection={handleClearSelection}
           onRangeSelect={handleRangeSelect}
           isRangeMode={rangeMode}
-          interlinearEnabled={interlinearEnabled}
-          onToggleInterlinear={onToggleInterlinear}
           onShare={handleShare}
           highlightActive={highlightActive}
           activeHighlightColor={activeHighlightColor}

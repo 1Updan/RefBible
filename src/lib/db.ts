@@ -51,14 +51,6 @@ export async function getNotes(verseId: string): Promise<Note[]> {
 }
 
 export async function saveNote(verseId: string, text: string): Promise<Note> {
-  const existing = await query<Note>(
-    'SELECT id, verse_id, text_content, created_at FROM notes WHERE verse_id = $1 ORDER BY created_at DESC LIMIT 1',
-    [verseId],
-  )
-  if (existing.length > 0) {
-    await exec('UPDATE notes SET text_content = $1, created_at = CURRENT_TIMESTAMP WHERE id = $2', [text, existing[0].id])
-    return { ...existing[0], text_content: text, created_at: new Date().toISOString() }
-  }
   await exec('INSERT INTO notes (verse_id, text_content) VALUES ($1, $2)', [verseId, text])
   const rows = await query<Note>(
     'SELECT id, verse_id, text_content, created_at FROM notes WHERE verse_id = $1 ORDER BY created_at DESC LIMIT 1',
@@ -67,8 +59,16 @@ export async function saveNote(verseId: string, text: string): Promise<Note> {
   return rows[0]
 }
 
+export async function updateNote(id: number, text: string): Promise<void> {
+  await exec('UPDATE notes SET text_content = $1, created_at = CURRENT_TIMESTAMP WHERE id = $2', [text, id])
+}
+
 export async function deleteNote(verseId: string): Promise<void> {
   await exec('DELETE FROM notes WHERE verse_id = $1', [verseId])
+}
+
+export async function deleteNoteById(id: number): Promise<void> {
+  await exec('DELETE FROM notes WHERE id = $1', [id])
 }
 
 export async function getAllNotes(): Promise<Note[]> {
@@ -101,6 +101,11 @@ export async function writeCache(verseId: string, mode: string, response: string
 }
 
 export async function getInstalledTranslations(): Promise<string[]> {
+  // Remove stale rows whose verse_id doesn't match any verse in the DB
+  await exec(
+    "DELETE FROM content_text WHERE verse_id NOT IN (SELECT id FROM verses)",
+    [],
+  )
   const rows = await query<{ translation_code: string }>(
     'SELECT DISTINCT translation_code FROM content_text ORDER BY translation_code',
   )

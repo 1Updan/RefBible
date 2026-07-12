@@ -74,3 +74,4 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+// force rebuild 18:27:01

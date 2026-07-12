@@ -16,7 +16,7 @@ for (const book of BOOKS) {
 }
 
 // Also index by KJV abbreviation so cross-refs stored in DB (KJV format) resolve
-const KJV_BOOKS: [string, string][] = [
+export const KJV_BOOKS: [string, string][] = [
   ['GEN', 'GEN'], ['EXO', 'EXOD'], ['LEV', 'LEV'], ['NUM', 'NUM'], ['DEU', 'DEUT'],
   ['JOS', 'JOSH'], ['JDG', 'JUDG'], ['RUT', 'RUTH'], ['1SA', '1SAM'], ['2SA', '2SAM'],
   ['1KI', '1KGS'], ['2KI', '2KGS'], ['1CH', '1CHR'], ['2CH', '2CHR'], ['EZR', 'EZRA'],
@@ -25,11 +25,11 @@ const KJV_BOOKS: [string, string][] = [
   ['EZK', 'EZEK'], ['DAN', 'DAN'], ['HOS', 'HOS'], ['JOL', 'JOEL'], ['AMO', 'AMOS'],
   ['OBA', 'OBAD'], ['JON', 'JONAH'], ['MIC', 'MIC'], ['NAM', 'NAH'], ['HAB', 'HAB'],
   ['ZEP', 'ZEPH'], ['HAG', 'HAG'], ['ZEC', 'ZECH'], ['MAL', 'MAL'],
-  ['MAT', 'MATT'], ['MRK', 'MARK'], ['LUK', 'LUKE'], ['JHN', 'JHN'], ['ACT', 'ACTS'],
+  ['MAT', 'MATT'], ['MRK', 'MARK'], ['LUK', 'LUKE'], ['JHN', 'JOHN'], ['ACT', 'ACTS'],
   ['ROM', 'ROM'], ['1CO', '1COR'], ['2CO', '2COR'], ['GAL', 'GAL'], ['EPH', 'EPH'],
   ['PHP', 'PHIL'], ['COL', 'COL'], ['1TH', '1THESS'], ['2TH', '2THESS'], ['1TI', '1TIM'],
   ['2TI', '2TIM'], ['TIT', 'TITUS'], ['PHM', 'PHLM'], ['HEB', 'HEB'], ['JAS', 'JAS'],
-  ['1PE', '1PET'], ['2PE', '2PET'], ['1JN', '1JHN'], ['2JN', '2JHN'], ['3JN', '3JHN'],
+  ['1PE', '1PET'], ['2PE', '2PET'], ['1JN', '1JOHN'], ['2JN', '2JOHN'], ['3JN', '3JOHN'],
   ['JUD', 'JUDE'], ['REV', 'REV'],
 ]
 for (const [kjv, osis] of KJV_BOOKS) {

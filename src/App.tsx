@@ -3,11 +3,11 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { useTheme } from "./hooks/useTheme";
 import { useReadingPreferences } from "./hooks/useReadingPreferences";
 import { NavigationProvider } from "./contexts/NavigationContext";
+import type { AiTarget } from "./contexts/navigation";
 import { useNavigation } from "./hooks/useNavigation";
 import { ReadingView } from "./components/reading/ReadingView";
 import { BookChapterNav } from "./components/layout/BookChapterNav";
 import { ChapterHeader } from "./components/layout/ChapterHeader";
-import { MobileTabBar } from "./components/layout/MobileTabBar";
 import { DesktopShell } from "./components/layout/AppShell";
 
 import { StudyPanel } from "./components/panels/StudyPanel";
@@ -28,10 +28,10 @@ import {
 } from "./lib/db";
 import { getBook, BOOKS } from "@/data/books";
 import type { HighlightColorId } from "./lib/highlights";
-import { useNetworkState } from "./hooks/useNetworkState";
+
 import { useSpeech } from "./hooks/useSpeech";
 import { SpeechControlBar } from "./components/reading/SpeechControlBar";
-import { BookOpen, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { BookOpen, ChevronLeft, ChevronRight, ChevronDown, Crosshair, Sparkles, Settings } from "lucide-react";
 import {
   isPermissionGranted,
   requestPermission,
@@ -90,6 +90,7 @@ function AppContent() {
     goBack,
     canGoBack,
     setPendingRange,
+    setAiTarget,
   } = useNavigation();
   const [ready, setReady] = useState(false);
   const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
@@ -99,10 +100,22 @@ function AppContent() {
   );
   const [activeHighlightColor, setActiveHighlightColor] =
     useState<HighlightColorId | null>(null);
+  const aiVerseRef = useRef<AiTarget | null>(null);
   const [installedVersions, setInstalledVersions] = useState<string[]>([
     "KJV",
     "NASB",
   ]);
+
+  useEffect(() => {
+    getInstalledTranslations().then((downloaded) =>
+      setInstalledVersions((prev) => [...new Set([...prev, ...downloaded])]),
+    )
+  }, [])
+
+  const refreshInstalledVersions = useCallback(async () => {
+    const downloaded = await getInstalledTranslations()
+    setInstalledVersions([...new Set(["KJV", "NASB", ...downloaded])])
+  }, [])
   const [noteText, setNoteText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showNav, setShowNav] = useState(false);
@@ -119,8 +132,6 @@ function AppContent() {
   const [controlsHidden, setControlsHidden] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
   const headerMeasureRef = useRef<HTMLDivElement>(null);
-  const tabBarMeasureRef = useRef<HTMLDivElement>(null);
-  const isOnline = useNetworkState();
   const {
     speak,
     pause,
@@ -366,6 +377,9 @@ function AppContent() {
   const handlePanelToggle = (
     panel: "bookmarks" | "ai" | "settings" | "study" | "search" | "crossrefs",
   ) => {
+    if (panel === "ai" && aiVerseRef.current) {
+      setAiTarget(aiVerseRef.current);
+    }
     if (activePanel === panel) {
       setActivePanel("none");
     } else if (panel === "ai") {
@@ -430,8 +444,6 @@ function AppContent() {
       canSpeak={canSpeak}
       onSpeak={handleSpeak}
       onStop={stop}
-      interlinearEnabled={prefs.interlinearEnabled}
-      onToggleInterlinear={toggleInterlinear}
       onOpenNav={
         !isDesktop
           ? () => {
@@ -470,10 +482,8 @@ function AppContent() {
       fontSize={prefs.fontSize}
       bookmarks={bookmarks}
       isDesktop={isDesktop}
-      isOnline={isOnline}
       interlinearEnabled={prefs.interlinearEnabled}
       interlinearLanguages={prefs.interlinearLanguages}
-      onToggleInterlinear={toggleInterlinear}
       onToggleBookmark={handleToggleBookmark}
       onOpenNote={handleOpenNote}
       onChapterText={handleChapterText}
@@ -498,6 +508,7 @@ function AppContent() {
       onHighlightVerse={handleHighlightVerse}
       onRemoveHighlight={handleRemoveHighlight}
       onHighlightColorChange={setActiveHighlightColor}
+      aiVerseRef={aiVerseRef}
     />
   );
 
@@ -534,6 +545,7 @@ function AppContent() {
               navigateTo(votd.bookId, votd.chapter);
               setVotdNavigateTo(votd.osisId);
             }}
+            onVersionsChanged={refreshInstalledVersions}
           />
         );
       case "bookmarks":
@@ -566,17 +578,6 @@ function AppContent() {
         return null;
     }
   };
-
-  const tabBar = (
-    <MobileTabBar
-      activePanel={activePanel}
-      onTabChange={(tab) => {
-        if (tab === "read") setActivePanel("none");
-        else if (tab === "saved") setActivePanel("bookmarks");
-        else if (tab === "settings") setActivePanel("settings");
-      }}
-    />
-  );
 
   const mobileSheet = activePanel && activePanel !== "none" && (
     <BottomSheet
@@ -631,6 +632,7 @@ function AppContent() {
             navigateTo(votd.bookId, votd.chapter);
             setVotdNavigateTo(votd.osisId);
           }}
+          onVersionsChanged={refreshInstalledVersions}
         />
       )}
     </BottomSheet>
@@ -691,19 +693,63 @@ function AppContent() {
         <main className="flex-1 min-h-0 flex flex-col bg-bg">
           {readingView}
         </main>
-        <div
-          ref={tabBarMeasureRef}
-          className={controlsHidden ? 'hidden' : 'shrink-0'}
-        >
-          {tabBar}
-        </div>
+        {!isDesktop && (
+          <div className="flex items-center justify-around border-t border-border bg-tab-bar backdrop-blur-xl px-2 pb-1 shrink-0 select-none" style={{ paddingBottom: 'max(4px, env(safe-area-inset-bottom, 4px))' }}>
+            <button
+              type="button"
+              onClick={() => handlePanelToggle('crossrefs')}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all duration-150 cursor-pointer ${
+                activePanel === 'study' && studyTab === 'crossrefs' ? 'text-accent' : 'text-text-tertiary'
+              }`}
+            >
+              <Crosshair size={18} />
+              <span className="text-[10px] font-medium leading-tight">Refs</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleInterlinear()}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all duration-150 cursor-pointer ${
+                prefs.interlinearEnabled ? 'text-accent' : 'text-text-tertiary'
+              }`}
+            >
+              <BookOpen size={18} />
+              <span className="text-[10px] font-medium leading-tight">Interlinear</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!navigator.onLine) {
+                  alert('You are offline — AI features require an internet connection.');
+                  return;
+                }
+                handlePanelToggle('ai');
+              }}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all duration-150 cursor-pointer ${
+                activePanel === 'study' && studyTab === 'ai' ? 'text-accent' : 'text-text-tertiary'
+              }`}
+            >
+              <Sparkles size={18} />
+              <span className="text-[10px] font-medium leading-tight">AI</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePanelToggle('settings')}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all duration-150 cursor-pointer ${
+                activePanel === 'settings' ? 'text-accent' : 'text-text-tertiary'
+              }`}
+            >
+              <Settings size={18} />
+              <span className="text-[10px] font-medium leading-tight">Settings</span>
+            </button>
+          </div>
+        )}
         {currentBook && (
           <>
             {chapter > 1 && (
               <button
                 type="button"
                 onClick={() => navigateTo(bookId, chapter - 1)}
-                className={`fixed z-40 flex items-center justify-center w-11 h-11 rounded-full text-text-tertiary hover:text-text-primary bg-black/35 dark:bg-white/25 ring-1 ring-black/20 dark:ring-white/15 active:bg-black/55 dark:active:bg-white/45 transition-all duration-150 cursor-pointer touch-manipulation ${isSelecting ? 'bottom-[140px]' : 'bottom-[80px]'} left-4`}
+                className={`fixed z-40 flex items-center justify-center w-11 h-11 rounded-full text-text-tertiary hover:text-text-primary bg-black/35 dark:bg-white/25 ring-1 ring-black/20 dark:ring-white/15 active:bg-black/55 dark:active:bg-white/45 transition-all duration-150 cursor-pointer touch-manipulation ${isSelecting ? 'bottom-[130px]' : 'bottom-[72px]'} left-4`}
                 aria-label="Previous chapter"
               >
                 <ChevronLeft size={22} />
@@ -713,7 +759,7 @@ function AppContent() {
               <button
                 type="button"
                 onClick={() => navigateTo(bookId, chapter + 1)}
-                className={`fixed z-40 flex items-center justify-center w-11 h-11 rounded-full text-text-tertiary hover:text-text-primary bg-black/35 dark:bg-white/25 ring-1 ring-black/20 dark:ring-white/15 active:bg-black/55 dark:active:bg-white/45 transition-all duration-150 cursor-pointer touch-manipulation ${isSelecting ? 'bottom-[140px]' : 'bottom-[80px]'} right-4`}
+                className={`fixed z-40 flex items-center justify-center w-11 h-11 rounded-full text-text-tertiary hover:text-text-primary bg-black/35 dark:bg-white/25 ring-1 ring-black/20 dark:ring-white/15 active:bg-black/55 dark:active:bg-white/45 transition-all duration-150 cursor-pointer touch-manipulation ${isSelecting ? 'bottom-[130px]' : 'bottom-[72px]'} right-4`}
                 aria-label="Next chapter"
               >
                 <ChevronRight size={22} />

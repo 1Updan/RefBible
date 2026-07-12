@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, AlertCircle, BookText, Volume2, VolumeX, Search } from 'lucide-react'
+import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, AlertCircle, BookText, Volume2, VolumeX, Search, Mic, MicOff } from 'lucide-react'
 import { useNavigation } from '@/hooks/useNavigation'
 import { useNetworkState } from '@/hooks/useNetworkState'
-import { getCrossReferences, getTranslations, saveNote, getNotes, getAllNotes, deleteNote, getStrongsEntry, getInterlinearWords, getUserCrossReferences, addCustomCrossReference, removeCustomCrossReference, searchVerses } from '@/lib/db'
+import { getCrossReferences, getTranslations, saveNote, getNotes, getAllNotes, deleteNote, deleteNoteById, updateNote, getStrongsEntry, getInterlinearWords, getUserCrossReferences, addCustomCrossReference, removeCustomCrossReference, searchVerses } from '@/lib/db'
 import { formatVerseId, parseOsisId, parseReference, verseIdFromBookChapterVerse } from '@/lib/utils'
 import type { SearchResult } from '@/lib/db'
 import { invoke } from '@tauri-apps/api/core'
@@ -260,6 +260,8 @@ function CrossRefsTab() {
 function NotesTab() {
   const { noteVerseId, closeNote, navigateTo, openNote } = useNavigation()
   const [text, setText] = useState('')
+  const [editingNoteId, setEditingNoteId] = useState<number | null>(null)
+  const [verseNotes, setVerseNotes] = useState<Note[]>([])
   const [allNotes, setAllNotes] = useState<Note[]>([])
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -270,21 +272,36 @@ function NotesTab() {
   useEffect(() => {
     if (noteVerseId) {
       getNotes(noteVerseId).then((notes) => {
-        setText(notes.length > 0 ? notes[0].text_content : '')
+        setVerseNotes(notes)
+        setText('')
+        setEditingNoteId(null)
       })
     }
-    return () => { setText('') }
+    return () => { setVerseNotes([]); setText(''); setEditingNoteId(null) }
   }, [noteVerseId])
 
   const handleSave = useCallback(async () => {
-    if (noteVerseId && text.trim()) {
+    if (!noteVerseId || !text.trim()) return
+    if (editingNoteId !== null) {
+      await updateNote(editingNoteId, text.trim())
+    } else {
       await saveNote(noteVerseId, text.trim())
-      setRefreshKey((n) => n + 1)
-      closeNote()
     }
-  }, [noteVerseId, text, closeNote])
+    setRefreshKey((n) => n + 1)
+    closeNote()
+  }, [noteVerseId, text, editingNoteId, closeNote])
 
-  const handleDelete = useCallback(async (verseId: string) => {
+  const handleEdit = useCallback((note: Note) => {
+    setEditingNoteId(note.id)
+    setText(note.text_content)
+  }, [])
+
+  const handleDeleteById = useCallback(async (noteId: number) => {
+    await deleteNoteById(noteId)
+    setRefreshKey((n) => n + 1)
+  }, [])
+
+  const handleDeleteAll = useCallback(async (verseId: string) => {
     await deleteNote(verseId)
     setRefreshKey((n) => n + 1)
     if (noteVerseId === verseId) closeNote()
@@ -301,11 +318,34 @@ function NotesTab() {
     return (
       <div className="space-y-3">
         <p className="text-xs text-text-secondary font-mono">{noteVerseId}</p>
+
+        {verseNotes.length > 1 && (
+          <div className="space-y-1 mb-2">
+            <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">{verseNotes.length} notes</p>
+            {verseNotes.map((n) => (
+              <div key={n.id} className="flex items-center justify-between px-2 py-1 rounded bg-surface-elevated border border-border-subtle">
+                <p className="text-xs text-text-secondary truncate flex-1 mr-2">{n.text_content}</p>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button type="button" onClick={() => handleEdit(n)} className="p-0.5 text-text-tertiary hover:text-accent transition-colors cursor-pointer" aria-label="Edit">
+                    <MessageSquareMore size={11} />
+                  </button>
+                  <button type="button" onClick={() => handleDeleteById(n.id)} className="p-0.5 text-text-tertiary hover:text-danger transition-colors cursor-pointer" aria-label="Delete">
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">
+          {editingNoteId !== null ? 'Edit Note' : 'New Note'}
+        </p>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Write your note…"
-          rows={5}
+          rows={4}
           className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent resize-none transition-all duration-150"
         />
         <div className="flex gap-2">
@@ -315,7 +355,7 @@ function NotesTab() {
             disabled={!text.trim()}
             className="flex-1 px-3 py-1.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer"
           >
-            Save Note
+            {editingNoteId !== null ? 'Update' : 'Add Note'}
           </button>
           <button
             type="button"
@@ -326,8 +366,9 @@ function NotesTab() {
           </button>
           <button
             type="button"
-            onClick={() => handleDelete(noteVerseId)}
+            onClick={() => handleDeleteAll(noteVerseId)}
             className="px-3 py-1.5 text-sm font-medium rounded-lg text-danger border border-danger/30 hover:bg-danger/10 transition-all duration-150 cursor-pointer"
+            title="Delete all notes for this verse"
           >
             <Trash2 size={14} />
           </button>
@@ -362,13 +403,13 @@ function NotesTab() {
                   type="button"
                   onClick={(e) => { e.stopPropagation(); openNote(note.verse_id) }}
                   className="p-1 rounded text-text-tertiary hover:text-accent transition-colors duration-150 cursor-pointer"
-                  aria-label="Edit note"
+                  aria-label="View notes"
                 >
                   <MessageSquareMore size={12} />
                 </button>
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); handleDelete(note.verse_id) }}
+                  onClick={(e) => { e.stopPropagation(); handleDeleteById(note.id) }}
                   className="p-1 rounded text-text-tertiary hover:text-danger transition-colors duration-150 cursor-pointer"
                   aria-label="Delete note"
                 >
@@ -444,6 +485,7 @@ const AI_PROVIDERS = [
   { id: 'anthropic', name: 'Anthropic', endpoint: 'https://api.anthropic.com/v1', model: 'claude-sonnet-4-20250514' },
   { id: 'deepseek', name: 'DeepSeek', endpoint: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
   { id: 'together', name: 'Together AI', endpoint: 'https://api.together.xyz/v1', model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo' },
+  { id: 'nvidia', name: 'NVIDIA NIM', endpoint: 'https://integrate.api.nvidia.com/v1', model: 'meta/llama-3.1-405b-instruct' },
   { id: 'custom', name: 'Custom', endpoint: '', model: '' },
 ]
 
@@ -454,7 +496,6 @@ function AiTab() {
   const [provider, setProvider] = useState(() => localStorage.getItem('refbible-ai-provider') ?? 'gemini')
   const [endpoint, setEndpoint] = useState(() => localStorage.getItem('refbible-ai-endpoint') ?? '')
   const [model, setModel] = useState(() => localStorage.getItem('refbible-ai-model') ?? '')
-  const saved = !!localStorage.getItem('refbible-ai-key')
   const [selectedMode, setSelectedMode] = useState<string | null>(null)
   const [customPrompt, setCustomPrompt] = useState('')
   const [response, setResponse] = useState('')
@@ -462,6 +503,9 @@ function AiTab() {
   const [error, setError] = useState<string | null>(null)
   const [aiSpeaking, setAiSpeaking] = useState(false)
   const [streaming, setStreaming] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const [saved, setSaved] = useState(() => !!localStorage.getItem('refbible-ai-key'))
+  const recognitionRef = useRef<any>(null)
   const responseRef = useRef('')
   const sentenceBufferRef = useRef('')
   const unlistenRef = useRef<(() => void)[]>([])
@@ -489,6 +533,39 @@ function AiTab() {
     unlistenRef.current = []
   }, [])
 
+  const toggleListening = useCallback(() => {
+    if (isListening) {
+      recognitionRef.current?.stop()
+      recognitionRef.current = null
+      setIsListening(false)
+      return
+    }
+    const SpeechRecognitionCtor = (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition
+    if (!SpeechRecognitionCtor) {
+      setError('Speech recognition is not supported in this browser.')
+      return
+    }
+    const recognition = new SpeechRecognitionCtor()
+    recognition.lang = 'en-US'
+    recognition.continuous = false
+    recognition.interimResults = true
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      const transcript = Array.from(event.results)
+        .map((r) => r[0].transcript)
+        .join('')
+      setCustomPrompt((prev) => prev + transcript)
+    }
+    recognition.onerror = () => {
+      setIsListening(false)
+    }
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+    recognition.start()
+    recognitionRef.current = recognition
+    setIsListening(true)
+  }, [isListening])
+
   useEffect(() => {
     return cleanup
   }, [cleanup])
@@ -508,7 +585,7 @@ function AiTab() {
     localStorage.setItem('refbible-ai-provider', provider)
     localStorage.setItem('refbible-ai-endpoint', endpoint)
     localStorage.setItem('refbible-ai-model', model)
-    window.location.reload()
+    setSaved(true)
   }
 
   const handleClear = () => {
@@ -516,7 +593,8 @@ function AiTab() {
     localStorage.removeItem('refbible-ai-provider')
     localStorage.removeItem('refbible-ai-endpoint')
     localStorage.removeItem('refbible-ai-model')
-    window.location.reload()
+    setApiKey('')
+    setSaved(false)
   }
 
   const handleRun = async () => {
@@ -567,11 +645,23 @@ function AiTab() {
 
       await invoke('ai_query_stream', { apiKey, prompt: combinedPrompt, provider, endpoint, model })
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
+      const raw = e instanceof Error ? e.message : String(e)
+      // Try to extract a friendly message from API error JSON
+      let friendly = raw
+      if (raw.includes('429') || raw.includes('RESOURCE_EXHAUSTED') || raw.includes('quota') || raw.includes('rate_limit')) {
+        friendly = 'AI provider returned a rate-limit or quota error. This usually means the daily free limit has been reached. Try again later or use a different API key with higher limits.'
+      } else if (raw.includes('401') || raw.includes('unauthorized') || raw.includes('API_KEY_INVALID')) {
+        friendly = 'Invalid API key. Check your key in Settings and try again.'
+      } else if (raw.includes('404') || raw.includes('model not found')) {
+        friendly = 'The selected model was not found. Try a different model or provider.'
+      }
+      setError(friendly)
       setLoading(false)
       setStreaming(false)
     }
   }
+
+  const currentProvider = AI_PROVIDERS.find((p) => p.id === provider)
 
   if (!isOnline) {
     return (
@@ -583,9 +673,29 @@ function AiTab() {
     )
   }
 
-  if (!saved) {
-    const selectedModeLabel = selectedMode ? AI_MODES.find((m) => m.id === selectedMode)?.label : null
-    return (
+  return (
+    <div className="space-y-4">
+      <div className="px-3 py-2 rounded-lg bg-surface-elevated border border-border-subtle flex items-center justify-between">
+        <span className="text-xs text-text-secondary">
+          {saved ? (currentProvider?.name ?? provider) : 'AI not configured'}
+        </span>
+        <div className="flex items-center gap-2">
+          {saved && (
+            <button type="button" onClick={handleClear} className="text-xs text-danger hover:text-danger/80 transition-colors cursor-pointer">
+              Revoke
+            </button>
+          )}
+          {saved && (
+            <button type="button" onClick={() => { localStorage.removeItem('refbible-ai-key'); setApiKey(''); setSaved(false) }} className="text-xs text-accent hover:text-accent/80 transition-colors cursor-pointer">
+              Change
+            </button>
+          )}
+        </div>
+      </div>
+
+    {!saved ? (() => {
+      const selectedModeLabel = selectedMode ? AI_MODES.find((m) => m.id === selectedMode)?.label : null
+      return (
       <div className="space-y-4">
         <div className="space-y-2">
           <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
@@ -693,20 +803,9 @@ function AiTab() {
           </p>
         </div>
       </div>
-    )
-  }
-
-  const currentProvider = AI_PROVIDERS.find((p) => p.id === provider)
-
-  return (
-    <div className="space-y-3">
-      <div className="px-3 py-2 rounded-lg bg-surface-elevated border border-border-subtle flex items-center justify-between">
-        <span className="text-xs text-text-secondary">{currentProvider?.name ?? provider}</span>
-        <button type="button" onClick={handleClear} className="text-xs text-danger hover:text-danger/80 transition-colors cursor-pointer">
-          Revoke
-        </button>
-      </div>
-
+      )
+    })() : (
+      <>
       {!aiTarget ? (
         <div className="px-4 py-6 rounded-lg bg-surface-elevated border border-border-subtle text-center">
           <Sparkles size={20} className="text-text-tertiary mx-auto mb-2" />
@@ -748,13 +847,27 @@ function AiTab() {
             <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
               {selectedMode === 'custom' ? 'Your Instruction' : 'Extra Instructions (optional)'}
             </p>
-            <textarea
-              value={customPrompt}
-              onChange={(e) => setCustomPrompt(e.target.value)}
-              placeholder={selectedMode === 'custom' ? 'Write your analysis instruction…' : 'Add your own instructions on top of the preset…'}
-              rows={3}
-              className="w-full px-3 py-2 text-xs rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent resize-none transition-all duration-150"
-            />
+            <div className="relative">
+              <textarea
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                placeholder={selectedMode === 'custom' ? 'Write your analysis instruction…' : 'Add your own instructions on top of the preset…'}
+                rows={3}
+                className="w-full px-3 py-2 text-xs rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent resize-none transition-all duration-150 pr-9"
+              />
+              <button
+                type="button"
+                onClick={toggleListening}
+                className={`absolute bottom-2 right-2 p-1.5 rounded-lg transition-all duration-150 cursor-pointer ${
+                  isListening
+                    ? 'bg-danger text-white animate-pulse'
+                    : 'text-text-tertiary hover:text-text-primary hover:bg-surface-hover'
+                }`}
+                aria-label={isListening ? 'Stop recording' : 'Start voice input'}
+              >
+                {isListening ? <MicOff size={14} /> : <Mic size={14} />}
+              </button>
+            </div>
           </div>
 
           <button
@@ -816,6 +929,8 @@ function AiTab() {
           )}
         </div>
       )}
+    </>
+    )}
     </div>
   )
 }

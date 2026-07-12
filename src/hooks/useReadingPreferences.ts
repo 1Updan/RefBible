@@ -9,6 +9,10 @@ interface Preferences {
 
 const STORAGE_KEY = 'refbible-prefs'
 
+function ensureAtLeastOne(v: string[]): string[] {
+  return v.length > 0 ? v : ['KJV']
+}
+
 function loadPrefs(): Preferences {
   if (typeof window === 'undefined') {
     return { fontSize: 19, visibleVersions: ['KJV', 'NASB'], interlinearEnabled: false, interlinearLanguages: ['hebrew', 'greek'] }
@@ -17,10 +21,10 @@ function loadPrefs(): Preferences {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as Record<string, unknown>
-      if (Array.isArray(parsed.visibleVersions) && parsed.visibleVersions.length > 0) {
+      if (Array.isArray(parsed.visibleVersions)) {
         return {
           fontSize: typeof parsed.fontSize === 'number' ? parsed.fontSize : 19,
-          visibleVersions: parsed.visibleVersions as string[],
+          visibleVersions: ensureAtLeastOne(parsed.visibleVersions as string[]),
           interlinearEnabled: parsed.interlinearEnabled === true,
           interlinearLanguages: Array.isArray(parsed.interlinearLanguages) ? parsed.interlinearLanguages as ('hebrew' | 'greek')[] : ['hebrew', 'greek'],
         }
@@ -50,7 +54,12 @@ export function useReadingPreferences() {
 
   const toggleVersion = useCallback((code: string) => {
     setPrefs((prev) => {
-      const set = new Set(prev.visibleVersions)
+      let versions = prev.visibleVersions
+      if (versions.length === 0) {
+        // Safety: never allow empty visibleVersions — default to KJV
+        versions = ['KJV']
+      }
+      const set = new Set(versions)
       if (set.has(code)) {
         if (set.size <= 1) return prev
         set.delete(code)
