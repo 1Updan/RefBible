@@ -9,6 +9,7 @@ import {
   getVerses,
   getNotesForChapter,
   getInterlinearWords,
+  getUserCrossReferences,
 } from "@/lib/db";
 import { useNavigation } from "@/hooks/useNavigation";
 import { getBook } from "@/data/books";
@@ -27,7 +28,6 @@ interface ReadingViewProps {
   fontSize: number;
   bookmarks: Set<string>;
   isDesktop: boolean;
-  isOnline: boolean;
   interlinearEnabled: boolean;
   interlinearLanguages: readonly ("hebrew" | "greek")[];
   onToggleInterlinear: () => void;
@@ -54,7 +54,6 @@ export function ReadingView({
   fontSize,
   bookmarks,
   isDesktop,
-  isOnline,
   interlinearEnabled,
   interlinearLanguages,
   onToggleInterlinear,
@@ -76,10 +75,7 @@ export function ReadingView({
   const {
     openCrossReferences,
     setCrossRefTarget,
-    setStudyTab,
-    setActivePanel,
     navigateTo,
-    setAiTarget,
     pendingRange,
     setPendingRange,
     activePanel,
@@ -272,14 +268,15 @@ export function ReadingView({
       >();
       const batch = vs.map(async (v) => {
         try {
-          const [texts, xrefs, interlinear] = await Promise.all([
+          const [texts, xrefs, userXrefs, interlinear] = await Promise.all([
             getTranslations(v.id),
             getCrossReferences(v.id),
+            getUserCrossReferences(v.id),
             interlinearEnabled
               ? getInterlinearWords(v.id)
               : Promise.resolve([] as InterlinearWord[]),
           ]);
-          map.set(v.id, { texts, xrefs, interlinear });
+          map.set(v.id, { texts, xrefs: [...xrefs, ...userXrefs], interlinear });
         } catch (_) {
           map.set(v.id, { texts: [], xrefs: [], interlinear: [] });
         }
@@ -331,6 +328,15 @@ export function ReadingView({
           }
           setPendingRange(null);
           setSelectedIds(newSelected);
+          const firstInRange = vs.find(
+            (v) =>
+              v.verse_num >= range.verseStart &&
+              v.verse_num <= range.verseEnd,
+          );
+          if (firstInRange) {
+            setHighlightedVerseId(firstInRange.id);
+            requestAnimationFrame(() => scrollToVerse(firstInRange.id));
+          }
         } else {
           setSelectedIds(new Set());
         }
@@ -518,13 +524,12 @@ export function ReadingView({
     (verseId: string) => {
       setSelectedIds(new Set([verseId]));
       const v = verses.find((x) => x.id === verseId);
-      if (!v) return;
       const book = getBook(bookId);
       openCrossReferences({
         verseId,
-        bookId: v.book_id,
-        chapter: v.chapter_num,
-        reference: `${book?.name ?? "John"} ${chapter}:${v.verse_num}`,
+        bookId: v?.book_id ?? bookId,
+        chapter: v?.chapter_num ?? chapter,
+        reference: `${book?.name ?? "John"} ${chapter}:${v?.verse_num ?? (verseId.split('.').pop() ?? '')}`,
       });
     },
     [verses, bookId, chapter, openCrossReferences],
@@ -562,37 +567,6 @@ export function ReadingView({
       });
     }
   }, [selectedList, verses, bookId, chapter, openCrossReferences]);
-
-  const handleActionAi = useCallback(() => {
-    if (selectedList.length === 1) {
-      const verseId = selectedList[0];
-      const v = verses.find((x) => x.id === verseId);
-      const d = data.get(verseId);
-      if (!v || !d) return;
-      const book = getBook(bookId);
-      const firstText =
-        d.texts.find((t) => t.translation_code === "KJV") ?? d.texts[0];
-      setAiTarget({
-        verseId,
-        bookId: v.book_id,
-        chapter: v.chapter_num,
-        verseNum: v.verse_num,
-        reference: `${book?.name ?? "John"} ${chapter}:${v.verse_num}`,
-        text: firstText?.text_data ?? "",
-      });
-      setStudyTab("ai");
-      setActivePanel("study");
-    }
-  }, [
-    selectedList,
-    verses,
-    data,
-    bookId,
-    chapter,
-    setStudyTab,
-    setActivePanel,
-    setAiTarget,
-  ]);
 
   const [shareVerse, setShareVerse] = useState<{
     reference: string;
@@ -742,12 +716,10 @@ export function ReadingView({
         <VerseActionBar
           selectedCount={selectedIds.size}
           isDesktop={isDesktop}
-          isOnline={isOnline}
           allBookmarked={allBookmarked}
           onToggleBookmark={handleActionBookmark}
           onAddNote={handleActionNote}
           onCrossReferences={handleActionCrossRefs}
-          onAiCommentary={handleActionAi}
           onClearSelection={handleClearSelection}
           onRangeSelect={handleRangeSelect}
           isRangeMode={rangeMode}

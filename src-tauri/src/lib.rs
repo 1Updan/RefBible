@@ -1,4 +1,3 @@
-mod commands;
 mod db;
 
 use std::fs;
@@ -20,6 +19,26 @@ fn ensure_db(app: &tauri::App) {
     let buf = read_bundled_db_gz(app);
     fs::write(&db_path, &buf).expect("failed to write decompressed DB");
     fs::write(&marker, b"1").expect("failed to write marker file");
+}
+
+fn run_migrations(conn: &rusqlite::Connection) {
+    conn.execute_batch(
+        "
+        CREATE TABLE IF NOT EXISTS highlights (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            verse_id TEXT NOT NULL,
+            color TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS user_custom_cross_references (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            origin_verse_id TEXT NOT NULL,
+            target_verse_id TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        DELETE FROM content_text WHERE verse_id NOT IN (SELECT id FROM verses);
+        "
+    ).expect("failed to run migrations");
 }
 
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
@@ -63,13 +82,13 @@ pub fn run() {
             let app_dir = app.path().app_data_dir().expect("failed to get app data dir");
             let db_path = app_dir.join("refbible.db");
             let conn = db::open(db_path).expect("failed to open database");
+            run_migrations(&conn);
             app.manage(db::DbState(std::sync::Mutex::new(conn)));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             db::db_query,
             db::db_execute,
-            commands::ai::ai_query_stream,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,6 +1,5 @@
-import { exec } from './db'
+import { exec, query } from './db'
 import { getVersion } from './versions'
-import { fetch } from '@tauri-apps/plugin-http'
 
 interface DownloadedVerse {
   number: number
@@ -26,6 +25,34 @@ interface DownloadedBible {
   language: string
   license: string
   books: DownloadedBook[]
+}
+
+interface VerseRow {
+  id: string
+  book_id: number
+  chapter_num: number
+  verse_num: number
+}
+
+async function buildVerseLookup(): Promise<Map<number, Map<number, Map<number, string>>>> {
+  const rows = await query<VerseRow>(
+    'SELECT id, book_id, chapter_num, verse_num FROM verses'
+  )
+  const map = new Map<number, Map<number, Map<number, string>>>()
+  for (const row of rows) {
+    let bookMap = map.get(row.book_id)
+    if (!bookMap) {
+      bookMap = new Map()
+      map.set(row.book_id, bookMap)
+    }
+    let chapterMap = bookMap.get(row.chapter_num)
+    if (!chapterMap) {
+      chapterMap = new Map()
+      bookMap.set(row.chapter_num, chapterMap)
+    }
+    chapterMap.set(row.verse_num, row.id)
+  }
+  return map
 }
 
 function validateDownloadedBible(data: unknown): DownloadedBible {
@@ -62,7 +89,7 @@ export async function downloadAndInstall(code: string): Promise<void> {
 
   let text: string;
   try {
-    const resp = await fetch(meta.url, { method: 'GET', connectTimeout: 30 });
+    const resp = await fetch(meta.url, { signal: AbortSignal.timeout(30_000) });
     text = await resp.text();
   } catch (e) {
     throw new Error(`Download failed: ${e instanceof Error ? e.message : String(e)}`);
@@ -78,13 +105,20 @@ export async function downloadAndInstall(code: string): Promise<void> {
 
   const bible = validateDownloadedBible(parsed)
 
+  await exec('DELETE FROM content_text WHERE translation_code = $1', [code])
+
+  const verseLookup = await buildVerseLookup()
   const allTexts: { id: string; code: string; text: string }[] = []
 
   for (const book of bible.books) {
-    const osis = book.book.toUpperCase()
+    const bookMap = verseLookup.get(book.bookId)
+    if (!bookMap) throw new Error(`Unknown bookId ${book.bookId} (${book.book})`)
     for (const ch of book.chapters) {
+      const chapterMap = bookMap.get(ch.chapter)
+      if (!chapterMap) throw new Error(`Missing chapter ${ch.chapter} for bookId ${book.bookId}`)
       for (const v of ch.verses) {
-        const verseId = `${osis}.${ch.chapter}.${v.number}`
+        const verseId = chapterMap.get(v.number)
+        if (!verseId) throw new Error(`Missing verse ${v.number} in ${book.bookId}.${ch.chapter}`)
         allTexts.push({ id: verseId, code, text: v.text })
       }
     }

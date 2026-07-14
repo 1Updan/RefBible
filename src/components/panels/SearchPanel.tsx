@@ -3,7 +3,6 @@ import { Search, X } from 'lucide-react'
 import { searchVerses } from '@/lib/db'
 import type { SearchResult } from '@/lib/db'
 import { getBook } from '@/data/books'
-import { parseReference } from '@/lib/utils'
 
 interface SearchPanelProps {
   onNavigate?: (bookId: number, chapter: number, range?: { verseStart: number; verseEnd: number }) => void
@@ -102,9 +101,7 @@ export function SearchPanel({ onNavigate, initialQuery, visibleVersions }: Searc
                 key={`${r.verse_id}-${r.translation_code}`}
                 type="button"
                 onClick={() => {
-                  const rangeRef = parseReference(query.trim())
-                  const range = rangeRef?.verse && rangeRef?.verseEnd ? { verseStart: rangeRef.verse, verseEnd: rangeRef.verseEnd } : undefined
-                  onNavigate?.(r.book_id, r.chapter_num, range)
+                  onNavigate?.(r.book_id, r.chapter_num, { verseStart: r.verse_num, verseEnd: r.verse_num })
                 }}
                 className="w-full text-left px-3 py-2 rounded-xl bg-surface-elevated border border-border-subtle hover:bg-surface-hover transition-all duration-150 cursor-pointer"
               >

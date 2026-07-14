@@ -1,12 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, AlertCircle, BookText, Volume2, VolumeX, Search } from 'lucide-react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import { Crosshair, MessageSquareMore, Trash2, BookText, Volume2, Search } from 'lucide-react'
+import clsx from 'clsx'
 import { useNavigation } from '@/hooks/useNavigation'
-import { useNetworkState } from '@/hooks/useNetworkState'
 import { getCrossReferences, getTranslations, saveNote, getNotes, getAllNotes, deleteNote, getStrongsEntry, getInterlinearWords, getUserCrossReferences, addCustomCrossReference, removeCustomCrossReference, searchVerses } from '@/lib/db'
 import { formatVerseId, parseOsisId, parseReference, verseIdFromBookChapterVerse } from '@/lib/utils'
 import type { SearchResult } from '@/lib/db'
-import { invoke } from '@tauri-apps/api/core'
-import { listen } from '@tauri-apps/api/event'
 import { getBook } from '@/data/books'
 import type { CrossReference, Note, StrongsEntry, InterlinearWord } from '@/types/db'
 import type { ActiveTab } from '@/contexts/navigation'
@@ -14,7 +12,6 @@ import type { ActiveTab } from '@/contexts/navigation'
 const TABS: { id: ActiveTab; label: string; icon: typeof Crosshair }[] = [
   { id: 'crossrefs', label: 'Cross-Refs', icon: Crosshair },
   { id: 'notes', label: 'Notes', icon: MessageSquareMore },
-  { id: 'ai', label: 'AI', icon: Sparkles },
   { id: 'word', label: 'Word', icon: BookText },
 ]
 
@@ -26,6 +23,7 @@ function CrossRefsTab() {
   const [addInput, setAddInput] = useState('')
   const [addError, setAddError] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [searching, setSearching] = useState(false)
@@ -39,24 +37,29 @@ function CrossRefsTab() {
     let cancelled = false
     async function load() {
       if (!target) return
-      const [refs, userRefs] = await Promise.all([
-        getCrossReferences(target),
-        getUserCrossReferences(target),
-      ])
-      if (cancelled) return
-      setXrefs(refs)
-      setUserXrefs(userRefs)
-      const allRefs = [...refs, ...userRefs]
-      const map = new Map<string, string>()
-      const batch = allRefs.map(async (x) => {
-        const texts = await getTranslations(x.target_verse_id)
-        const first = texts.find((t) => t.translation_code === 'KJV') ?? texts[0]
-        if (first) {
-          map.set(x.target_verse_id, first.text_data)
-        }
-      })
-      await Promise.all(batch)
-      if (!cancelled) setPreviews(map)
+      try {
+        const [refs, userRefs] = await Promise.all([
+          getCrossReferences(target),
+          getUserCrossReferences(target),
+        ])
+        if (cancelled) return
+        setXrefs(refs)
+        setUserXrefs(userRefs)
+        setLoadError(null)
+        const allRefs = [...refs, ...userRefs]
+        const map = new Map<string, string>()
+        const batch = allRefs.map(async (x) => {
+          const texts = await getTranslations(x.target_verse_id)
+          const first = texts.find((t) => t.translation_code === 'KJV') ?? texts[0]
+          if (first) {
+            map.set(x.target_verse_id, first.text_data)
+          }
+        })
+        await Promise.all(batch)
+        if (!cancelled) setPreviews(map)
+      } catch (e) {
+        if (!cancelled) setLoadError(String(e))
+      }
     }
     load()
     return () => { cancelled = true }
@@ -66,12 +69,6 @@ function CrossRefsTab() {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
     const trimmed = addInput.trim()
     if (trimmed.length < 2) {
-      setSearchResults([])
-      setShowSearchResults(false)
-      return
-    }
-    const parsed = parseReference(trimmed)
-    if (parsed && parsed.verse) {
       setSearchResults([])
       setShowSearchResults(false)
       return
@@ -150,6 +147,18 @@ function CrossRefsTab() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  function renderHighlightedText(text: string, query: string): React.ReactNode {
+    if (!query.trim()) return text
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const regex = new RegExp(`(${escaped})`, 'gi')
+    const parts = text.split(regex)
+    return parts.map((part, i) =>
+      i % 2 === 1
+        ? <mark key={i} className="bg-accent/30 text-text-primary rounded-sm px-0.5">{part}</mark>
+        : <Fragment key={i}>{part}</Fragment>
+    )
+  }
+
   if (!crossRefTarget) {
     return <p className="text-xs text-text-tertiary px-1 py-4 text-center">Select a verse to see cross references</p>
   }
@@ -171,7 +180,7 @@ function CrossRefsTab() {
               onChange={(e) => { setAddInput(e.target.value); setAddError(null) }}
               onKeyDown={(e) => { if (e.key === 'Enter') handleAdd() }}
               onFocus={() => { if (searchResults.length > 0) setShowSearchResults(true) }}
-              placeholder="Search or type a ref, e.g. Romans 1:1"
+              placeholder="Search Bible or type a reference e.g. Romans 1:1"
               className="w-full pl-6 pr-2 py-1.5 text-xs rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
             />
           </div>
@@ -181,9 +190,10 @@ function CrossRefsTab() {
             disabled={adding || !addInput.trim()}
             className="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer shrink-0"
           >
-            {adding ? 'Adding\u2026' : 'Add'}
+            {adding ? 'Adding\u2026' : 'Add Ref'}
           </button>
         </div>
+        <p className="text-[10px] text-text-tertiary px-1 mt-1">Click a search result to navigate, hover and tap +Add to add as cross-reference</p>
         {showSearchResults && (
           <div
             ref={resultsRef}
@@ -196,16 +206,36 @@ function CrossRefsTab() {
             ) : (
               searchResults.map((r) => {
                 const book = getBook(r.book_id)
+                const label = `${book?.name ?? 'Unknown'} ${r.chapter_num}:${r.verse_num}`
                 return (
-                  <button
+                  <div
                     key={r.verse_id}
-                    type="button"
-                    onClick={() => handleAdd(r.verse_id)}
-                    className="w-full text-left px-2.5 py-2 text-xs hover:bg-surface-hover transition-colors duration-100 cursor-pointer border-b border-border last:border-b-0"
+                    className="flex items-start gap-1 px-2.5 py-2 text-xs border-b border-border last:border-b-0 hover:bg-surface-hover transition-colors duration-100 group"
                   >
-                    <span className="font-semibold text-accent">{book?.name ?? 'Unknown'} {r.chapter_num}:{r.verse_num}</span>
-                    <p className="text-text-secondary mt-0.5 leading-relaxed line-clamp-2">{r.text_data}</p>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigateTo(r.book_id, r.chapter_num, r.verse_id)
+                        setShowSearchResults(false)
+                        setAddInput('')
+                      }}
+                      className="flex-1 text-left cursor-pointer min-w-0"
+                    >
+                      <span className="font-semibold text-accent">{label}</span>
+                      <p className="text-text-secondary mt-0.5 leading-relaxed line-clamp-2">{renderHighlightedText(r.text_data, addInput)}</p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleAdd(r.verse_id)
+                      }}
+                      className="shrink-0 mt-0.5 px-1.5 py-0.5 text-[10px] font-medium rounded bg-accent/15 text-accent hover:bg-accent/30 active:bg-accent/40 transition-all duration-150 cursor-pointer touch-manipulation"
+                      title="Add as cross-reference"
+                    >
+                      +Add
+                    </button>
+                  </div>
                 )
               })
             )}
@@ -215,8 +245,11 @@ function CrossRefsTab() {
       {addError && (
         <p className="text-[10px] text-danger px-1">{addError}</p>
       )}
+      {loadError && (
+        <p className="text-[10px] text-danger px-1">Error loading: {loadError}</p>
+      )}
 
-      {xrefs.length === 0 && userXrefs.length === 0 && (
+      {!loadError && xrefs.length === 0 && userXrefs.length === 0 && (
         <p className="text-xs text-text-tertiary px-1">No cross references available. Add your own above.</p>
       )}
       {[...xrefs, ...userXrefs].map((xref: CrossReference & { user_created?: boolean }) => {
@@ -225,7 +258,12 @@ function CrossRefsTab() {
         return (
           <div
             key={xref.id}
-            className="relative w-full text-left p-2.5 rounded-lg bg-surface-elevated border border-border-subtle hover:bg-surface-hover transition-all duration-150 group"
+            className={clsx(
+              'relative w-full text-left p-2.5 rounded-lg border transition-all duration-150 group',
+              isUser
+                ? 'bg-accent/5 border-accent/20 hover:bg-accent/10'
+                : 'bg-surface-elevated border-border-subtle hover:bg-surface-hover',
+            )}
           >
             <button
               type="button"
@@ -237,14 +275,14 @@ function CrossRefsTab() {
             >
               <span className="text-xs font-semibold text-accent">{formatVerseId(xref.target_verse_id)}</span>
               {preview && (
-                <p className="text-xs text-text-secondary mt-0.5 leading-relaxed break-words pr-8">{preview}</p>
+                <p className="text-xs text-text-secondary mt-0.5 leading-relaxed break-words pr-12">{preview}</p>
               )}
             </button>
             {isUser && (
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); handleRemove(xref.id) }}
-                className="absolute top-2 right-2 p-1 rounded text-text-tertiary hover:text-danger transition-colors duration-150 opacity-0 group-hover:opacity-100 cursor-pointer"
+                className="absolute bottom-2 right-2 p-1 rounded text-danger hover:text-danger/80 transition-all duration-150 cursor-pointer"
                 aria-label="Remove cross-reference"
               >
                 <Trash2 size={12} />
@@ -384,444 +422,8 @@ function NotesTab() {
   )
 }
 
-interface AiModeDef {
-  id: string
-  label: string
-  description: string
-  systemPrompt: string
-}
-
-const AI_MODES: AiModeDef[] = [
-  {
-    id: 'context',
-    label: 'Context & Background',
-    description: 'Context, history, cross-references',
-
-    systemPrompt: `You are an expert in biblical exegesis. Analyze the passage thoroughly across four layers: (1) Immediate context — how the surrounding verses frame its meaning, the narrative or argumentative flow leading into and out of the text. (2) Book-level context — the author's purpose, the book's overarching themes, and how this passage contributes to them. (3) Historical and cultural setting — authorship, audience, date, societal norms, political and religious landscape, geographical details. (4) Intertextual connections — specific cross-references (cite verse numbers), quotations of or allusions to other Old or New Testament passages, and how the passage fits into the sweep of redemptive history from Genesis to Revelation. For each layer, explain why it matters for interpreting the passage. Be specific: name historical figures, quote relevant cross-references, and trace thematic developments across Testaments.`,
-  },
-  {
-    id: 'words',
-    label: 'Words & Structure',
-    description: 'Genre, outline, original language',
-
-    systemPrompt: `You are an expert in biblical literary analysis and biblical languages. Analyze the passage in two complementary dimensions. First, literary analysis: identify the genre (narrative, poetry, prophecy, epistle, wisdom, apocalyptic) and explain how genre shapes interpretation. Break the passage into a logical outline showing how each part contributes to the whole. Detect and explain literary devices — chiasms, parallelisms, inclusio, metaphors, similes, hyperbole, irony, merisms, and wordplay — describing their rhetorical effect. Second, lexical analysis: identify the key Greek, Hebrew, or Aramaic words behind the English translation. For each, provide the lemma, Strong's number, semantic range, grammatical features (tense, voice, mood for verbs; case, number, gender for nouns), and how the word functions in this specific context. Show how the word is used elsewhere in Scripture. Always tie word-level and literary insights back to the meaning and impact of the passage as a whole.`,
-  },
-  {
-    id: 'theology',
-    label: 'Theology & Doctrine',
-    description: 'Doctrines, biblical themes, church tradition',
-
-    systemPrompt: `You are an expert in biblical and systematic theology. Identify and explain the major doctrinal themes present in the passage — the nature and character of God, Christology, the work of the Holy Spirit, sin and salvation, humanity and the image of God, covenant, kingdom of God, grace, faith, judgment, and eschatology. Connect each theme to the broader biblical narrative, showing how this passage develops, affirms, or challenges what Scripture teaches on the subject. Then discuss how the passage has been understood throughout church history — cite key theologians (e.g., Augustine, Aquinas, Luther, Calvin, Wesley), ecumenical creeds, and confessional statements where relevant. Highlight areas of both interpretive consensus and significant divergence among traditions, explaining what theologically is at stake in each view. Conclude by summarizing the passage's most significant theological contribution.`,
-  },
-  {
-    id: 'application',
-    label: 'Modern Application',
-    description: 'Ethics, contemporary living',
-
-    systemPrompt: `You are an expert in biblical ethics and practical theology. Extract the ethical principles, commands, values, and virtues taught or implied in the passage. Carefully distinguish between cultural-specific instructions (bound to the original context and not directly transferable) and transcultural principles (applicable today), explaining your reasoning for each classification. For each transcultural principle, provide concrete, actionable guidance for contemporary life across multiple spheres — personal character and spirituality, relationships and family, work and vocation, church and community, and engagement with the broader culture. Include reflection questions that move the reader from understanding to personal transformation. Be specific and practical rather than abstract — give examples of what faithful application looks like in real-world situations today.`,
-  },
-  {
-    id: 'story',
-    label: 'Story Mode',
-    description: 'Immersive biblical storytelling',
-
-    systemPrompt: `You are a gifted biblical storyteller. Present the passage as a vivid, engaging narrative. Begin by setting the scene — include relevant geographical, cultural, and historical details so the world of the text feels immediate and real. Introduce the key characters with their backgrounds and motivations. Identify the dramatic tension or conflict that drives the narrative forward. Walk through the narrative arc — setup, rising action, climax, resolution — while remaining 100% faithful to Scripture; never contradict or embellish beyond what is written. Weave explanatory details (customs, geography, political dynamics, theological background) naturally into the story so they enrich rather than interrupt. Use sensory language and vivid description to make the scene come alive. End by connecting the passage to its role in the larger biblical story and suggesting what it reveals about God's character and purposes.`,
-  },
-  {
-    id: 'custom',
-    label: 'Custom',
-    description: 'Write your own instruction',
-
-    systemPrompt: '',
-  },
-]
-
-const AI_PROVIDERS = [
-  { id: 'gemini', name: 'Google Gemini', endpoint: '', model: 'gemini-2.0-flash' },
-  { id: 'openai', name: 'OpenAI', endpoint: 'https://api.openai.com/v1', model: 'gpt-4o' },
-  { id: 'openrouter', name: 'OpenRouter', endpoint: 'https://openrouter.ai/api/v1', model: 'openai/gpt-4o' },
-  { id: 'groq', name: 'Groq', endpoint: 'https://api.groq.com/openai/v1', model: 'llama-3.3-70b-versatile' },
-  { id: 'anthropic', name: 'Anthropic', endpoint: 'https://api.anthropic.com/v1', model: 'claude-sonnet-4-20250514' },
-  { id: 'deepseek', name: 'DeepSeek', endpoint: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
-  { id: 'together', name: 'Together AI', endpoint: 'https://api.together.xyz/v1', model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo' },
-  { id: 'custom', name: 'Custom', endpoint: '', model: '' },
-]
-
-function AiTab() {
-  const { aiTarget } = useNavigation()
-  const isOnline = useNetworkState()
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('refbible-ai-key') ?? '')
-  const [provider, setProvider] = useState(() => localStorage.getItem('refbible-ai-provider') ?? 'gemini')
-  const [endpoint, setEndpoint] = useState(() => localStorage.getItem('refbible-ai-endpoint') ?? '')
-  const [model, setModel] = useState(() => localStorage.getItem('refbible-ai-model') ?? '')
-  const saved = !!localStorage.getItem('refbible-ai-key')
-  const [selectedMode, setSelectedMode] = useState<string | null>(null)
-  const [customPrompt, setCustomPrompt] = useState('')
-  const [response, setResponse] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [aiSpeaking, setAiSpeaking] = useState(false)
-  const [streaming, setStreaming] = useState(false)
-  const responseRef = useRef('')
-  const sentenceBufferRef = useRef('')
-  const unlistenRef = useRef<(() => void)[]>([])
-
-  const speakSentence = useCallback((sentence: string) => {
-    const utterance = new SpeechSynthesisUtterance(sentence)
-    utterance.rate = 0.65
-    utterance.onend = () => {
-      if (speechSynthesis.speaking === false) {
-        setAiSpeaking(false)
-      }
-    }
-    utterance.onerror = () => setAiSpeaking(false)
-    speechSynthesis.speak(utterance)
-    setAiSpeaking(true)
-  }, [])
-
-  const stopAiSpeech = useCallback(() => {
-    speechSynthesis.cancel()
-    setAiSpeaking(false)
-  }, [])
-
-  const cleanup = useCallback(() => {
-    for (const u of unlistenRef.current) u()
-    unlistenRef.current = []
-  }, [])
-
-  useEffect(() => {
-    return cleanup
-  }, [cleanup])
-
-  const handleProviderChange = (newProvider: string) => {
-    setProvider(newProvider)
-    const p = AI_PROVIDERS.find((x) => x.id === newProvider)
-    if (p) {
-      setEndpoint(p.endpoint)
-      setModel(p.model)
-    }
-    localStorage.setItem('refbible-ai-provider', newProvider)
-  }
-
-  const handleSave = () => {
-    localStorage.setItem('refbible-ai-key', apiKey)
-    localStorage.setItem('refbible-ai-provider', provider)
-    localStorage.setItem('refbible-ai-endpoint', endpoint)
-    localStorage.setItem('refbible-ai-model', model)
-    window.location.reload()
-  }
-
-  const handleClear = () => {
-    localStorage.removeItem('refbible-ai-key')
-    localStorage.removeItem('refbible-ai-provider')
-    localStorage.removeItem('refbible-ai-endpoint')
-    localStorage.removeItem('refbible-ai-model')
-    window.location.reload()
-  }
-
-  const handleRun = async () => {
-    if (!aiTarget) return
-    if (!apiKey) return
-    const mode = AI_MODES.find((m) => m.id === (selectedMode ?? 'context'))
-    if (!mode) return
-    setLoading(true)
-    setStreaming(true)
-    setError(null)
-    setResponse('')
-    responseRef.current = ''
-    sentenceBufferRef.current = ''
-    stopAiSpeech()
-    cleanup()
-
-    const systemPrompt = mode.systemPrompt
-    const combinedPrompt = customPrompt.trim()
-      ? `${systemPrompt}\n\nExtra instructions from user:\n${customPrompt}\n\nVerse: ${aiTarget.reference}\n\n${aiTarget.text}`
-      : `${systemPrompt}\n\nVerse: ${aiTarget.reference}\n\n${aiTarget.text}`
-
-    try {
-      const unlistenToken = await listen<string>('ai:token', (event) => {
-        const token = event.payload
-        responseRef.current += token
-        setResponse(responseRef.current)
-
-        sentenceBufferRef.current += token
-        let match
-        const sentenceEnd = /[.!?](?:\s|$)/
-        while ((match = sentenceEnd.exec(sentenceBufferRef.current)) !== null) {
-          const completedSentence = sentenceBufferRef.current.slice(0, match.index + 1)
-          sentenceBufferRef.current = sentenceBufferRef.current.slice(match.index + 1).trimStart()
-          speakSentence(completedSentence)
-        }
-      })
-      unlistenRef.current.push(unlistenToken)
-
-      const unlistenDone = await listen('ai:done', () => {
-        if (sentenceBufferRef.current.trim()) {
-          speakSentence(sentenceBufferRef.current.trim())
-          sentenceBufferRef.current = ''
-        }
-        setLoading(false)
-        setStreaming(false)
-      })
-      unlistenRef.current.push(unlistenDone)
-
-      await invoke('ai_query_stream', { apiKey, prompt: combinedPrompt, provider, endpoint, model })
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
-      setLoading(false)
-      setStreaming(false)
-    }
-  }
-
-  if (!isOnline) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-6 text-center">
-        <WifiOff size={24} className="text-text-tertiary" />
-        <p className="text-sm text-text-secondary font-medium">You are offline</p>
-        <p className="text-xs text-text-tertiary">AI analysis requires an internet connection.</p>
-      </div>
-    )
-  }
-
-  if (!saved) {
-    const selectedModeLabel = selectedMode ? AI_MODES.find((m) => m.id === selectedMode)?.label : null
-    return (
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
-            <Sparkles size={13} />
-            Pick an Analysis Mode
-          </h3>
-            <div className="flex flex-col gap-1.5">
-            {AI_MODES.filter((m) => m.id !== 'custom').map((mode) => (
-              <button
-                key={mode.id}
-                type="button"
-                onClick={() => setSelectedMode(mode.id)}
-                className={`text-left px-2.5 py-2 rounded-lg border text-xs transition-all duration-150 cursor-pointer ${
-                  selectedMode === mode.id
-                    ? 'bg-accent text-white border-accent'
-                    : 'bg-surface-elevated text-text-secondary border-border-subtle hover:border-accent/30 hover:text-text-primary'
-                }`}
-              >
-                <p className="font-semibold">{mode.label}</p>
-                <p className={`mt-0.5 leading-tight ${selectedMode === mode.id ? 'text-white/80' : 'text-text-tertiary'}`}>
-                  {mode.description}
-                </p>
-              </button>
-            ))}
-          </div>
-          {selectedMode ? (
-            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-accent/10 border border-accent/20">
-              <Sparkles size={14} className="shrink-0 mt-0.5 text-accent" />
-              <p className="text-xs text-text-primary leading-relaxed">
-                You picked <strong className="text-accent">{selectedModeLabel}</strong>. Configure your AI provider below and click <strong>Activate AI</strong>.
-              </p>
-            </div>
-          ) : (
-            <p className="text-xs text-text-tertiary mt-1">
-              Choose a mode above, then configure your AI provider to get started.
-            </p>
-          )}
-        </div>
-
-        <hr className="border-border" />
-
-        <div className="space-y-3">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">AI Provider</label>
-            <select
-              value={provider}
-              onChange={(e) => handleProviderChange(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
-            >
-              {AI_PROVIDERS.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">API Key</label>
-            <input
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder={provider === 'gemini' ? 'Paste your Gemini API key' : 'Paste your API key'}
-              className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
-            />
-          </div>
-
-          {provider !== 'gemini' && (
-            <>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Endpoint</label>
-                <input
-                  type="text"
-                  value={endpoint}
-                  onChange={(e) => setEndpoint(e.target.value)}
-                  placeholder="https://api.openai.com/v1"
-                  className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Model</label>
-                <input
-                  type="text"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  placeholder={provider === 'custom' ? 'Enter model name' : undefined}
-                  className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
-                />
-              </div>
-            </>
-          )}
-
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!apiKey.trim()}
-            className="w-full px-3 py-2 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer"
-          >
-            Activate AI
-          </button>
-
-          <p className="text-xs text-text-tertiary flex items-start gap-1.5">
-            <AlertCircle size={12} className="shrink-0 mt-0.5" />
-            Your key is stored locally and never sent anywhere except the API provider you choose.
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  const currentProvider = AI_PROVIDERS.find((p) => p.id === provider)
-
-  return (
-    <div className="space-y-3">
-      <div className="px-3 py-2 rounded-lg bg-surface-elevated border border-border-subtle flex items-center justify-between">
-        <span className="text-xs text-text-secondary">{currentProvider?.name ?? provider}</span>
-        <button type="button" onClick={handleClear} className="text-xs text-danger hover:text-danger/80 transition-colors cursor-pointer">
-          Revoke
-        </button>
-      </div>
-
-      {!aiTarget ? (
-        <div className="px-4 py-6 rounded-lg bg-surface-elevated border border-border-subtle text-center">
-          <Sparkles size={20} className="text-text-tertiary mx-auto mb-2" />
-          <p className="text-sm text-text-secondary">
-            Select a verse and tap the AI button in the action bar.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <div className="px-3 py-2 rounded-lg bg-accent/10 border border-accent/20">
-            <p className="text-xs font-semibold text-accent">{aiTarget.reference}</p>
-            <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">{aiTarget.text}</p>
-          </div>
-
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Analysis Mode</p>
-          <div className="flex flex-col gap-1.5">
-              {AI_MODES.map((mode) => (
-                <button
-                  key={mode.id}
-                  type="button"
-                  onClick={() => setSelectedMode(mode.id)}
-                  className={`text-left px-2.5 py-2 rounded-lg border text-xs transition-all duration-150 cursor-pointer ${
-                    selectedMode === mode.id
-                      ? 'bg-accent text-white border-accent'
-                      : 'bg-surface-elevated text-text-secondary border-border-subtle hover:border-accent/30 hover:text-text-primary'
-                  }`}
-                >
-                  <p className="font-semibold">{mode.label}</p>
-                  <p className={`mt-0.5 leading-tight ${selectedMode === mode.id ? 'text-white/80' : 'text-text-tertiary'}`}>
-                    {mode.description}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
-              {selectedMode === 'custom' ? 'Your Instruction' : 'Extra Instructions (optional)'}
-            </p>
-            <textarea
-              value={customPrompt}
-              onChange={(e) => setCustomPrompt(e.target.value)}
-              placeholder={selectedMode === 'custom' ? 'Write your analysis instruction…' : 'Add your own instructions on top of the preset…'}
-              rows={3}
-              className="w-full px-3 py-2 text-xs rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent resize-none transition-all duration-150"
-            />
-          </div>
-
-          <button
-            type="button"
-            onClick={handleRun}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer"
-          >
-            {loading ? (
-              <>
-                <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {streaming ? 'Receiving response…' : 'Analyzing…'}
-              </>
-            ) : (
-              <>
-                <Sparkles size={14} />
-                Run Analysis
-              </>
-            )}
-          </button>
-
-          {error && (
-            <div className="px-3 py-2 rounded-lg bg-danger/10 border border-danger/30">
-              <p className="text-xs text-danger">{error}</p>
-            </div>
-          )}
-
-          {response && (
-            <div className="px-3 py-3 rounded-lg bg-surface-elevated border border-border-subtle">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Result</p>
-                <div className="flex items-center gap-1">
-                  {aiSpeaking ? (
-                    <button
-                      type="button"
-                      onClick={stopAiSpeech}
-                      className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg bg-danger/10 text-danger hover:bg-danger/20 transition-all duration-150 cursor-pointer"
-                    >
-                      <VolumeX size={12} />
-                      Stop
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => speakSentence(responseRef.current)}
-                      className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg bg-accent/10 text-accent hover:bg-accent/20 transition-all duration-150 cursor-pointer"
-                    >
-                      <Volume2 size={12} />
-                      Listen
-                    </button>
-                  )}
-                </div>
-              </div>
-              <div className="text-xs text-text-primary leading-relaxed whitespace-pre-wrap">{response}</div>
-              {streaming && (
-                <span className="inline-block w-2 h-4 ml-0.5 bg-accent animate-pulse rounded-sm" />
-              )}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
 function WordTab() {
-  const { wordTarget, setAiTarget, setStudyTab } = useNavigation()
+  const { wordTarget } = useNavigation()
   const [strongs, setStrongs] = useState<StrongsEntry | null>(null)
   const [verseWords, setVerseWords] = useState<InterlinearWord[]>([])
 
@@ -834,21 +436,6 @@ function WordTab() {
       setVerseWords(words)
     })
   }, [wordTarget])
-
-  const handleAskAi = useCallback(() => {
-    if (!wordTarget) return
-    const w = wordTarget.word
-    const langLabel = w.language === 'hebrew' ? 'Hebrew' : 'Greek'
-    setAiTarget({
-      verseId: wordTarget.verseId,
-      bookId: 0,
-      chapter: 0,
-      verseNum: 0,
-      reference: wordTarget.reference,
-      text: `Analyze the ${langLabel} word "${w.original_text}" (Strong's ${w.strongs_number ?? 'N/A'}, lemma: ${w.lemma ?? 'N/A'}) in ${wordTarget.reference}. Provide lexical meaning, grammatical analysis, usage in context, and theological significance.`,
-    })
-    setStudyTab('ai')
-  }, [wordTarget, setAiTarget, setStudyTab])
 
   const speak = useCallback((text: string) => {
     speechSynthesis.cancel()
@@ -950,14 +537,6 @@ function WordTab() {
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={handleAskAi}
-        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover transition-all duration-150 cursor-pointer"
-      >
-        <Sparkles size={14} />
-        Ask AI about this word
-      </button>
     </div>
   )
 }
@@ -996,7 +575,6 @@ export function StudyPanel() {
       <div className="flex-1 overflow-y-auto p-3">
         {studyTab === 'crossrefs' && <CrossRefsTab />}
         {studyTab === 'notes' && <NotesTab />}
-        {studyTab === 'ai' && <AiTab />}
         {studyTab === 'word' && <WordTab />}
       </div>
     </div>

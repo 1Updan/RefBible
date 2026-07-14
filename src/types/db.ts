@@ -18,6 +18,7 @@ export interface CrossReference {
   target_verse_id: string
   reference?: string
   thematic_weight: number
+  user_created?: boolean
 }
 
 export interface Bookmark {

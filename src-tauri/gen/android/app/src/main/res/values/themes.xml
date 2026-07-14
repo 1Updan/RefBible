@@ -5,8 +5,5 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
-    <!-- Splash screen theme - shown before WebView loads -->
-    <style name="Theme.splash" parent="Theme.app">
-        <item name="android:windowBackground">@android:color/white</item>
-    </style>
+
 </resources>

@@ -73,6 +73,10 @@ export const VerseRow = memo(function VerseRow({
     }
   }
 
+  const hasHiddenUserXrefs = useMemo(() => {
+    return crossReferences.slice(3).some((x) => x.user_created)
+  }, [crossReferences])
+
   const showMoreThanOne = visibleVersions.length > 1
 
   const versionTexts = visibleVersions
@@ -168,13 +172,26 @@ export const VerseRow = memo(function VerseRow({
               />
             ))}
             {crossReferences.length > 3 && (
-              <button
-                type="button"
-                onClick={() => onOpenCrossRefs(verse.id)}
-                className="text-xs text-accent hover:text-accent-hover font-medium px-1 cursor-pointer"
-              >
-                +{crossReferences.length - 3} more
-              </button>
+              <span className="inline-flex items-baseline gap-0.5">
+                {hasHiddenUserXrefs ? (
+                  <button
+                    type="button"
+                    onClick={() => onOpenCrossRefs(verse.id)}
+                    className="text-xs font-medium px-1 cursor-pointer transition-colors duration-150 text-accent hover:text-accent-hover"
+                  >
+                    <span className="text-danger">+</span>
+                    {crossReferences.length - 3} more
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onOpenCrossRefs(verse.id)}
+                    className="text-xs text-accent hover:text-accent-hover font-medium px-1 cursor-pointer"
+                  >
+                    +{crossReferences.length - 3} more
+                  </button>
+                )}
+              </span>
             )}
           </div>
         )}

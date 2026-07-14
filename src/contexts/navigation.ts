@@ -8,16 +8,7 @@ export interface CrossRefTarget {
   reference: string
 }
 
-export interface AiTarget {
-  verseId: string
-  bookId: number
-  chapter: number
-  verseNum: number
-  reference: string
-  text: string
-}
-
-export type ActiveTab = 'crossrefs' | 'notes' | 'ai' | 'word'
+export type ActiveTab = 'crossrefs' | 'notes' | 'word'
 
 export interface WordTarget {
   word: InterlinearWord
@@ -31,8 +22,6 @@ export interface NavigationContextValue {
   crossRefTarget: CrossRefTarget | null
   setCrossRefTarget: (target: CrossRefTarget | null) => void
   openCrossReferences: (target: CrossRefTarget) => void
-  aiTarget: AiTarget | null
-  setAiTarget: (target: AiTarget | null) => void
   wordTarget: WordTarget | null
   setWordTarget: (target: WordTarget | null) => void
   openWordStudy: (target: WordTarget) => void

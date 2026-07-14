@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, ChevronDown, Bookmark, Sparkles, Settings, ArrowLeft, Check, Search, Crosshair, BookOpen, Volume2, Menu, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ChevronDown, Bookmark, Settings, ArrowLeft, Check, Search, Crosshair, BookOpen, Volume2, Menu, X } from 'lucide-react'
 import clsx from 'clsx'
 
 import { parseReference } from '@/lib/utils'
@@ -15,7 +15,7 @@ interface ChapterHeaderProps {
   onNextChapter: () => void
   activePanel: string
   studyTab: string
-  onTogglePanel: (panel: 'bookmarks' | 'ai' | 'settings' | 'search' | 'crossrefs') => void
+  onTogglePanel: (panel: 'bookmarks' | 'settings' | 'search' | 'crossrefs') => void
   isDesktop: boolean
   visibleVersions: string[]
   installedVersions: string[]
@@ -247,27 +247,6 @@ export function ChapterHeader({
               <Bookmark size={15} />
             </button>
           </Tooltip>
-          <Tooltip label="AI">
-            <button
-              type="button"
-              onClick={() => {
-                if (!navigator.onLine) {
-                  alert('You are offline — AI features require an internet connection.')
-                  return
-                }
-                onTogglePanel('ai')
-              }}
-              className={clsx(
-                'p-1 rounded-md transition-all duration-150 cursor-pointer',
-                activePanel === 'study' && studyTab === 'ai'
-                  ? 'bg-accent-light text-accent'
-                  : 'text-text-tertiary hover:text-text-primary hover:bg-surface',
-              )}
-              aria-label="AI"
-            >
-              <Sparkles size={15} />
-            </button>
-          </Tooltip>
           <Tooltip label="Settings">
             <button
               type="button"
@@ -357,17 +336,6 @@ export function ChapterHeader({
                     <BookOpen size={14} />
                     Interlinear
                     {interlinearEnabled && <Check size={12} className="ml-auto text-accent" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { onTogglePanel('ai'); setMobileMenuOpen(false) }}
-                    className={clsx(
-                      'w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors duration-100 cursor-pointer text-left',
-                      activePanel === 'study' && studyTab === 'ai' ? 'text-accent bg-accent/10' : 'text-text-primary hover:bg-surface',
-                    )}
-                  >
-                    <Sparkles size={14} />
-                    AI
                   </button>
                 </div>
 

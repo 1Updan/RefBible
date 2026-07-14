@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Bookmark, BookmarkCheck, Crosshair, MessageSquareMore, Sparkles, X, List, XCircle, GripVertical, BookText, Share2, Highlighter, Eraser } from 'lucide-react'
+import { Bookmark, BookmarkCheck, Crosshair, MessageSquareMore, X, List, XCircle, GripVertical, BookText, Share2, Highlighter, Eraser } from 'lucide-react'
 import { HIGHLIGHT_COLORS } from '@/lib/highlights'
 import type { HighlightColorId } from '@/lib/highlights'
 import clsx from 'clsx'
@@ -7,14 +7,12 @@ import clsx from 'clsx'
 interface VerseActionBarProps {
   selectedCount: number
   isDesktop: boolean
-  isOnline: boolean
   allBookmarked: boolean
   interlinearEnabled: boolean
   onToggleInterlinear: () => void
   onToggleBookmark: () => void
   onAddNote: () => void
   onCrossReferences: () => void
-  onAiCommentary: () => void
   onClearSelection: () => void
   onRangeSelect?: () => void
   isRangeMode?: boolean
@@ -29,14 +27,12 @@ interface VerseActionBarProps {
 export function VerseActionBar({
   selectedCount,
   isDesktop,
-  isOnline,
   allBookmarked,
   interlinearEnabled,
   onToggleInterlinear,
   onToggleBookmark,
   onAddNote,
   onCrossReferences,
-  onAiCommentary,
   onClearSelection,
   onRangeSelect,
   isRangeMode,
@@ -52,13 +48,11 @@ export function VerseActionBar({
       <DesktopActionBar
         selectedCount={selectedCount}
         allBookmarked={allBookmarked}
-        isOnline={isOnline}
         interlinearEnabled={interlinearEnabled}
         onToggleInterlinear={onToggleInterlinear}
         onToggleBookmark={onToggleBookmark}
         onAddNote={onAddNote}
         onCrossReferences={onCrossReferences}
-        onAiCommentary={onAiCommentary}
         onClearSelection={onClearSelection}
         onRangeSelect={onRangeSelect}
         isRangeMode={isRangeMode}
@@ -147,18 +141,6 @@ export function VerseActionBar({
         </button>
         <button
           type="button"
-          onClick={() => {
-            if (!isOnline) { alert('You are offline — AI features require an internet connection.'); return }
-            onAiCommentary()
-          }}
-          disabled={!isOnline}
-          className="flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg transition-all duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed text-white/80 hover:text-white"
-        >
-          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          <span className="text-[7px] sm:text-[9px] leading-none">AI</span>
-        </button>
-        <button
-          type="button"
           onClick={onToggleInterlinear}
           className={clsx(
             'flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg transition-all duration-150 cursor-pointer',
@@ -213,13 +195,11 @@ export function VerseActionBar({
 function DesktopActionBar({
   selectedCount,
   allBookmarked,
-  isOnline,
   interlinearEnabled,
   onToggleInterlinear,
   onToggleBookmark,
   onAddNote,
   onCrossReferences,
-  onAiCommentary,
   onClearSelection,
   onRangeSelect,
   isRangeMode,
@@ -232,13 +212,11 @@ function DesktopActionBar({
 }: {
   selectedCount: number
   allBookmarked: boolean
-  isOnline: boolean
   interlinearEnabled: boolean
   onToggleInterlinear: () => void
   onToggleBookmark: () => void
   onAddNote: () => void
   onCrossReferences: () => void
-  onAiCommentary: () => void
   onClearSelection: () => void
   onRangeSelect?: () => void
   isRangeMode?: boolean
@@ -350,7 +328,6 @@ function DesktopActionBar({
           />
         )}
         <ActionButton icon={<Crosshair size={13} />} label="Refs" onClick={onCrossReferences} />
-        <ActionButton icon={<Sparkles size={13} />} label="AI" onClick={onAiCommentary} disabled={!isOnline} />
         <ActionButton icon={<BookText size={13} />} label="IL" onClick={onToggleInterlinear} highlighted={interlinearEnabled} />
         <span className="w-px h-4 bg-white/20" />
         <button

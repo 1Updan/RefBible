@@ -28,7 +28,6 @@ import {
 } from "./lib/db";
 import { getBook, BOOKS } from "@/data/books";
 import type { HighlightColorId } from "./lib/highlights";
-import { useNetworkState } from "./hooks/useNetworkState";
 import { useSpeech } from "./hooks/useSpeech";
 import { SpeechControlBar } from "./components/reading/SpeechControlBar";
 import { BookOpen, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
@@ -103,6 +102,15 @@ function AppContent() {
     "KJV",
     "NASB",
   ]);
+
+  const refreshInstalledVersions = useCallback(async () => {
+    const codes = await getInstalledTranslations()
+    setInstalledVersions(codes)
+  }, [])
+
+  useEffect(() => {
+    refreshInstalledVersions()
+  }, [refreshInstalledVersions])
   const [noteText, setNoteText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showNav, setShowNav] = useState(false);
@@ -120,7 +128,6 @@ function AppContent() {
   const [isSelecting, setIsSelecting] = useState(false);
   const headerMeasureRef = useRef<HTMLDivElement>(null);
   const tabBarMeasureRef = useRef<HTMLDivElement>(null);
-  const isOnline = useNetworkState();
   const {
     speak,
     pause,
@@ -364,17 +371,10 @@ function AppContent() {
   }
 
   const handlePanelToggle = (
-    panel: "bookmarks" | "ai" | "settings" | "study" | "search" | "crossrefs",
+    panel: "bookmarks" | "settings" | "study" | "search" | "crossrefs",
   ) => {
     if (activePanel === panel) {
       setActivePanel("none");
-    } else if (panel === "ai") {
-      if (activePanel === "study" && studyTab === "ai") {
-        setActivePanel("none");
-      } else {
-        setStudyTab("ai");
-        setActivePanel("study");
-      }
     } else if (panel === "crossrefs") {
       if (activePanel === "study" && studyTab === "crossrefs") {
         setActivePanel("none");
@@ -470,7 +470,6 @@ function AppContent() {
       fontSize={prefs.fontSize}
       bookmarks={bookmarks}
       isDesktop={isDesktop}
-      isOnline={isOnline}
       interlinearEnabled={prefs.interlinearEnabled}
       interlinearLanguages={prefs.interlinearLanguages}
       onToggleInterlinear={toggleInterlinear}
@@ -534,6 +533,8 @@ function AppContent() {
               navigateTo(votd.bookId, votd.chapter);
               setVotdNavigateTo(votd.osisId);
             }}
+            installedVersions={installedVersions}
+            onRefreshInstalled={refreshInstalledVersions}
           />
         );
       case "bookmarks":
@@ -631,6 +632,8 @@ function AppContent() {
             navigateTo(votd.bookId, votd.chapter);
             setVotdNavigateTo(votd.osisId);
           }}
+          installedVersions={installedVersions}
+          onRefreshInstalled={refreshInstalledVersions}
         />
       )}
     </BottomSheet>

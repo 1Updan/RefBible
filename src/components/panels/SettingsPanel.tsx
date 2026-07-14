@@ -3,7 +3,7 @@ import { useRef } from 'react'
 import { Sun, Moon, BookMarked, Download, Trash2, CheckCircle, ChevronDown, ChevronRight, Globe, BookText, Volume2, Cloud, FileUp } from 'lucide-react'
 import clsx from 'clsx'
 import type { Theme } from '@/contexts/theme'
-import { getInstalledTranslations, removeTranslation, exportBackupData, importBackupData } from '@/lib/db'
+import { removeTranslation, exportBackupData, importBackupData } from '@/lib/db'
 import { downloadAndInstall } from '@/lib/downloader'
 import { getVersionsByLanguage } from '@/lib/versions'
 import type { VersionMeta } from '@/lib/versions'
@@ -23,6 +23,8 @@ interface SettingsPanelProps {
   selectedVoiceUri: string
   onChangeVoice: (uri: string) => void
   onVotdNavigate: () => void
+  installedVersions: string[]
+  onRefreshInstalled: () => void
 }
 
 const THEMES: { value: Theme; label: string; icon: typeof Sun }[] = [
@@ -63,10 +65,11 @@ export function SettingsPanel({
   selectedVoiceUri,
   onChangeVoice,
   onVotdNavigate,
+  installedVersions,
+  onRefreshInstalled,
 }: SettingsPanelProps) {
   const [openTranslations, toggleTranslations] = useSectionState('translations')
   const [openAudio, toggleAudio] = useSectionState('audio')
-  const [installed, setInstalled] = useState<Set<string>>(new Set())
   const [downloading, setDownloading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [expandedLangs, setExpandedLangs] = useState<Set<string>>(() => {
@@ -77,25 +80,19 @@ export function SettingsPanel({
       return new Set()
     }
   })
-  useEffect(() => {
-    getInstalledTranslations().then((codes) => setInstalled(new Set(codes)))
-  }, [])
 
   useEffect(() => {
     localStorage.setItem('refbible:expanded-langs', JSON.stringify([...expandedLangs]))
   }, [expandedLangs])
 
-  const refreshInstalled = async () => {
-    const codes = await getInstalledTranslations()
-    setInstalled(new Set(codes))
-  }
+  const installed = new Set(installedVersions)
 
   const handleDownload = async (code: string) => {
     setDownloading(code)
     setError(null)
     try {
       await downloadAndInstall(code)
-      await refreshInstalled()
+      await onRefreshInstalled()
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {
@@ -105,7 +102,7 @@ export function SettingsPanel({
 
   const handleDelete = async (code: string) => {
     await removeTranslation(code)
-    await refreshInstalled()
+    await onRefreshInstalled()
   }
 
   const toggleLang = (name: string) => {
