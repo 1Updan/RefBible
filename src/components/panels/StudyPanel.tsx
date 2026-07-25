@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import clsx from 'clsx'
 import { Crosshair, MessageSquareMore, Sparkles, Trash2, WifiOff, AlertCircle, BookText, Volume2, VolumeX, Search, Mic, MicOff, Plus } from 'lucide-react'
 import { useNavigation } from '@/hooks/useNavigation'
 import { useNetworkState } from '@/hooks/useNetworkState'
@@ -239,7 +240,12 @@ function CrossRefsTab() {
         return (
           <div
             key={xref.id}
-            className="relative w-full text-left p-2.5 rounded-lg bg-surface-elevated border border-border-subtle hover:bg-surface-hover transition-all duration-150 group"
+            className={clsx(
+              "relative w-full text-left p-2.5 rounded-lg border transition-all duration-150 group",
+              isUser
+                ? "bg-red-50 border-red-200 hover:bg-red-100"
+                : "bg-surface-elevated border-border-subtle hover:bg-surface-hover",
+            )}
           >
             <button
               type="button"
@@ -258,10 +264,10 @@ function CrossRefsTab() {
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); handleRemove(xref.id) }}
-                className="absolute top-2 right-2 p-1 rounded text-text-tertiary hover:text-danger transition-colors duration-150 opacity-0 group-hover:opacity-100 cursor-pointer"
+                className="absolute top-2 right-2 p-1.5 rounded-md text-danger hover:bg-red-100 transition-colors duration-150 cursor-pointer"
                 aria-label="Remove cross-reference"
               >
-                <Trash2 size={12} />
+                <Trash2 size={14} />
               </button>
             )}
           </div>

@@ -169,6 +169,7 @@ export const VerseRow = memo(function VerseRow({
                 key={xref.id}
                 reference={formatVerseId(xref.target_verse_id)}
                 onClick={() => onNavigateToRef(xref.target_verse_id)}
+                isUserAdded={!!xref.user_created}
               />
             ))}
             {crossReferences.length > 3 && (
@@ -179,8 +180,7 @@ export const VerseRow = memo(function VerseRow({
                     onClick={() => onOpenCrossRefs(verse.id)}
                     className="text-xs font-medium px-1 cursor-pointer transition-colors duration-150 text-accent hover:text-accent-hover"
                   >
-                    <span className="text-danger">+</span>
-                    {crossReferences.length - 3} more
+                    <span className="text-danger font-bold">+{crossReferences.length - 3} more</span>
                   </button>
                 ) : (
                   <button
