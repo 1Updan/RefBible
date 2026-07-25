@@ -23,3 +23,34 @@ const ABBR_MAP: Record<string, string> = {
 export function toOsis(bookAbbr: string): string {
   return ABBR_MAP[bookAbbr] ?? bookAbbr.toUpperCase()
 }
+
+// KJV-to-OSIS mapping: database uses KJV format (PSA, MAT, MRK, etc.)
+// while ABBR_MAP produces the long OSIS format (PS, MATT, MARK, etc.)
+const OSIS_TO_KJV: Record<string, string> = {
+  GEN: 'GEN', EXOD: 'EXO', LEV: 'LEV', NUM: 'NUM', DEUT: 'DEU',
+  JOSH: 'JOS', JUDG: 'JDG', RUTH: 'RUT',
+  '1SAM': '1SA', '2SAM': '2SA', '1KGS': '1KI', '2KGS': '2KI',
+  '1CHR': '1CH', '2CHR': '2CH',
+  EZRA: 'EZR', NEH: 'NEH', ESTH: 'EST', JOB: 'JOB',
+  PS: 'PSA', PROV: 'PRO', ECCL: 'ECC', SONG: 'SNG',
+  ISA: 'ISA', JER: 'JER', LAM: 'LAM', EZEK: 'EZK', DAN: 'DAN',
+  HOS: 'HOS', JOEL: 'JOL', AMOS: 'AMO', OBAD: 'OBA',
+  JONAH: 'JON', MIC: 'MIC', NAH: 'NAM', HAB: 'HAB',
+  ZEPH: 'ZEP', HAG: 'HAG', ZECH: 'ZEC', MAL: 'MAL',
+  MATT: 'MAT', MARK: 'MRK', LUKE: 'LUK', JHN: 'JHN',
+  ACTS: 'ACT', ROM: 'ROM', '1COR': '1CO', '2COR': '2CO',
+  GAL: 'GAL', EPH: 'EPH', PHIL: 'PHP', COL: 'COL',
+  '1THESS': '1TH', '2THESS': '2TH',
+  '1TIM': '1TI', '2TIM': '2TI',
+  TITUS: 'TIT', PHLM: 'PHM', HEB: 'HEB', JAS: 'JAS',
+  '1PET': '1PE', '2PET': '2PE',
+  '1JHN': '1JN', '2JHN': '2JN', '3JHN': '3JN',
+  JUDE: 'JUD', REV: 'REV',
+}
+
+export function toDbOsis(osis: string): string {
+  const parts = osis.split('.')
+  const mapped = OSIS_TO_KJV[parts[0]]
+  if (mapped) parts[0] = mapped
+  return parts.join('.')
+}

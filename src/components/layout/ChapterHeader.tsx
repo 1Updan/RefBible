@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, ChevronDown, Bookmark, Settings, ArrowLeft, Check, Search, Crosshair, BookOpen, Volume2, Menu, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ChevronDown, Bookmark, Settings, ArrowLeft, Check, Search, Crosshair, BookOpen, Menu, X } from 'lucide-react'
 import clsx from 'clsx'
 
 import { parseReference } from '@/lib/utils'
@@ -22,10 +22,6 @@ interface ChapterHeaderProps {
   onToggleVersion: (code: string) => void
   onSearch: (query: string) => void
   onNavigateToRef?: (bookId: number, chapter: number, range?: { verseStart: number; verseEnd: number }) => void
-  speaking: boolean
-  canSpeak: boolean
-  onSpeak: () => void
-  onStop: () => void
   onOpenNav?: () => void
   interlinearEnabled?: boolean
   onToggleInterlinear?: () => void
@@ -48,10 +44,6 @@ export function ChapterHeader({
   onToggleVersion,
   onSearch,
   onNavigateToRef,
-  speaking,
-  canSpeak,
-  onSpeak,
-  onStop,
   onOpenNav,
   interlinearEnabled,
   onToggleInterlinear,
@@ -199,23 +191,6 @@ export function ChapterHeader({
             )}
           </div>
 
-          <Tooltip label={speaking ? 'Stop' : 'Read aloud'}>
-            <button
-              type="button"
-              onClick={speaking ? onStop : onSpeak}
-              disabled={!canSpeak}
-              className={clsx(
-                'p-1 rounded-md transition-all duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed',
-                speaking
-                  ? 'text-accent bg-accent-light animate-pulse'
-                  : 'text-text-tertiary hover:text-text-primary hover:bg-surface',
-              )}
-              aria-label={speaking ? 'Stop reading' : 'Read chapter aloud'}
-            >
-              <Volume2 size={15} />
-            </button>
-          </Tooltip>
-
           <span className="w-px h-4 bg-border mx-0.5 shrink-0" />
           <Tooltip label="Cross References">
             <button
@@ -315,15 +290,6 @@ export function ChapterHeader({
                   >
                     <Bookmark size={14} />
                     Bookmarks
-                  </button>
-                  <button
-                    type="button"
-                    onClick={speaking ? () => { onStop(); setMobileMenuOpen(false) } : () => { onSpeak(); setMobileMenuOpen(false) }}
-                    disabled={!canSpeak}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-text-primary hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-100 cursor-pointer text-left"
-                  >
-                    <Volume2 size={14} className={speaking ? 'text-accent' : ''} />
-                    {speaking ? 'Stop Reading' : 'Read Aloud'}
                   </button>
                   <button
                     type="button"

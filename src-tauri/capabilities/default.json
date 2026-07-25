@@ -10,7 +10,7 @@
     {
       "identifier": "http:default",
       "allow": [
-        { "url": "https://raw.githubusercontent.com/**" }
+        { "url": "https://raw.githubusercontent.com/*" }
       ]
     },
     "notification:default",

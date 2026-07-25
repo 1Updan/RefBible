@@ -36,3 +36,15 @@ tmp/
 __pycache__/
 *.pyc
 src-tauri/gen/schemas/
+RefBible-*.apk*
+
+# Temp/debug files
+check_asv*.py
+check_db*.py
+check_live_db.py
+test_insert.py
+ui*.xml
+screen.png
+*.bak
+AI_FEATURE_AUDIT.md
+gen/

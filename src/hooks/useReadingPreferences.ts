@@ -11,7 +11,7 @@ const STORAGE_KEY = 'refbible-prefs'
 
 function loadPrefs(): Preferences {
   if (typeof window === 'undefined') {
-    return { fontSize: 19, visibleVersions: ['KJV', 'NASB'], interlinearEnabled: false, interlinearLanguages: ['hebrew', 'greek'] }
+    return { fontSize: 19, visibleVersions: ['KJV'], interlinearEnabled: false, interlinearLanguages: ['hebrew', 'greek'] }
   }
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -30,7 +30,7 @@ function loadPrefs(): Preferences {
     // ignore parse errors
   }
   localStorage.removeItem(STORAGE_KEY)
-  return { fontSize: 19, visibleVersions: ['KJV', 'NASB'], interlinearEnabled: false, interlinearLanguages: ['hebrew', 'greek'] }
+  return { fontSize: 19, visibleVersions: ['KJV'], interlinearEnabled: false, interlinearLanguages: ['hebrew', 'greek'] }
 }
 
 function savePrefs(prefs: Preferences) {

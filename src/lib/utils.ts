@@ -15,8 +15,12 @@ for (const book of BOOKS) {
   BOOK_MAP[osis.toLowerCase()] = book.id
 }
 
-// Also index by KJV abbreviation so cross-refs stored in DB (KJV format) resolve
-const KJV_BOOKS: [string, string][] = [
+// KJV-format book code list. `KJV_BOOKS[i] = [kjvCode, osisCode]`.
+// The bundled database stores verse IDs using the KJV abbreviations (`PSA.1.1`,
+// `MAT.5.14`, `MRK.10.27`, `JHN.1.1`...). The verse-of-the-day list and many
+// downloaded bible JSONs use OSIS abbreviations (`PS`, `MATT`, `MARK`, `JHN`...)
+// — this list is the bridge. Exported so the downloader can reuse it.
+export const KJV_BOOKS: [string, string][] = [
   ['GEN', 'GEN'], ['EXO', 'EXOD'], ['LEV', 'LEV'], ['NUM', 'NUM'], ['DEU', 'DEUT'],
   ['JOS', 'JOSH'], ['JDG', 'JUDG'], ['RUT', 'RUTH'], ['1SA', '1SAM'], ['2SA', '2SAM'],
   ['1KI', '1KGS'], ['2KI', '2KGS'], ['1CH', '1CHR'], ['2CH', '2CHR'], ['EZR', 'EZRA'],

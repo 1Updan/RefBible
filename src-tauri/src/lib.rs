@@ -1,3 +1,4 @@
+mod commands;
 mod db;
 
 use std::fs;
@@ -21,6 +22,13 @@ fn ensure_db(app: &tauri::App) {
     fs::write(&marker, b"1").expect("failed to write marker file");
 }
 
+// Inline migrations: the bundled refbible.db.gz ships WITHOUT the highlights
+// and user_custom_cross_references tables (they'd be empty anyway), so we have
+// to create them on first run. The orphan-cleanup keeps stale content_text rows
+// (from older buggy downloads that used the wrong verse-id format) from
+// polluting the table. The 1JHN/2JHN/3JHN rewrite fixes a source-data bug where
+// cross-references for 1-3 John used the long OSIS book code (1JHN) instead of
+// the short one (1JN) the verses table uses. Idempotent: safe to run on every launch.
 fn run_migrations(conn: &rusqlite::Connection) {
     conn.execute_batch(
         "
@@ -37,6 +45,12 @@ fn run_migrations(conn: &rusqlite::Connection) {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
         DELETE FROM content_text WHERE verse_id NOT IN (SELECT id FROM verses);
+        UPDATE cross_references SET origin_verse_id = '1JN.' || substr(origin_verse_id, 6) WHERE origin_verse_id LIKE '1JHN.%';
+        UPDATE cross_references SET origin_verse_id = '2JN.' || substr(origin_verse_id, 6) WHERE origin_verse_id LIKE '2JHN.%';
+        UPDATE cross_references SET origin_verse_id = '3JN.' || substr(origin_verse_id, 6) WHERE origin_verse_id LIKE '3JHN.%';
+        UPDATE cross_references SET target_verse_id = '1JN.' || substr(target_verse_id, 6) WHERE target_verse_id LIKE '1JHN.%';
+        UPDATE cross_references SET target_verse_id = '2JN.' || substr(target_verse_id, 6) WHERE target_verse_id LIKE '2JHN.%';
+        UPDATE cross_references SET target_verse_id = '3JN.' || substr(target_verse_id, 6) WHERE target_verse_id LIKE '3JHN.%';
         "
     ).expect("failed to run migrations");
 }
@@ -72,6 +86,7 @@ pub fn run() {
         .plugin(tauri_plugin_http::init())
         .setup(|app| {
             if cfg!(debug_assertions) {
+                eprintln!("[setup] starting...");
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
                         .level(log::LevelFilter::Info)
@@ -80,15 +95,22 @@ pub fn run() {
             }
             ensure_db(app);
             let app_dir = app.path().app_data_dir().expect("failed to get app data dir");
+            if cfg!(debug_assertions) {
+                eprintln!("[setup] app_data_dir: {:?}", app_dir);
+            }
             let db_path = app_dir.join("refbible.db");
             let conn = db::open(db_path).expect("failed to open database");
             run_migrations(&conn);
             app.manage(db::DbState(std::sync::Mutex::new(conn)));
+            if cfg!(debug_assertions) {
+                eprintln!("[setup] complete");
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             db::db_query,
             db::db_execute,
+            commands::ai::ai_query_stream,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

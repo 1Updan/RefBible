@@ -62,6 +62,7 @@ export interface StrongsEntry {
   definition: string | null
   pronunciation: string | null
   word_count: number | null
+  gloss: string | null
 }
 
 export interface Highlight {

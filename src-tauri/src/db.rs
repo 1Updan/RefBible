@@ -46,12 +46,22 @@ fn convert_sql(sql: &str) -> String {
     sql.replace('$', "?")
 }
 
+// Gate stderr tracing behind debug builds so release doesn't spam logs.
+macro_rules! dbg_log {
+    ($($arg:tt)*) => {
+        if cfg!(debug_assertions) {
+            eprintln!($($arg)*);
+        }
+    };
+}
+
 #[tauri::command]
 pub fn db_query(
     state: tauri::State<'_, DbState>,
     sql: String,
     params: Vec<Value>,
 ) -> Result<Vec<Map<String, Value>>, String> {
+    dbg_log!("[db_query] sql={:?} params_len={}", sql, params.len());
     let conn = state.0.lock().map_err(|e| format!("Lock error: {}", e))?;
     let sql = convert_sql(&sql);
     let mut stmt = conn.prepare(&sql).map_err(|e| format!("Prepare: {}", e))?;
@@ -78,6 +88,7 @@ pub fn db_query(
     for row in rows {
         result.push(row.map_err(|e| format!("Row: {}", e))?);
     }
+    dbg_log!("[db_query] success: {} rows", result.len());
     Ok(result)
 }
 
@@ -87,6 +98,7 @@ pub fn db_execute(
     sql: String,
     params: Vec<Value>,
 ) -> Result<u64, String> {
+    dbg_log!("[db_execute] sql={:?} params_len={}", sql, params.len());
     let conn = state.0.lock().map_err(|e| format!("Lock error: {}", e))?;
     let sql = convert_sql(&sql);
     let owned: Vec<rusqlite::types::Value> = params.iter().map(json_to_rusqlite).collect();

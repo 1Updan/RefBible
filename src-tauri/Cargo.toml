@@ -34,4 +34,6 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 tauri-plugin-http = "2"
 tauri-plugin-notification = "2"
 flate2 = "1.1"
+futures-util = "0.3"
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream"] }
 

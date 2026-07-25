@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRef } from 'react'
-import { Sun, Moon, BookMarked, Download, Trash2, CheckCircle, ChevronDown, ChevronRight, Globe, BookText, Volume2, Cloud, FileUp } from 'lucide-react'
+import { Sun, Moon, BookMarked, Download, Trash2, CheckCircle, ChevronDown, ChevronRight, BookText, Cloud, FileUp } from 'lucide-react'
 import clsx from 'clsx'
 import type { Theme } from '@/contexts/theme'
 import { removeTranslation, exportBackupData, importBackupData } from '@/lib/db'
 import { downloadAndInstall } from '@/lib/downloader'
-import { getVersionsByLanguage } from '@/lib/versions'
+import { getVersionsByLanguage, VERSIONS } from '@/lib/versions'
 import type { VersionMeta } from '@/lib/versions'
-import type { SpeechVoice } from '@/hooks/useSpeech'
 import { getTodaysVerse } from '@/lib/verseOfTheDay'
 
 interface SettingsPanelProps {
@@ -19,9 +18,6 @@ interface SettingsPanelProps {
   interlinearLanguages: ('hebrew' | 'greek')[]
   onToggleInterlinear: () => void
   onSetInterlinearLanguages: (langs: ('hebrew' | 'greek')[]) => void
-  voices: SpeechVoice[]
-  selectedVoiceUri: string
-  onChangeVoice: (uri: string) => void
   onVotdNavigate: () => void
   installedVersions: string[]
   onRefreshInstalled: () => void
@@ -61,29 +57,13 @@ export function SettingsPanel({
   interlinearLanguages,
   onToggleInterlinear,
   onSetInterlinearLanguages,
-  voices,
-  selectedVoiceUri,
-  onChangeVoice,
   onVotdNavigate,
   installedVersions,
   onRefreshInstalled,
 }: SettingsPanelProps) {
   const [openTranslations, toggleTranslations] = useSectionState('translations')
-  const [openAudio, toggleAudio] = useSectionState('audio')
   const [downloading, setDownloading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [expandedLangs, setExpandedLangs] = useState<Set<string>>(() => {
-    try {
-      const saved = localStorage.getItem('refbible:expanded-langs')
-      return saved ? new Set(JSON.parse(saved)) : new Set()
-    } catch {
-      return new Set()
-    }
-  })
-
-  useEffect(() => {
-    localStorage.setItem('refbible:expanded-langs', JSON.stringify([...expandedLangs]))
-  }, [expandedLangs])
 
   const installed = new Set(installedVersions)
 
@@ -103,15 +83,6 @@ export function SettingsPanel({
   const handleDelete = async (code: string) => {
     await removeTranslation(code)
     await onRefreshInstalled()
-  }
-
-  const toggleLang = (name: string) => {
-    setExpandedLangs((prev) => {
-      const next = new Set(prev)
-      if (next.has(name)) next.delete(name)
-      else next.add(name)
-      return next
-    })
   }
 
   const byLang = getVersionsByLanguage()
@@ -245,77 +216,28 @@ export function SettingsPanel({
             <p className="text-xs text-danger mb-3 px-1">{error}</p>
           )}
 
-          <div className="space-y-1">
-            {[...byLang.entries()].map(([langName, versions]) => {
-              const open = expandedLangs.has(langName)
-              return (
-                <div key={langName}>
-                  <button
-                    type="button"
-                    onClick={() => toggleLang(langName)}
-                    className="w-full flex items-center gap-1.5 px-2 py-2 text-xs font-bold text-accent uppercase tracking-widest hover:text-accent-hover transition-colors duration-150 cursor-pointer border-b border-border-subtle"
-                  >
-                    {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                    <Globe size={13} />
-                    {langName}
-                  </button>
-                  {open && (
-                    <div className="space-y-0.5 pt-1">
-                      {versions.map((v) => (
-                        <VersionRow
-                          key={v.code}
-                          version={v}
-                          installed={installed.has(v.code)}
-                          downloading={downloading === v.code}
-                          onDownload={() => handleDownload(v.code)}
-                          onDelete={() => handleDelete(v.code)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-          </>)}
-        </section>
-
-        <section>
-          <button
-            type="button"
-            onClick={toggleAudio}
-            className="w-full flex items-center gap-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2.5 cursor-pointer"
-          >
-            {openAudio ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            <Volume2 size={13} />
-            Audio
-          </button>
-
-          {openAudio && (<>
-          <div className="space-y-1.5">
-            {voices.length === 0 ? (
-              <p className="text-xs text-text-tertiary px-1">No voices available. Install a text-to-speech voice in your system settings.</p>
-            ) : (
-              voices.map((v) => (
-                <button
-                  key={v.uri}
-                  type="button"
-                  onClick={() => onChangeVoice(v.uri)}
-                  className={clsx(
-                    'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left transition-all duration-150 cursor-pointer',
-                    selectedVoiceUri === v.uri
-                      ? 'bg-accent/10 text-accent font-medium'
-                      : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary',
-                  )}
-                >
-                  <Volume2 size={14} className={clsx(selectedVoiceUri === v.uri ? 'text-accent' : 'text-text-tertiary')} />
-                  <div className="min-w-0">
-                    <span className="block truncate">{v.name}</span>
-                    <span className="text-[10px] text-text-tertiary">{v.lang}</span>
-                  </div>
-                </button>
-              ))
-            )}
+          <div className="space-y-0.5">
+            {byLang.size > 0
+              ? [...byLang.values()].flat().map((v) => (
+                  <VersionRow
+                    key={v.code}
+                    version={v}
+                    installed={installed.has(v.code)}
+                    downloading={downloading === v.code}
+                    onDownload={() => handleDownload(v.code)}
+                    onDelete={() => handleDelete(v.code)}
+                  />
+                ))
+              : VERSIONS.map((v) => (
+                  <VersionRow
+                    key={v.code}
+                    version={v}
+                    installed={installed.has(v.code)}
+                    downloading={downloading === v.code}
+                    onDownload={() => handleDownload(v.code)}
+                    onDelete={() => handleDelete(v.code)}
+                  />
+                ))}
           </div>
           </>)}
         </section>

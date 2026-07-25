@@ -18,30 +18,37 @@ export function DesktopShell({ nav, reading, sidebar, onCloseSidebar }: DesktopS
   const startX = useRef(0)
   const startW = useRef(0)
 
-  const handleResizeStart = useCallback((side: 'nav' | 'sidebar') => (e: React.MouseEvent) => {
+  const handleResizeStart = useCallback((side: 'nav' | 'sidebar') => (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault()
-    startX.current = e.clientX
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX
+    startX.current = clientX
     startW.current = side === 'nav' ? navWidth : sidebarWidth
     setResizing(side)
   }, [navWidth, sidebarWidth])
 
   useEffect(() => {
     if (!resizing) return
-    const handleMouseMove = (e: MouseEvent) => {
+    const move = (clientX: number) => {
       if (resizing === 'nav') {
-        setNavWidth(Math.max(160, Math.min(400, startW.current + e.clientX - startX.current)))
+        setNavWidth(Math.max(160, Math.min(400, startW.current + clientX - startX.current)))
       } else {
-        setSidebarWidth(Math.max(240, Math.min(500, startW.current - (e.clientX - startX.current))))
+        setSidebarWidth(Math.max(240, Math.min(500, startW.current - (clientX - startX.current))))
       }
     }
-    const handleMouseUp = () => setResizing(null)
+    const handleMouseMove = (e: MouseEvent) => move(e.clientX)
+    const handleTouchMove = (e: TouchEvent) => { if (e.touches.length) { e.preventDefault(); move(e.touches[0].clientX) } }
+    const handleUp = () => setResizing(null)
     document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener('mouseup', handleUp)
+    document.addEventListener('touchmove', handleTouchMove, { passive: false })
+    document.addEventListener('touchend', handleUp)
     document.body.style.cursor = 'col-resize'
     document.body.style.userSelect = 'none'
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('mouseup', handleUp)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleUp)
       document.body.style.cursor = ''
       document.body.style.userSelect = ''
     }
@@ -105,16 +112,20 @@ export function DesktopShell({ nav, reading, sidebar, onCloseSidebar }: DesktopS
       {navOpen && (
         <div
           onMouseDown={handleResizeStart('nav')}
-          className="absolute top-0 bottom-0 z-10 w-1 cursor-col-resize bg-transparent hover:bg-accent/30 active:bg-accent/50 transition-colors duration-150"
+          onTouchStart={handleResizeStart('nav')}
+          className="absolute top-0 bottom-0 z-20 w-4 -ml-2 cursor-col-resize bg-transparent hover:bg-accent/30 active:bg-accent/50 transition-colors duration-150 touch-none"
           style={{ left: `${navWidth}px` }}
+          aria-hidden="true"
         />
       )}
 
       {sidebar && (
         <div
           onMouseDown={handleResizeStart('sidebar')}
-          className="absolute top-0 bottom-0 z-10 w-1 cursor-col-resize bg-transparent hover:bg-accent/30 active:bg-accent/50 transition-colors duration-150"
+          onTouchStart={handleResizeStart('sidebar')}
+          className="absolute top-0 bottom-0 z-20 w-4 -mr-2 cursor-col-resize bg-transparent hover:bg-accent/30 active:bg-accent/50 transition-colors duration-150 touch-none"
           style={{ right: `${sidebarWidth}px` }}
+          aria-hidden="true"
         />
       )}
     </div>

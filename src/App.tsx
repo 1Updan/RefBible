@@ -28,12 +28,13 @@ import {
 } from "./lib/db";
 import { getBook, BOOKS } from "@/data/books";
 import type { HighlightColorId } from "./lib/highlights";
-import { useSpeech } from "./hooks/useSpeech";
-import { SpeechControlBar } from "./components/reading/SpeechControlBar";
-import { BookOpen, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import type { AiTarget } from "./contexts/navigation";
+
+import { AiVaultProvider } from "./contexts/AiVaultContext";
+import { AiChatPanel } from "./components/panels/AiChatPanel";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import {
   isPermissionGranted,
-  requestPermission,
   sendNotification,
   onNotificationReceived,
 } from "@tauri-apps/plugin-notification";
@@ -46,6 +47,7 @@ import {
   setPendingVotdNavigation,
 } from "./lib/verseOfTheDay";
 import { formatVerseId, parseOsisId } from "./lib/utils";
+import { toDbOsis } from "./data/osis";
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(
@@ -71,37 +73,49 @@ function AppContent() {
     return () => clearTimeout(timer)
   }, [])
 
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  // Desktop-class layout: wide screens, OR a landscape phone/tablet where we
+  // want the resizable 3-pane shell so the user can drag the side panels to
+  // make the reading column bigger. (Previously only >=768px, which excluded
+  // landscape phones and left them with no resizable panels at all.)
+  const isWide = useMediaQuery("(min-width: 768px)");
+  const isLandscape = useMediaQuery(
+    "(orientation: landscape) and (min-width: 560px)",
+  );
+  const isDesktop = isWide || isLandscape;
+
   const { theme, setTheme } = useTheme();
   const { prefs, update, toggleVersion, toggleInterlinear } =
     useReadingPreferences();
   const {
-    activePanel,
-    setActivePanel,
-    bookId,
-    chapter,
-    navigateTo,
-    noteVerseId,
-    closeNote,
-    openNote,
-    studyTab,
-    setStudyTab,
-    goBack,
-    canGoBack,
-    setPendingRange,
-  } = useNavigation();
-  const [ready, setReady] = useState(false);
-  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
-  const [bookmarkRefresh, setBookmarkRefresh] = useState(0);
-  const [highlightColors, setHighlightColors] = useState<Map<string, string[]>>(
-    new Map(),
-  );
-  const [activeHighlightColor, setActiveHighlightColor] =
-    useState<HighlightColorId | null>(null);
-  const [installedVersions, setInstalledVersions] = useState<string[]>([
-    "KJV",
-    "NASB",
-  ]);
+      activePanel,
+      setActivePanel,
+      bookId,
+      chapter,
+      navigateTo,
+      noteVerseId,
+      closeNote,
+      openNote,
+      studyTab,
+      setStudyTab,
+      goBack,
+      canGoBack,
+      setPendingRange,
+      setAiTarget,
+    } = useNavigation();
+    const [ready, setReady] = useState(false);
+    const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
+    const [bookmarkRefresh, setBookmarkRefresh] = useState(0);
+    const [dataRefreshKey, setDataRefreshKey] = useState(0);
+    const [highlightColors, setHighlightColors] = useState<Map<string, string[]>>(
+      new Map(),
+    );
+    const [activeHighlightColor, setActiveHighlightColor] =
+      useState<HighlightColorId | null>(null);
+    const aiVerseRef = useRef<AiTarget | null>(null);
+    const [installedVersions, setInstalledVersions] = useState<string[]>([
+      "KJV",
+      "NASB",
+    ]);
 
   const refreshInstalledVersions = useCallback(async () => {
     const codes = await getInstalledTranslations()
@@ -128,21 +142,6 @@ function AppContent() {
   const [isSelecting, setIsSelecting] = useState(false);
   const headerMeasureRef = useRef<HTMLDivElement>(null);
   const tabBarMeasureRef = useRef<HTMLDivElement>(null);
-  const {
-    speak,
-    pause,
-    stop,
-    speaking,
-    paused,
-    resume,
-    isActive,
-    availableVoices,
-    selectedVoiceUri,
-    setSelectedVoiceUri,
-  } = useSpeech();
-  const chapterTextRef = useRef<{ verses: string[] }>({ verses: [] });
-  const [speakFromVerse, setSpeakFromVerse] = useState<number | null>(null);
-  const [canSpeak, setCanSpeak] = useState(false);
 
   useEffect(() => {
     setReady(true)
@@ -160,7 +159,7 @@ function AppContent() {
       const parsed = parseOsisId(pendingOsis);
       if (parsed) {
         navigateTo(parsed.bookId, parsed.chapter);
-        queueMicrotask(() => setVotdNavigateTo(pendingOsis));
+        queueMicrotask(() => setVotdNavigateTo(toDbOsis(pendingOsis)));
       }
       clearPendingVotdNavigation();
     }
@@ -170,28 +169,28 @@ function AppContent() {
       const parsed = parseOsisId(votd.osisId);
       if (parsed) {
         navigateTo(parsed.bookId, parsed.chapter);
-        setVotdNavigateTo(votd.osisId);
+        setVotdNavigateTo(toDbOsis(votd.osisId));
       }
     });
 
     if (shouldSendNotificationToday()) {
       const votd = getTodaysVerse();
-      setPendingVotdNavigation(votd.osisId);
 
+      // Only notify if the user has ALREADY granted permission.
+      // Do NOT prompt at launch — that blocks the UI and hurts first-run UX.
+      // The permission request is deferred to an explicit user opt-in (settings).
       isPermissionGranted()
         .then((granted) => {
-          if (!granted) {
-            return requestPermission().then((perm) => perm === "granted");
-          }
-          return granted;
-        })
-        .then((canNotify) => {
-          if (canNotify) {
+          if (granted) {
             sendNotification({
               title: `Verse of the Day — ${votd.reference}`,
               body: votd.text,
             });
             markNotificationSent();
+            // Only set pending VOTD navigation when a notification is actually
+            // sent. This prevents the app from always navigating to the VOTD
+            // on every launch when notifications aren't permitted.
+            setPendingVotdNavigation(votd.osisId);
           }
         });
     }
@@ -299,6 +298,10 @@ function AppContent() {
     [isDesktop, setActivePanel, setStudyTab, openNote],
   );
 
+  const handleDataChange = useCallback(() => {
+    setDataRefreshKey((n) => n + 1);
+  }, []);
+
   const handleSaveNote = useCallback(async () => {
     if (!noteVerseId) return;
     const text = noteText.trim();
@@ -311,7 +314,8 @@ function AppContent() {
     }
     setNoteText("");
     closeNote();
-  }, [noteVerseId, noteText, closeNote]);
+    handleDataChange();
+  }, [noteVerseId, noteText, closeNote, handleDataChange]);
 
   const handleNavigateBookmark = useCallback(
     (_: string, bookId: number, chapter: number) => {
@@ -320,37 +324,16 @@ function AppContent() {
     [navigateTo],
   );
 
-  const handleSpeak = useCallback(() => {
-    if (isActive()) {
-      if (paused) {
-        resume();
-      } else {
-        pause();
-      }
-      return;
-    }
-    const verses = chapterTextRef.current.verses;
-    if (verses.length === 0) return;
-    const from = speakFromVerse ?? 1;
-    const text = verses.slice(from - 1).join(" ");
-    speak(text);
-  }, [isActive, paused, resume, pause, speak, speakFromVerse]);
-
-  const handleChapterText = useCallback((text: string) => {
-    setCanSpeak(text.length > 0);
-  }, []);
-
-  const handleChapterVerses = useCallback((verses: string[]) => {
-    chapterTextRef.current.verses = verses;
-    setSpeakFromVerse(null);
-  }, []);
-
   if (!ready) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-bg">
         <div className="flex flex-col items-center gap-6 max-w-[280px] text-center">
-          <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center">
-            <BookOpen size={32} className="text-accent" />
+          <div className="w-32 h-32 rounded-3xl bg-accent/10 flex items-center justify-center overflow-hidden">
+            <img
+              src="/rblogo.svg"
+              alt="RefBible"
+              className="h-28 w-auto object-contain"
+            />
           </div>
           <div className="flex flex-col items-center gap-1">
             <h1 className="text-3xl font-extrabold text-text-primary tracking-tight">
@@ -371,21 +354,26 @@ function AppContent() {
   }
 
   const handlePanelToggle = (
-    panel: "bookmarks" | "settings" | "study" | "search" | "crossrefs",
-  ) => {
-    if (activePanel === panel) {
-      setActivePanel("none");
-    } else if (panel === "crossrefs") {
-      if (activePanel === "study" && studyTab === "crossrefs") {
-        setActivePanel("none");
-      } else {
-        setStudyTab("crossrefs");
-        setActivePanel("study");
-      }
-    } else {
-      setActivePanel(panel);
-    }
-  };
+        panel: "bookmarks" | "ai" | "settings" | "study" | "search" | "crossrefs",
+      ) => {
+        if (panel === "ai" && aiVerseRef.current) {
+          setAiTarget(aiVerseRef.current);
+        }
+        if (activePanel === panel) {
+          setActivePanel("none");
+        } else if (panel === "ai") {
+          setActivePanel("ai");
+        } else if (panel === "crossrefs") {
+          if (activePanel === "study" && studyTab === "crossrefs") {
+            setActivePanel("none");
+          } else {
+            setStudyTab("crossrefs");
+            setActivePanel("study");
+          }
+        } else {
+          setActivePanel(panel);
+        }
+      };
 
   const handleSearch = (q: string) => {
     setSearchQuery(q);
@@ -426,10 +414,6 @@ function AppContent() {
         setPendingRange(range ?? null);
         navigateTo(b, c);
       }}
-      speaking={speaking}
-      canSpeak={canSpeak}
-      onSpeak={handleSpeak}
-      onStop={stop}
       interlinearEnabled={prefs.interlinearEnabled}
       onToggleInterlinear={toggleInterlinear}
       onOpenNav={
@@ -444,66 +428,48 @@ function AppContent() {
     />
   );
 
-  const speechBar = (
-    <SpeechControlBar
-      speaking={speaking}
-      paused={paused}
-      bookName={currentBook?.name ?? "John"}
-      chapter={chapter}
-      onPlayPause={handleSpeak}
-      onStop={stop}
-      onPrevChapter={() => chapter > 1 && navigateTo(bookId, chapter - 1)}
-      onNextChapter={() =>
-        chapter < (currentBook?.chapters ?? 21) &&
-        navigateTo(bookId, chapter + 1)
-      }
-      hasPrev={chapter > 1}
-      hasNext={chapter < (currentBook?.chapters ?? 21)}
-    />
-  );
-
   const readingView = (
-    <ReadingView
-      bookId={bookId}
-      chapter={chapter}
-      visibleVersions={prefs.visibleVersions}
-      fontSize={prefs.fontSize}
-      bookmarks={bookmarks}
-      isDesktop={isDesktop}
-      interlinearEnabled={prefs.interlinearEnabled}
-      interlinearLanguages={prefs.interlinearLanguages}
-      onToggleInterlinear={toggleInterlinear}
-      onToggleBookmark={handleToggleBookmark}
-      onOpenNote={handleOpenNote}
-      onChapterText={handleChapterText}
-      onChapterVerses={handleChapterVerses}
-      onSelectionVerse={(v) => { setSpeakFromVerse(v); setIsSelecting(v !== null); }}
-      onSwipePrev={
-        !isDesktop
-          ? () => chapter > 1 && navigateTo(bookId, chapter - 1)
-          : undefined
-      }
-      onSwipeNext={
-        !isDesktop
-          ? () =>
-              chapter < (currentBook?.chapters ?? 21) &&
-              navigateTo(bookId, chapter + 1)
-          : undefined
-      }
-      onControlsVisibleChange={!isDesktop ? setControlsHidden : undefined}
-      votdVerseId={votdNavigateTo}
-      highlightColors={highlightColors}
-      activeHighlightColor={activeHighlightColor}
-      onHighlightVerse={handleHighlightVerse}
-      onRemoveHighlight={handleRemoveHighlight}
-      onHighlightColorChange={setActiveHighlightColor}
-    />
-  );
+      <ReadingView
+        bookId={bookId}
+        chapter={chapter}
+        visibleVersions={prefs.visibleVersions}
+        fontSize={prefs.fontSize}
+        bookmarks={bookmarks}
+        isDesktop={isDesktop}
+        interlinearEnabled={prefs.interlinearEnabled}
+        interlinearLanguages={prefs.interlinearLanguages}
+        onToggleInterlinear={toggleInterlinear}
+        onToggleBookmark={handleToggleBookmark}
+        onOpenNote={handleOpenNote}
+        onSelectionVerse={(v) => { setIsSelecting(v !== null); }}
+        onSwipePrev={
+          !isDesktop
+              ? () => chapter > 1 && navigateTo(bookId, chapter - 1)
+              : undefined
+        }
+        onSwipeNext={
+          !isDesktop
+              ? () =>
+                  chapter < (currentBook?.chapters ?? 21) &&
+                  navigateTo(bookId, chapter + 1)
+              : undefined
+        }
+        onControlsVisibleChange={!isDesktop ? setControlsHidden : undefined}
+        votdVerseId={votdNavigateTo}
+        highlightColors={highlightColors}
+        activeHighlightColor={activeHighlightColor}
+                onHighlightVerse={handleHighlightVerse}
+                onRemoveHighlight={handleRemoveHighlight}
+                onHighlightColorChange={setActiveHighlightColor}
+                      dataRefreshKey={dataRefreshKey}
+                      aiVerseRef={aiVerseRef}
+                      handlePanelToggle={() => handlePanelToggle("crossrefs")}
+                    />
+    );
 
   const reading = (
     <>
       {chapterHeader}
-      {speechBar}
       {readingView}
     </>
   );
@@ -511,7 +477,7 @@ function AppContent() {
   const renderSidebar = () => {
     switch (activePanel) {
       case "study":
-        return <StudyPanel />;
+              return <StudyPanel />;
       case "settings":
         return (
           <SettingsPanel
@@ -525,17 +491,14 @@ function AppContent() {
             onSetInterlinearLanguages={(langs) =>
               update({ interlinearLanguages: langs })
             }
-            voices={availableVoices}
-            selectedVoiceUri={selectedVoiceUri}
-            onChangeVoice={setSelectedVoiceUri}
             onVotdNavigate={() => {
               const votd = getTodaysVerse();
               navigateTo(votd.bookId, votd.chapter);
-              setVotdNavigateTo(votd.osisId);
+              setVotdNavigateTo(toDbOsis(votd.osisId));
             }}
             installedVersions={installedVersions}
             onRefreshInstalled={refreshInstalledVersions}
-          />
+            />
         );
       case "bookmarks":
         return (
@@ -569,15 +532,20 @@ function AppContent() {
   };
 
   const tabBar = (
-    <MobileTabBar
-      activePanel={activePanel}
-      onTabChange={(tab) => {
-        if (tab === "read") setActivePanel("none");
-        else if (tab === "saved") setActivePanel("bookmarks");
-        else if (tab === "settings") setActivePanel("settings");
-      }}
-    />
-  );
+        <MobileTabBar
+          activePanel={activePanel}
+          interlinearEnabled={prefs.interlinearEnabled}
+          onTabChange={(tab) => {
+                      if (tab === "read") {
+                        setNavBookId(bookId);
+                        setNavChapter(chapter);
+                        setShowNav(true);
+                      } else if (tab === "interlinear") toggleInterlinear();
+                      else if (tab === "references") handlePanelToggle("crossrefs");
+                      else if (tab === "settings") setActivePanel("settings");
+                    }}
+        />
+      );
 
   const mobileSheet = activePanel && activePanel !== "none" && (
     <BottomSheet
@@ -613,31 +581,36 @@ function AppContent() {
         />
       )}
       {activePanel === "settings" && (
-        <SettingsPanel
-          theme={theme}
-          onChangeTheme={setTheme}
-          fontSize={prefs.fontSize}
-          onChangeFontSize={(px) => update({ fontSize: px })}
-          interlinearEnabled={prefs.interlinearEnabled}
-          interlinearLanguages={prefs.interlinearLanguages}
-          onToggleInterlinear={toggleInterlinear}
-          onSetInterlinearLanguages={(langs) =>
-            update({ interlinearLanguages: langs })
-          }
-          voices={availableVoices}
-          selectedVoiceUri={selectedVoiceUri}
-          onChangeVoice={setSelectedVoiceUri}
-          onVotdNavigate={() => {
-            const votd = getTodaysVerse();
-            navigateTo(votd.bookId, votd.chapter);
-            setVotdNavigateTo(votd.osisId);
-          }}
-          installedVersions={installedVersions}
-          onRefreshInstalled={refreshInstalledVersions}
-        />
-      )}
-    </BottomSheet>
-  );
+              <SettingsPanel
+                theme={theme}
+                onChangeTheme={setTheme}
+                fontSize={prefs.fontSize}
+                onChangeFontSize={(px) => update({ fontSize: px })}
+                interlinearEnabled={prefs.interlinearEnabled}
+                interlinearLanguages={prefs.interlinearLanguages}
+                onToggleInterlinear={toggleInterlinear}
+                onSetInterlinearLanguages={(langs) =>
+                  update({ interlinearLanguages: langs })
+                }
+                onVotdNavigate={() => {
+                  const votd = getTodaysVerse();
+                  navigateTo(votd.bookId, votd.chapter);
+                  setVotdNavigateTo(toDbOsis(votd.osisId));
+                }}
+                installedVersions={installedVersions}
+                onRefreshInstalled={refreshInstalledVersions}
+              />
+            )}
+            {activePanel === "ai" && (
+              <AiChatPanel
+                verseId={aiVerseRef.current?.verseId}
+                reference={aiVerseRef.current?.reference}
+                verseText={aiVerseRef.current?.text}
+                onClose={() => setActivePanel("none")}
+              />
+            )}
+          </BottomSheet>
+        );
 
   const noteSheet = noteVerseId && (
     <BottomSheet
@@ -682,24 +655,25 @@ function AppContent() {
   }
 
   return (
-    <>
-      <div className="min-h-[100dvh] h-[100dvh] flex flex-col overflow-hidden bg-bg" style={{ paddingTop: 'env(safe-area-inset-top, 26px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-        <div
-          ref={headerMeasureRef}
-          className={controlsHidden ? 'hidden' : 'shrink-0'}
-        >
-          {chapterHeader}
-        </div>
-        {speechBar}
-        <main className="flex-1 min-h-0 flex flex-col bg-bg">
-          {readingView}
-        </main>
-        <div
-          ref={tabBarMeasureRef}
-          className={controlsHidden ? 'hidden' : 'shrink-0'}
-        >
-          {tabBar}
-        </div>
+      <>
+        <div className="min-h-[100dvh] h-[100dvh] flex flex-col overflow-hidden bg-bg" style={{ paddingTop: 'env(safe-area-inset-top, 26px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+          <div
+            ref={headerMeasureRef}
+            className={controlsHidden ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto shrink-0'}
+            style={{ height: controlsHidden ? '0px' : 'auto', transition: 'height 200ms ease, opacity 200ms ease' }}
+          >
+            {chapterHeader}
+          </div>
+          <main className="flex-1 min-h-0 flex flex-col bg-bg">
+            {readingView}
+          </main>
+          <div
+            ref={tabBarMeasureRef}
+            className={controlsHidden ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto shrink-0'}
+            style={{ height: controlsHidden ? '0px' : 'auto', transition: 'height 200ms ease, opacity 200ms ease' }}
+          >
+            {tabBar}
+          </div>
         {currentBook && (
           <>
             {chapter > 1 && (
@@ -738,6 +712,7 @@ function AppContent() {
         }}
         onSelectChapter={(ch) => setNavChapter(ch)}
         onSelectVerse={(b, c) => {
+          console.warn('[NavBottomSheet] onSelectVerse called: bookId=', b, 'chapter=', c);
           navigateTo(b, c);
           setShowNav(false);
         }}
@@ -805,20 +780,25 @@ function NavBottomSheet({
                 OT
               </button>
               {otExpanded &&
-                OT_BOOKS.map((b) => (
-                  <button
-                    key={b.id}
-                    type="button"
-                    onClick={() => onSelectBook(b.id)}
-                    className={`w-full text-left px-3 py-2.5 text-xs font-medium transition-all duration-100 cursor-pointer border-l-2 min-h-[44px] ${
-                      navBookId === b.id
-                        ? "bg-accent/[0.12] text-accent font-semibold border-l-accent"
-                        : "text-text-secondary hover:bg-surface-hover hover:text-text-primary border-l-transparent hover:border-l-border"
-                    }`}
-                  >
-                    {b.name}
-                  </button>
-                ))}
+                              OT_BOOKS.map((b) => (
+                                <button
+                                  key={b.id}
+                                  type="button"
+                                  onClick={() => onSelectBook(b.id)}
+                                  className={`w-full text-left px-3 py-2.5 text-xs font-medium transition-all duration-100 cursor-pointer border-l-2 min-h-[44px] ${
+                                    navBookId === b.id
+                                      ? "bg-accent/[0.12] text-accent font-semibold border-l-accent"
+                                      : "text-text-secondary hover:bg-surface-hover hover:text-text-primary border-l-transparent hover:border-l-border"
+                                  }`}
+                                  ref={navBookId === b.id ? (el: HTMLButtonElement | null) => {
+                                    if (el) {
+                                      setTimeout(() => el.scrollIntoView({ block: 'center', behavior: 'smooth' }), 0);
+                                    }
+                                  } : undefined}
+                                >
+                                  {b.name}
+                                </button>
+                              ))}
             </div>
             <div>
               <button
@@ -840,20 +820,25 @@ function NavBottomSheet({
                 NT
               </button>
               {ntExpanded &&
-                NT_BOOKS.map((b) => (
-                  <button
-                    key={b.id}
-                    type="button"
-                    onClick={() => onSelectBook(b.id)}
-                    className={`w-full text-left px-3 py-2.5 text-xs font-medium transition-all duration-100 cursor-pointer border-l-2 min-h-[44px] ${
-                      navBookId === b.id
-                        ? "bg-accent/[0.12] text-accent font-semibold border-l-accent"
-                        : "text-text-secondary hover:bg-surface-hover hover:text-text-primary border-l-transparent hover:border-l-border"
-                    }`}
-                  >
-                    {b.name}
-                  </button>
-                ))}
+                              NT_BOOKS.map((b) => (
+                                <button
+                                  key={b.id}
+                                  type="button"
+                                  onClick={() => onSelectBook(b.id)}
+                                  className={`w-full text-left px-3 py-2.5 text-xs font-medium transition-all duration-100 cursor-pointer border-l-2 min-h-[44px] ${
+                                    navBookId === b.id
+                                      ? "bg-accent/[0.12] text-accent font-semibold border-l-accent"
+                                      : "text-text-secondary hover:bg-surface-hover hover:text-text-primary border-l-transparent hover:border-l-border"
+                                  }`}
+                                  ref={navBookId === b.id ? (el: HTMLButtonElement | null) => {
+                                    if (el) {
+                                      setTimeout(() => el.scrollIntoView({ block: 'center', behavior: 'smooth' }), 0);
+                                    }
+                                  } : undefined}
+                                >
+                                  {b.name}
+                                </button>
+                              ))}
             </div>
           </div>
         </div>
@@ -895,7 +880,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <NavigationProvider>
-        <AppContent />
+        <AiVaultProvider>
+          <AppContent />
+        </AiVaultProvider>
       </NavigationProvider>
     </ThemeProvider>
   );

@@ -4,13 +4,11 @@ import { VerseActionBar } from "./VerseActionBar";
 import { ShareSheet } from "./ShareSheet";
 import type { HighlightColorId } from "@/lib/highlights";
 import {
-  getCrossReferences,
-  getTranslations,
+  getChapterContent,
   getVerses,
   getNotesForChapter,
-  getInterlinearWords,
-  getUserCrossReferences,
 } from "@/lib/db";
+import type { ChapterVerseContent } from "@/lib/db";
 import { useNavigation } from "@/hooks/useNavigation";
 import { getBook } from "@/data/books";
 import { parseOsisId } from "@/lib/utils";
@@ -20,6 +18,7 @@ import type {
   CrossReference,
   InterlinearWord,
 } from "@/types/db";
+import type { AiTarget } from "@/contexts/navigation";
 
 interface ReadingViewProps {
   bookId: number;
@@ -45,6 +44,9 @@ interface ReadingViewProps {
   onHighlightVerse?: (verseId: string, color?: HighlightColorId) => void;
   onRemoveHighlight?: (verseId: string) => void;
   onHighlightColorChange?: (color: HighlightColorId | null) => void;
+  dataRefreshKey?: number;
+  aiVerseRef?: React.MutableRefObject<AiTarget | null>;
+  handlePanelToggle?: () => void;
 }
 
 export function ReadingView({
@@ -56,7 +58,6 @@ export function ReadingView({
   isDesktop,
   interlinearEnabled,
   interlinearLanguages,
-  onToggleInterlinear,
   onToggleBookmark,
   onOpenNote,
   onChapterText,
@@ -71,7 +72,10 @@ export function ReadingView({
   onHighlightVerse,
   onRemoveHighlight,
   onHighlightColorChange,
-}: ReadingViewProps) {
+  dataRefreshKey,
+      aiVerseRef,
+          handlePanelToggle,
+        }: ReadingViewProps) {
   const {
     openCrossReferences,
     setCrossRefTarget,
@@ -117,25 +121,37 @@ export function ReadingView({
   const swipeTranslate = useRef(0);
   const swipeContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
-  const controlsVisibleRef = useRef(true);
-  const controlsCallbackRef = useRef(onControlsVisibleChange);
+    const controlsVisibleRef = useRef(true);
+    const lastScrollToggle = useRef(0);
+    const controlsCallbackRef = useRef(onControlsVisibleChange);
   useEffect(() => {
     controlsCallbackRef.current = onControlsVisibleChange;
   }, [onControlsVisibleChange]);
 
   const handleScroll = useCallback((e: React.UIEvent) => {
-    const target = e.target as HTMLElement;
-    const scrollY = target.scrollTop;
-    const diff = scrollY - lastScrollY.current;
-    lastScrollY.current = scrollY;
-    if (diff > 8 && scrollY > 40 && controlsVisibleRef.current) {
-      controlsVisibleRef.current = false;
-      controlsCallbackRef.current?.(true);
-    } else if (diff < -8 && !controlsVisibleRef.current) {
-      controlsVisibleRef.current = true;
-      controlsCallbackRef.current?.(false);
-    }
-  }, []);
+      const target = e.target as HTMLElement
+      const scrollY = target.scrollTop
+      const scrollHeight = target.scrollHeight
+      const clientHeight = target.clientHeight
+      const diff = scrollY - lastScrollY.current
+      lastScrollY.current = scrollY
+    
+      // Near bottom (within 50px) - keep controls visible, don't auto-hide
+      const nearBottom = scrollY + clientHeight >= scrollHeight - 50
+    
+      const now = Date.now()
+      if (now - lastScrollToggle.current < 300) return // debounce rapid toggles
+    
+      if (diff > 8 && scrollY > 40 && controlsVisibleRef.current && !nearBottom) {
+        controlsVisibleRef.current = false
+        lastScrollToggle.current = now
+        controlsCallbackRef.current?.(true)
+      } else if (diff < -8 && !controlsVisibleRef.current) {
+        controlsVisibleRef.current = true
+        lastScrollToggle.current = now
+        controlsCallbackRef.current?.(false)
+      }
+    }, [])
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     swipeStartX.current = e.touches[0].clientX;
@@ -239,7 +255,7 @@ export function ReadingView({
         bookId !== prevChapterRef.current.bookId ||
         chapter !== prevChapterRef.current.chapter;
       prevChapterRef.current = { bookId, chapter };
-      if (chapterChanged) setLoading(true);
+      if (chapterChanged && verses.length === 0) setLoading(true);
       let vs: Verse[];
       let noteIds: Set<string>;
       try {
@@ -258,30 +274,14 @@ export function ReadingView({
       }
       setVerses(vs);
       setVerseNotes(noteIds);
-      const map = new Map<
-        string,
-        {
-          texts: ContentText[];
-          xrefs: CrossReference[];
-          interlinear: InterlinearWord[];
-        }
-      >();
-      const batch = vs.map(async (v) => {
-        try {
-          const [texts, xrefs, userXrefs, interlinear] = await Promise.all([
-            getTranslations(v.id),
-            getCrossReferences(v.id),
-            getUserCrossReferences(v.id),
-            interlinearEnabled
-              ? getInterlinearWords(v.id)
-              : Promise.resolve([] as InterlinearWord[]),
-          ]);
-          map.set(v.id, { texts, xrefs: [...xrefs, ...userXrefs], interlinear });
-        } catch (_) {
-          map.set(v.id, { texts: [], xrefs: [], interlinear: [] });
-        }
-      });
-      await Promise.all(batch);
+      let map: Map<string, ChapterVerseContent>;
+      try {
+        map = await getChapterContent(bookId, chapter, interlinearEnabled);
+      } catch (e) {
+        if (cancelled) return;
+        console.error('getChapterContent failed, showing verse list without text:', e);
+        map = new Map(vs.map((v) => [v.id, { texts: [], xrefs: [], interlinear: [] }]));
+      }
       if (!cancelled) {
         setData(map);
         if (onChapterText || onChapterVerses) {
@@ -373,6 +373,7 @@ export function ReadingView({
     onChapterVerses,
     setPendingRange,
     votdVerseId,
+    dataRefreshKey,
   ]);
 
   useEffect(() => {
@@ -442,14 +443,14 @@ export function ReadingView({
   }, []);
 
   useEffect(() => {
-    if (!highlightedVerseId) return;
-    const raf = requestAnimationFrame(() => scrollToVerse(highlightedVerseId));
-    const timer = setTimeout(() => setHighlightedVerseId(null), 4000);
-    return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(timer);
-    };
-  }, [highlightedVerseId, scrollToVerse]);
+        if (!highlightedVerseId) return;
+        const raf = requestAnimationFrame(() => scrollToVerse(highlightedVerseId))
+        const timer = setTimeout(() => setHighlightedVerseId(null), 4000)
+        return () => {
+          cancelAnimationFrame(raf)
+          clearTimeout(timer)
+        }
+      }, [highlightedVerseId, scrollToVerse])
 
   const handleClearSelection = useCallback(() => {
     setSelectedIds(new Set());
@@ -521,21 +522,43 @@ export function ReadingView({
   );
 
   const handleOpenCrossRefs = useCallback(
-    (verseId: string) => {
-      setSelectedIds(new Set([verseId]));
-      const v = verses.find((x) => x.id === verseId);
-      const book = getBook(bookId);
-      openCrossReferences({
-        verseId,
-        bookId: v?.book_id ?? bookId,
-        chapter: v?.chapter_num ?? chapter,
-        reference: `${book?.name ?? "John"} ${chapter}:${v?.verse_num ?? (verseId.split('.').pop() ?? '')}`,
-      });
-    },
-    [verses, bookId, chapter, openCrossReferences],
-  );
+      (verseId: string) => {
+        setSelectedIds(new Set([verseId]));
+        const v = verses.find((x) => x.id === verseId);
+        const book = getBook(bookId);
+        openCrossReferences({
+          verseId,
+          bookId: v?.book_id ?? bookId,
+          chapter: v?.chapter_num ?? chapter,
+          reference: `${book?.name ?? "John"} ${chapter}:${v?.verse_num ?? (verseId.split('.').pop() ?? '')}`,
+        });
+      },
+      [verses, bookId, chapter, openCrossReferences],
+    );
 
-  const selectedList = useMemo(
+    useEffect(() => {
+      if (!aiVerseRef) return;
+      if (selectedIds.size === 0) {
+        aiVerseRef.current = null;
+        return;
+      }
+      const firstId = [...selectedIds][0];
+      const v = verses.find((x) => x.id === firstId);
+      const d = data.get(firstId);
+      if (!v || !d) return;
+      const book = getBook(bookId);
+      const firstText = d.texts.find((t) => t.translation_code === "KJV") ?? d.texts[0];
+      aiVerseRef.current = {
+        verseId: firstId,
+        bookId,
+        chapter,
+        verseNum: v.verse_num,
+        reference: `${book?.name ?? "John"} ${chapter}:${v.verse_num}`,
+        text: firstText?.text_data ?? "",
+      };
+    }, [selectedIds, verses, data, bookId, chapter, aiVerseRef]);
+
+    const selectedList = useMemo(
     () => [...selectedIds].sort((a, b) => a.localeCompare(b)),
     [selectedIds],
   );
@@ -553,20 +576,6 @@ export function ReadingView({
   const handleActionNote = useCallback(() => {
     if (selectedList.length === 1) onOpenNote(selectedList[0]);
   }, [selectedList, onOpenNote]);
-
-  const handleActionCrossRefs = useCallback(() => {
-    if (selectedList.length === 1) {
-      const v = verses.find((x) => x.id === selectedList[0]);
-      if (!v) return;
-      const book = getBook(bookId);
-      openCrossReferences({
-        verseId: selectedList[0],
-        bookId: v.book_id,
-        chapter: v.chapter_num,
-        reference: `${book?.name ?? "John"} ${chapter}:${v.verse_num}`,
-      });
-    }
-  }, [selectedList, verses, bookId, chapter, openCrossReferences]);
 
   const [shareVerse, setShareVerse] = useState<{
     reference: string;
@@ -652,7 +661,7 @@ export function ReadingView({
     );
   }
 
-  if (loading) {
+  if (loading && verses.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center gap-2">
@@ -713,26 +722,24 @@ export function ReadingView({
       </div>
 
       {selectedIds.size > 0 && (
-        <VerseActionBar
-          selectedCount={selectedIds.size}
-          isDesktop={isDesktop}
-          allBookmarked={allBookmarked}
-          onToggleBookmark={handleActionBookmark}
-          onAddNote={handleActionNote}
-          onCrossReferences={handleActionCrossRefs}
-          onClearSelection={handleClearSelection}
-          onRangeSelect={handleRangeSelect}
-          isRangeMode={rangeMode}
-          interlinearEnabled={interlinearEnabled}
-          onToggleInterlinear={onToggleInterlinear}
-          onShare={handleShare}
-          highlightActive={highlightActive}
-          activeHighlightColor={activeHighlightColor}
-          onToggleHighlight={handleToggleHighlight}
-          onHighlightColorSelect={handleHighlightColorSelect}
-          onEraseSelection={handleEraseSelection}
-        />
-      )}
+              <VerseActionBar
+                selectedCount={selectedIds.size}
+                isDesktop={isDesktop}
+                allBookmarked={allBookmarked}
+                onToggleBookmark={handleActionBookmark}
+                onAddNote={handleActionNote}
+                onClearSelection={handleClearSelection}
+                onRangeSelect={handleRangeSelect}
+                isRangeMode={rangeMode}
+                onShare={handleShare}
+                highlightActive={highlightActive}
+                activeHighlightColor={activeHighlightColor}
+                onToggleHighlight={handleToggleHighlight}
+                onHighlightColorSelect={handleHighlightColorSelect}
+                onEraseSelection={handleEraseSelection}
+                handlePanelToggle={handlePanelToggle ? () => handlePanelToggle() : undefined}
+              />
+            )}
 
       {shareVerse && (
         <ShareSheet

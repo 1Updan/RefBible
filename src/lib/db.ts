@@ -2,12 +2,52 @@ import { invoke } from '@tauri-apps/api/core'
 import type { Verse, ContentText, CrossReference, Bookmark, Note, InterlinearWord, StrongsEntry, Highlight } from '@/types/db'
 import { parseReference } from './utils'
 
+// Cold-start guard: on a fresh launch the WebView can fire the first invoke()
+// calls before the Tauri IPC bridge has finished wiring up. Those calls get
+// their callback dropped ("Couldn't find callback id ...") so the promise
+// NEVER resolves or rejects -> the reading view hangs on its spinner forever
+// (the "blank middle panel until you toggle a setting" bug). We wrap invoke in
+// a timeout race: if a call hasn't answered in `timeoutMs`, we retry it. By the
+// retry the bridge is ready, so it resolves normally. Steady-state calls are
+// unaffected (they answer well within the timeout on the first try).
+async function invokeWithRetry<T>(
+  cmd: string,
+  args: Record<string, unknown>,
+  attempts = 4,
+  timeoutMs = 1500,
+): Promise<T> {
+  let lastErr: unknown
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await new Promise<T>((resolve, reject) => {
+        let settled = false
+        const timer = setTimeout(() => {
+          if (!settled) {
+            settled = true
+            reject(new Error(`invoke '${cmd}' timed out after ${timeoutMs}ms (cold-start IPC retry)`))
+          }
+        }, timeoutMs)
+        invoke<T>(cmd, args).then(
+          (v) => { if (!settled) { settled = true; clearTimeout(timer); resolve(v) } },
+          (e) => { if (!settled) { settled = true; clearTimeout(timer); reject(e) } },
+        )
+      })
+    } catch (e) {
+      lastErr = e
+      console.warn(`[db] invoke '${cmd}' attempt ${i + 1}/${attempts} failed:`, e)
+      // brief backoff before the next attempt lets the IPC bridge finish init
+      await new Promise((r) => setTimeout(r, 150 * (i + 1)))
+    }
+  }
+  throw lastErr
+}
+
 export async function query<T>(sql: string, params: unknown[] = []): Promise<T[]> {
-  return invoke<T[]>('db_query', { sql, params })
+  return invokeWithRetry<T[]>('db_query', { sql, params })
 }
 
 export async function exec(sql: string, params: unknown[] = []): Promise<void> {
-  await invoke<number>('db_execute', { sql, params })
+  await invokeWithRetry<number>('db_execute', { sql, params })
 }
 
 export async function getVerses(bookId: number, chapter: number): Promise<Verse[]> {
@@ -69,6 +109,14 @@ export async function saveNote(verseId: string, text: string): Promise<Note> {
 
 export async function deleteNote(verseId: string): Promise<void> {
   await exec('DELETE FROM notes WHERE verse_id = $1', [verseId])
+}
+
+export async function deleteNoteById(id: number): Promise<void> {
+  await exec('DELETE FROM notes WHERE id = $1', [id])
+}
+
+export async function updateNote(id: number, text: string): Promise<void> {
+  await exec('UPDATE notes SET text_content = $1, created_at = CURRENT_TIMESTAMP WHERE id = $2', [text, id])
 }
 
 export async function getAllNotes(): Promise<Note[]> {
@@ -165,14 +213,75 @@ ORDER BY v.verse_num, ct.translation_code`,
   const binds: unknown[] = [`%${search}%`]
   if (versions) binds.push(...versions)
   const verParam = versions && versions.length > 0 ? 2 : 0
+  // Deduplicate by verse: one result per verse (first matching translation).
+  // GROUP BY verse ensures unique verses, so OT + NT both appear even with
+  // many translations. LIMIT 500 covers most searches without the OT filling
+  // the limit before NT results appear.
   return query<SearchResult>(
-    `SELECT v.id as verse_id, v.book_id, v.chapter_num, v.verse_num, ct.translation_code, ct.text_data
+    `SELECT v.id as verse_id, v.book_id, v.chapter_num, v.verse_num,
+       MIN(ct.translation_code) as translation_code,
+       (SELECT ct2.text_data FROM content_text ct2
+        WHERE ct2.verse_id = v.id
+        ${verParam > 0 ? `AND ct2.translation_code IN (${versions!.map((_, i) => `$${verParam + i}`).join(',')})` : ''}
+        AND ct2.text_data LIKE $1 LIMIT 1) as text_data
 FROM content_text ct JOIN verses v ON v.id = ct.verse_id
 WHERE ct.text_data LIKE $1${verParam > 0 ? ` AND ct.translation_code IN (${versions!.map((_, i) => `$${verParam + i}`).join(',')})` : ''}
+GROUP BY v.id, v.book_id, v.chapter_num, v.verse_num
 ORDER BY v.book_id, v.chapter_num, v.verse_num
-LIMIT 100`,
+LIMIT 1000`,
     binds,
   )
+}
+
+export interface ChapterVerseContent {
+  texts: ContentText[]
+  xrefs: CrossReference[]
+  interlinear: InterlinearWord[]
+}
+
+// Bulk-load all per-verse content for a chapter in a handful of queries
+// instead of N queries per verse. Drastically reduces DB round-trips so
+// chapter swipes stay smooth.
+export async function getChapterContent(
+  bookId: number,
+  chapter: number,
+  interlinearEnabled: boolean,
+): Promise<Map<string, ChapterVerseContent>> {
+  const verses = await getVerses(bookId, chapter)
+  const ids = verses.map((v) => v.id)
+  const map = new Map<string, ChapterVerseContent>()
+  for (const v of verses) {
+    map.set(v.id, { texts: [], xrefs: [], interlinear: [] })
+  }
+  if (ids.length === 0) return map
+
+  const [texts, xrefs, userXrefs, interlinear] = await Promise.all([
+    query<ContentText>(
+      `SELECT id, verse_id, translation_code, text_data FROM content_text WHERE verse_id IN (${ids.map((_, i) => `$${i + 1}`).join(', ')})`,
+      ids,
+    ),
+    query<CrossReference>(
+      `SELECT id, origin_verse_id, target_verse_id, thematic_weight FROM cross_references WHERE origin_verse_id IN (${ids.map((_, i) => `$${i + 1}`).join(', ')}) ORDER BY thematic_weight DESC`,
+      ids,
+    ),
+    query<(CrossReference & { user_created: boolean })>(
+      `SELECT id, origin_verse_id, target_verse_id, created_at, 1 as user_created FROM user_custom_cross_references WHERE origin_verse_id IN (${ids.map((_, i) => `$${i + 1}`).join(', ')}) ORDER BY created_at DESC`,
+      ids,
+    ),
+    interlinearEnabled
+      ? query<InterlinearWord>(
+          `SELECT id, verse_id, word_index, language, original_text, transliteration, strongs_number, lemma, gloss, morphology FROM interlinear_words WHERE verse_id IN (${ids.map((_, i) => `$${i + 1}`).join(', ')}) ORDER BY word_index`,
+          ids,
+        )
+      : Promise.resolve([] as InterlinearWord[]),
+  ])
+
+  for (const t of texts) map.get(t.verse_id)?.texts.push(t)
+  for (const x of xrefs) map.get(x.origin_verse_id)?.xrefs.push(x)
+  for (const ux of userXrefs) map.get(ux.origin_verse_id)?.xrefs.push(ux)
+  for (const w of interlinear) map.get(w.verse_id)?.interlinear.push(w)
+
+  return map
 }
 
 export async function getInterlinearWords(verseId: string): Promise<InterlinearWord[]> {
