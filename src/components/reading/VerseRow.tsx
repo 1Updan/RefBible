@@ -74,7 +74,7 @@ export const VerseRow = memo(function VerseRow({
   }
 
   const hasHiddenUserXrefs = useMemo(() => {
-    return crossReferences.slice(5).some((x) => x.user_created)
+    return crossReferences.slice(3).some((x) => x.user_created)
   }, [crossReferences])
 
   const showMoreThanOne = visibleVersions.length > 1
@@ -164,7 +164,7 @@ export const VerseRow = memo(function VerseRow({
 
         {crossReferences.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {crossReferences.slice(0, 5).map((xref) => (
+            {crossReferences.slice(0, 3).map((xref) => (
               <CrossReferenceChip
                 key={xref.id}
                 reference={formatVerseId(xref.target_verse_id)}
@@ -172,7 +172,7 @@ export const VerseRow = memo(function VerseRow({
                 isUserAdded={!!xref.user_created}
               />
             ))}
-            {crossReferences.length > 5 && (
+            {crossReferences.length > 3 && (
               <span className="inline-flex items-baseline gap-0.5">
                 {hasHiddenUserXrefs ? (
                   <button
@@ -180,7 +180,7 @@ export const VerseRow = memo(function VerseRow({
                     onClick={() => onOpenCrossRefs(verse.id)}
                     className="text-xs font-medium px-1 cursor-pointer transition-colors duration-150 text-accent hover:text-accent-hover"
                   >
-                    <span className="text-danger font-bold">+{crossReferences.length - 5} more</span>
+                    <span className="text-danger font-bold">+{crossReferences.length - 3} more</span>
                   </button>
                 ) : (
                   <button
@@ -188,7 +188,7 @@ export const VerseRow = memo(function VerseRow({
                     onClick={() => onOpenCrossRefs(verse.id)}
                     className="text-xs text-accent hover:text-accent-hover font-medium px-1 cursor-pointer"
                   >
-                    +{crossReferences.length - 5} more
+                    +{crossReferences.length - 3} more
                   </button>
                 )}
               </span>
