@@ -243,8 +243,46 @@ export function SettingsPanel({
         </section>
 
         <BackupSection />
+
+        <DataSourcesSection />
       </div>
     </div>
+  )
+}
+
+function DataSourcesSection() {
+  const [openSources, toggleSources] = useSectionState('datasources')
+  return (
+    <section>
+      <button
+        type="button"
+        onClick={toggleSources}
+        className="w-full flex items-center gap-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2.5 cursor-pointer"
+      >
+        {openSources ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        Data Sources
+      </button>
+
+      {openSources && (
+        <div className="space-y-2 px-1">
+          <p className="text-xs text-text-secondary leading-relaxed">
+            Cross-references courtesy of{' '}
+            <a
+              href="https://www.openbible.info/labs/cross-references/"
+              target="_blank"
+              rel="noopener"
+              className="text-accent hover:text-accent-hover font-medium"
+            >
+              OpenBible.info
+            </a>{' '}
+            (CC-BY 4.0), based on the public-domain Treasury of Scripture Knowledge.
+          </p>
+          <p className="text-xs text-text-tertiary leading-relaxed">
+            Bible text: King James Version (public domain) and New American Standard Bible (fair use).
+          </p>
+        </div>
+      )}
+    </section>
   )
 }
 
