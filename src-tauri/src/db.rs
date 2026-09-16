@@ -7,7 +7,20 @@ use serde_json::{Map, Number, Value};
 pub struct DbState(pub Mutex<Connection>);
 
 pub fn open(path: PathBuf) -> Result<Connection, String> {
-    Connection::open(&path).map_err(|e| format!("Failed to open database: {}", e))
+    let conn = Connection::open(&path).map_err(|e| format!("Failed to open database: {}", e))?;
+    // Read-heavy Bible workload: WAL + NORMAL sync speeds up writes
+    // (bookmarks/notes/highlights) without risking the bundled content,
+    // larger page cache + memory temp store + mmap speed up chapter loads.
+    conn.execute_batch(
+        "PRAGMA busy_timeout = 5000;
+         PRAGMA journal_mode = WAL;
+         PRAGMA synchronous = NORMAL;
+         PRAGMA cache_size = -64000;
+         PRAGMA temp_store = MEMORY;
+         PRAGMA mmap_size = 67108864;",
+    )
+    .map_err(|e| format!("Failed to tune database: {}", e))?;
+    Ok(conn)
 }
 
 fn json_to_rusqlite(val: &Value) -> rusqlite::types::Value {
