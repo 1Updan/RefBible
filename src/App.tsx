@@ -49,6 +49,8 @@ import {
 import { formatVerseId, parseOsisId } from "./lib/utils";
 import { toDbOsis } from "./data/osis";
 import { getVersion } from "@tauri-apps/api/app";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(
@@ -302,9 +304,64 @@ function AppContent() {
   const headerMeasureRef = useRef<HTMLDivElement>(null);
   const tabBarMeasureRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setReady(true)
+  // First-run Bible database: on fresh installs the database is not
+  // bundled anymore (keeps installs small) and must be downloaded once.
+  const [dbScreen, setDbScreen] = useState<'checking' | 'ready' | 'downloading' | 'error'>('checking');
+  const [dbProgress, setDbProgress] = useState<{ downloaded: number; total: number | null }>({ downloaded: 0, total: null });
+  const [dbError, setDbError] = useState("");
+
+  const startDbDownload = useCallback(() => {
+    setDbError("");
+    setDbProgress({ downloaded: 0, total: null });
+    setDbScreen('downloading');
+    invoke('download_db')
+      .then(() => {
+        setDbScreen('ready');
+        setReady(true);
+      })
+      .catch((err) => {
+        setDbError(typeof err === 'string' ? err : String(err));
+        setDbScreen('error');
+      });
   }, []);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    (async () => {
+      try {
+        unlisten = await listen<{ phase: string; downloaded?: number; total?: number | null }>(
+          'db-download',
+          (e) => {
+            if (e.payload.phase === 'downloading') {
+              setDbProgress({
+                downloaded: e.payload.downloaded ?? 0,
+                total: e.payload.total ?? null,
+              });
+            }
+          },
+        );
+      } catch {
+        // Event listening unavailable (e.g. web preview) — the
+        // invoke() result below still drives the UI.
+      }
+      try {
+        const ok = await invoke<boolean>('db_status');
+        if (ok) {
+          setDbScreen('ready');
+          setReady(true);
+        } else {
+          startDbDownload();
+        }
+      } catch {
+        // Backend commands unavailable (e.g. web preview) — proceed as before.
+        setDbScreen('ready');
+        setReady(true);
+      }
+    })();
+    return () => {
+      unlisten?.();
+    };
+  }, [startDbDownload]);
 
   useEffect(() => {
     if (!ready) return;
@@ -484,6 +541,66 @@ function AppContent() {
   );
 
   if (!ready) {
+    if (dbScreen === 'downloading' || dbScreen === 'error') {
+      const pct = dbProgress.total
+        ? Math.min(100, Math.round((dbProgress.downloaded / dbProgress.total) * 100))
+        : null;
+      const sizeText = dbProgress.total
+        ? `${(dbProgress.downloaded / 1048576).toFixed(1)} / ${(dbProgress.total / 1048576).toFixed(1)} MB`
+        : `${(dbProgress.downloaded / 1048576).toFixed(1)} MB downloaded`;
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-bg">
+          <div className="flex flex-col items-center gap-6 max-w-[280px] text-center">
+            <div className="w-32 h-32 rounded-3xl bg-accent/10 flex items-center justify-center overflow-hidden">
+              <img
+                src="/rblogo.svg"
+                alt="RefBible"
+                className="h-28 w-auto object-contain"
+              />
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <h1 className="text-3xl font-extrabold text-text-primary tracking-tight">
+                RefBible
+              </h1>
+              <p className="text-sm text-text-secondary font-medium">
+                Bible Study Tool
+              </p>
+            </div>
+            <div className="w-12 h-px bg-border-subtle" />
+            {dbScreen === 'downloading' ? (
+              <div className="flex flex-col items-center gap-2 w-full">
+                <p className="text-xs text-text-secondary font-medium">
+                  Downloading Bible data… {pct !== null ? `${pct}%` : ''}
+                </p>
+                <div className="w-full h-1.5 rounded-full bg-border overflow-hidden">
+                  {pct !== null ? (
+                    <div
+                      className="h-full rounded-full bg-accent transition-all duration-200"
+                      style={{ width: `${pct}%` }}
+                    />
+                  ) : (
+                    <div className="h-full w-1/3 rounded-full bg-accent animate-pulse" />
+                  )}
+                </div>
+                <p className="text-xs text-text-tertiary">{sizeText} — one-time download</p>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-3 w-full">
+                <p className="text-xs text-danger font-medium">Download failed</p>
+                <p className="text-xs text-text-tertiary break-all">{dbError}</p>
+                <button
+                  type="button"
+                  onClick={startDbDownload}
+                  className="w-full px-3 py-2.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover active:bg-accent-hover transition-all duration-150 cursor-pointer touch-manipulation"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="flex items-center justify-center min-h-screen bg-bg">
         <div className="flex flex-col items-center gap-6 max-w-[280px] text-center">

@@ -4,7 +4,7 @@ use std::sync::Mutex;
 use rusqlite::Connection;
 use serde_json::{Map, Number, Value};
 
-pub struct DbState(pub Mutex<Connection>);
+pub struct DbState(pub Mutex<Option<Connection>>);
 
 pub fn open(path: PathBuf) -> Result<Connection, String> {
     let conn = Connection::open(&path).map_err(|e| format!("Failed to open database: {}", e))?;
@@ -75,7 +75,10 @@ pub fn db_query(
     params: Vec<Value>,
 ) -> Result<Vec<Map<String, Value>>, String> {
     dbg_log!("[db_query] sql={:?} params_len={}", sql, params.len());
-    let conn = state.0.lock().map_err(|e| format!("Lock error: {}", e))?;
+    let guard = state.0.lock().map_err(|e| format!("Lock error: {}", e))?;
+    let conn = guard
+        .as_ref()
+        .ok_or("Bible data is still downloading — please wait and try again")?;
     let sql = convert_sql(&sql);
     let mut stmt = conn.prepare(&sql).map_err(|e| format!("Prepare: {}", e))?;
 
@@ -112,7 +115,10 @@ pub fn db_execute(
     params: Vec<Value>,
 ) -> Result<u64, String> {
     dbg_log!("[db_execute] sql={:?} params_len={}", sql, params.len());
-    let conn = state.0.lock().map_err(|e| format!("Lock error: {}", e))?;
+    let guard = state.0.lock().map_err(|e| format!("Lock error: {}", e))?;
+    let conn = guard
+        .as_ref()
+        .ok_or("Bible data is still downloading — please wait and try again")?;
     let sql = convert_sql(&sql);
     let owned: Vec<rusqlite::types::Value> = params.iter().map(json_to_rusqlite).collect();
     let refs: Vec<&dyn rusqlite::types::ToSql> = owned.iter().map(|v| v as &dyn rusqlite::types::ToSql).collect();

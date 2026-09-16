@@ -1,6 +1,115 @@
 use tauri::Emitter;
 use futures_util::StreamExt;
 
+/// Test an AI provider connection from Rust (not the WebView) so the
+/// check works under the app's strict CSP and for any custom endpoint:
+/// WebView fetch is limited to allow-listed domains, reqwest is not.
+#[tauri::command]
+pub async fn ai_test_connection(
+    api_key: String,
+    provider: String,
+    endpoint: String,
+) -> Result<serde_json::Value, String> {
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(30))
+        .connect_timeout(std::time::Duration::from_secs(15))
+        .build()
+        .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
+
+    let (url, auth_header): (String, Option<(String, String)>) = match provider.as_str() {
+        "gemini" => (
+            format!(
+                "https://generativelanguage.googleapis.com/v1beta/models?key={}",
+                api_key
+            ),
+            None,
+        ),
+        "ollama" => {
+            let base = endpoint.trim_end_matches('/');
+            let base = if base.is_empty() {
+                "http://localhost:11434".to_string()
+            } else {
+                base.to_string()
+            };
+            (format!("{}/api/tags", base), None)
+        }
+        _ => {
+            // openai / custom / nvidia (all OpenAI-compatible)
+            let base = endpoint.trim_end_matches('/');
+            let base = if base.is_empty() {
+                "https://api.openai.com/v1".to_string()
+            } else {
+                base.to_string()
+            };
+            (
+                format!("{}/models", base),
+                Some((
+                    "Authorization".to_string(),
+                    format!("Bearer {}", api_key),
+                )),
+            )
+        }
+    };
+
+    let mut req = client.get(&url);
+    if let Some((name, value)) = auth_header {
+        req = req.header(name, value);
+    }
+    let resp = req
+        .send()
+        .await
+        .map_err(|e| format!("Connection failed: {}", e))?;
+    if !resp.status().is_success() {
+        let code = resp.status().as_u16();
+        let body = resp.text().await.unwrap_or_default();
+        let snippet: String = body.chars().take(300).collect();
+        return Err(format!("Provider returned HTTP {}: {}", code, snippet));
+    }
+    let data: serde_json::Value = resp
+        .json()
+        .await
+        .map_err(|e| format!("Invalid response: {}", e))?;
+
+    // Extract a short model list for display; shape differs per provider.
+    let models: Vec<String> = if provider == "gemini" {
+        data.get("models")
+            .and_then(|m| m.as_array())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|m| m.get("name").and_then(|n| n.as_str()))
+                    .map(|n| n.trim_start_matches("models/").to_string())
+                    .filter(|n| n.contains("gemini"))
+                    .take(8)
+                    .collect()
+            })
+            .unwrap_or_default()
+    } else if provider == "ollama" {
+        data.get("models")
+            .and_then(|m| m.as_array())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|m| m.get("name").and_then(|n| n.as_str()))
+                    .map(|s| s.to_string())
+                    .take(8)
+                    .collect()
+            })
+            .unwrap_or_default()
+    } else {
+        data.get("data")
+            .and_then(|m| m.as_array())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|m| m.get("id").and_then(|n| n.as_str()))
+                    .map(|s| s.to_string())
+                    .take(8)
+                    .collect()
+            })
+            .unwrap_or_default()
+    };
+
+    Ok(serde_json::json!({ "valid": true, "models": models }))
+}
+
 #[tauri::command]
 pub async fn ai_query_stream(
     app: tauri::AppHandle,

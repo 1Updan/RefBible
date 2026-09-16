@@ -7,6 +7,7 @@ import {
 import { useAiVault } from '@/contexts/AiVaultContext';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import { saveNote } from '@/lib/db';
 
 const MODES = [
   { id: 'context', label: 'Contextual', systemPrompt: 'You are a Bible scholar. Explain the verse in its historical, cultural, and literary context. Be concise but thorough.' },
@@ -84,17 +85,23 @@ export function AiChatPanel({ verseId, reference, verseText, onClose }: AiChatPa
 
   const saveAsNote = useCallback(async () => {
     const lastAi = [...messages].reverse().find(m => m.role === 'assistant');
-    if (!lastAi || !reference) return;
+    if (!lastAi || !verseId) return;
     try {
-      await invoke('db_save_note', { verseId: reference, text: `[AI] ${lastAi.content}` });
+      await saveNote(verseId, `[AI] ${lastAi.content}`);
     } catch (e) {
       console.error('Failed to save as note:', e);
     }
-  }, [messages, reference]);
+  }, [messages, verseId]);
 
   // ── Send message ──
   const handleSend = useCallback(async () => {
     if (!input.trim() || !activeConfig || streaming) return;
+
+    // Drop listeners from any previous send first: otherwise every
+    // past message's token listener is still alive and each new token
+    // gets appended N times (duplicated streamed text).
+    unlistenRef.current.forEach(fn => fn());
+    unlistenRef.current = [];
 
     const userMsg: Message = {
       id: crypto.randomUUID(),

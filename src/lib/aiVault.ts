@@ -341,65 +341,37 @@ export async function testApiKey(config: AiProviderConfig): Promise<{ valid: boo
   }
 }
 
-async function testGeminiKey(config: AiProviderConfig): Promise<{ valid: boolean; error?: string; models?: string[] }> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${config.apiKey}`;
-  
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' }
-  });
-  
-  if (!response.ok) {
-    const body = await response.text();
-    return { valid: false, error: `Gemini API error: ${response.status} - ${body}` };
+// NOTE: connection tests run in Rust (ai_test_connection), NOT WebView
+// fetch — the app CSP blocks provider domains in the WebView, so the old
+// fetch-based tests always failed in built apps (they only worked in dev).
+async function testViaRust(config: AiProviderConfig): Promise<{ valid: boolean; error?: string; models?: string[] }> {
+  try {
+    const { invoke } = await import('@tauri-apps/api/core');
+    const result = await invoke<{ valid: boolean; models?: string[] }>('ai_test_connection', {
+      apiKey: config.apiKey,
+      provider: config.provider,
+      endpoint: config.endpoint || '',
+    });
+    return { valid: true, models: result.models };
+  } catch (e) {
+    const raw = e instanceof Error ? e.message : String(e);
+    if (/localhost|127\.0\.0\.1|failed to connect|Connection failed/i.test(raw) && config.provider === 'ollama') {
+      return { valid: false, error: `Ollama not reachable at ${config.endpoint || 'http://localhost:11434'}` };
+    }
+    return { valid: false, error: raw };
   }
-  
-  const data = await response.json();
-  const models = data.models?.map((m: any) => m.name.replace('models/', '')).filter((n: string) => n.includes('gemini')) || [];
-  
-  return { valid: true, models };
+}
+
+async function testGeminiKey(config: AiProviderConfig): Promise<{ valid: boolean; error?: string; models?: string[] }> {
+  return testViaRust(config);
 }
 
 async function testOpenAiKey(config: AiProviderConfig): Promise<{ valid: boolean; error?: string; models?: string[] }> {
-  const base = (config.endpoint || 'https://api.openai.com/v1').replace(/\/$/, '');
-  const url = `${base}/models`;
-  
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${config.apiKey}`,
-      'Content-Type': 'application/json'
-    }
-  });
-  
-  if (!response.ok) {
-    const body = await response.text();
-    return { valid: false, error: `API error: ${response.status} - ${body}` };
-  }
-  
-  const data = await response.json();
-  const models = data.data?.map((m: any) => m.id) || [];
-  
-  return { valid: true, models };
+  return testViaRust(config);
 }
 
 async function testOllamaKey(config: AiProviderConfig): Promise<{ valid: boolean; error?: string; models?: string[] }> {
-  const base = (config.endpoint || 'http://localhost:11434').replace(/\/$/, '');
-  const url = `${base}/api/tags`;
-  
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' }
-  });
-  
-  if (!response.ok) {
-    return { valid: false, error: `Ollama not reachable at ${base}` };
-  }
-  
-  const data = await response.json();
-  const models = data.models?.map((m: any) => m.name) || [];
-  
-  return { valid: true, models };
+  return testViaRust(config);
 }
 
 /**
