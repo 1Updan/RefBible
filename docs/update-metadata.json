@@ -1,7 +1,7 @@
 {
   "current_version": "0.1.0",
-  "latest_version": "9.9.9",
-  "changelog": "TEST: update prompt verification - please ignore",
+  "latest_version": "0.1.0",
+  "changelog": "Initial release with core Bible study features",
   "android_store_url": "https://play.google.com/store/apps/details?id=com.refbible.app",
   "ios_store_url": "https://apps.apple.com/us/app/refbible/id123456789"
 }
