@@ -101,19 +101,25 @@ export function AiVaultProvider({ children, initialPin }: { children: ReactNode;
 
   const unlock = useCallback(async (pin: string) => {
     if (isUnlocked) return;
-    
+
     try {
       setError(null);
       pinRef.current = pin;
       await initVault(pin);
       await migrateFromLocalStorage();
-      await refreshConfigs();
+      const all = await getAllConfigs();
+      setConfigs(all);
+      // Auto-select so chat works immediately after unlock: keep the
+      // previous choice if it still exists, else take the first config.
+      setActiveConfigId((prev) =>
+        prev && all.some((c) => c.id === prev) ? prev : (all[0]?.id ?? null),
+      );
       setIsUnlocked(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Invalid PIN or vault corrupted');
       throw e;
     }
-  }, [isUnlocked, refreshConfigs]);
+  }, [isUnlocked]);
 
   const lock = useCallback(() => {
     lockVault();

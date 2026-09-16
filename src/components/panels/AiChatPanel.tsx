@@ -8,6 +8,7 @@ import { useAiVault } from '@/contexts/AiVaultContext';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { saveNote } from '@/lib/db';
+import { hasStoredConfigs, getAllConfigs } from '@/lib/aiVault';
 
 const MODES = [
   { id: 'context', label: 'Contextual', systemPrompt: 'You are a Bible scholar. Explain the verse in its historical, cultural, and literary context. Be concise but thorough.' },
@@ -33,7 +34,7 @@ interface AiChatPanelProps {
 }
 
 export function AiChatPanel({ verseId, reference, verseText, onClose }: AiChatPanelProps) {
-  const { activeConfig } = useAiVault();
+  const { activeConfig, unlock, lock } = useAiVault();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -42,6 +43,11 @@ export function AiChatPanel({ verseId, reference, verseText, onClose }: AiChatPa
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [speaking, setSpeaking] = useState(false);
+  // null = still checking; true = encrypted configs exist but vault is locked
+  const [vaultLocked, setVaultLocked] = useState<boolean | null>(null);
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [unlocking, setUnlocking] = useState(false);
 
   const responseRef = useRef('');
   const unlistenRef = useRef<(() => void)[]>([]);
@@ -196,6 +202,51 @@ export function AiChatPanel({ verseId, reference, verseText, onClose }: AiChatPa
     setInput(lastUser.content);
   }, [messages, streaming]);
 
+  // Distinguish "vault locked" from "nothing configured": configs are
+  // encrypted at rest, so a cold start always looks empty until unlocked.
+  useEffect(() => {
+    if (activeConfig) {
+      setVaultLocked(false);
+      return;
+    }
+    let cancelled = false;
+    hasStoredConfigs()
+      .then((has) => {
+        if (!cancelled) setVaultLocked(has);
+      })
+      .catch(() => {
+        if (!cancelled) setVaultLocked(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeConfig]);
+
+  const handleUnlock = useCallback(async () => {
+    if (pinInput.length < 4) {
+      setPinError('PIN must be at least 4 characters');
+      return;
+    }
+    setPinError(null);
+    setUnlocking(true);
+    try {
+      await unlock(pinInput);
+      setPinInput('');
+      // PBKDF2 never fails, so a wrong PIN "unlocks" into an empty vault —
+      // verify decrypted configs actually appeared.
+      const stored = await hasStoredConfigs().catch(() => false);
+      const decrypted = stored ? await getAllConfigs().catch(() => []) : [];
+      if (stored && decrypted.length === 0) {
+        lock();
+        setPinError('Incorrect PIN — try again');
+      }
+    } catch (e) {
+      setPinError(e instanceof Error ? e.message : 'Failed to unlock');
+    } finally {
+      setUnlocking(false);
+    }
+  }, [pinInput, unlock, lock]);
+
   // ── Empty states ──
   if (!verseId || !reference) {
     return (
@@ -208,6 +259,45 @@ export function AiChatPanel({ verseId, reference, verseText, onClose }: AiChatPa
   }
 
   if (!activeConfig) {
+    if (vaultLocked === null) {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+          <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin mb-3" />
+          <p className="text-xs text-text-tertiary">Checking AI setup…</p>
+        </div>
+      );
+    }
+    if (vaultLocked) {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+          <Sparkles size={32} className="text-text-tertiary mb-3" />
+          <p className="text-sm text-text-secondary">AI vault is locked</p>
+          <p className="text-xs text-text-tertiary mt-1 mb-4">Enter your PIN to unlock your saved provider</p>
+          <input
+            type="password"
+            value={pinInput}
+            onChange={(e) => {
+              setPinInput(e.target.value);
+              setPinError(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleUnlock();
+            }}
+            placeholder="Enter PIN"
+            className="w-full max-w-[220px] px-3 py-2 text-sm text-center rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
+          />
+          {pinError && <p className="text-xs text-danger mt-2">{pinError}</p>}
+          <button
+            type="button"
+            onClick={handleUnlock}
+            disabled={unlocking || pinInput.length < 4}
+            className="mt-3 px-6 py-2.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150"
+          >
+            {unlocking ? 'Unlocking…' : 'Unlock'}
+          </button>
+        </div>
+      );
+    }
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
         <Sparkles size={32} className="text-text-tertiary mb-3" />

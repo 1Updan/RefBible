@@ -436,6 +436,28 @@ export function isVaultReady(): boolean {
 }
 
 /**
+ * Do encrypted configs exist on this device (readable without the PIN)?
+ * Lets the UI distinguish "vault locked — enter PIN" from "nothing
+ * configured yet" instead of showing the wrong empty state.
+ */
+export async function hasStoredConfigs(): Promise<boolean> {
+  const database = await openDB();
+  try {
+    const count: number = await new Promise((resolve, reject) => {
+      const tx = database.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.count();
+      request.onsuccess = () => resolve(request.result as number);
+      request.onerror = () => reject(new Error('Failed to read vault'));
+    });
+    return count > 0;
+  } finally {
+    // Only our own connection — the module-level `db` (if any) is untouched.
+    database.close();
+  }
+}
+
+/**
  * Lock the vault (clear master key from memory)
  */
 export function lockVault(): void {
