@@ -181,7 +181,7 @@ export function ReadingView({
     }
   }, [onSwipePrev, onSwipeNext]);
 
-  const handleTouchEnd = useCallback(
+const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
       if (!onSwipePrev && !onSwipeNext) return;
       const dx = e.changedTouches[0].clientX - swipeStartX.current;
@@ -191,7 +191,7 @@ export function ReadingView({
         swipeContainerRef.current.style.transform = '';
         swipeContainerRef.current.style.opacity = '1';
       }
-      if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
+      if (Math.abs(dx) < 80 || Math.abs(dy) > Math.abs(dx)) return;
       if (dx > 0) onSwipePrev?.();
       else onSwipeNext?.();
     },
