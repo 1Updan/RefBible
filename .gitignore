@@ -42,9 +42,17 @@ RefBible-*.apk*
 check_asv*.py
 check_db*.py
 check_live_db.py
+check_*.py
 test_insert.py
 ui*.xml
 screen.png
+screen_*.png
+slim_*.png
+plusfix*.png
+datasrc*.png
+parity.png
+update_*.png
+rel_verify.png
 *.bak
 AI_FEATURE_AUDIT.md
 gen/
