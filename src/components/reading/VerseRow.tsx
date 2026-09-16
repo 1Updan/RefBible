@@ -188,7 +188,7 @@ export const VerseRow = memo(function VerseRow({
                     onClick={() => onOpenCrossRefs(verse.id)}
                     className="text-xs text-accent hover:text-accent-hover font-medium px-1 cursor-pointer"
                   >
-                    +{crossReferences.length - 3} more
+                    +{crossReferences.length - 5} more
                   </button>
                 )}
               </span>
