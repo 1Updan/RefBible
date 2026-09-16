@@ -72,13 +72,16 @@ interface AiConfigPanelProps {
 }
 
 export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfigPanelProps) {
-  const { 
-    isUnlocked, 
-    unlock, 
-    testConfig, 
-    configs, 
+  const {
+    isUnlocked,
+    unlock,
+    testConfig,
+    configs,
     error: vaultError,
-    clearError 
+    clearError,
+    saveConfig,
+    updateConfig,
+    removeConfig,
   } = useAiVault();
 
   // Multi-step wizard state
@@ -95,6 +98,9 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [pinError, setPinError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Auto-focus inputs
   useEffect(() => {
@@ -120,9 +126,59 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
       setModel(provider.defaultModel);
       setEndpoint(provider.defaultEndpoint || '');
       setApiKey('');
+      setEditingId(null);
     setTestResult(null);
     goNext();
   }, [goNext]);
+
+  // Persist the wizard result to the encrypted vault. Without this call
+  // the whole setup flow was a dead end (configs were never saved).
+  const handleSaveAndActivate = useCallback(async () => {
+    if (!selectedProvider || !apiKey) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const payload = {
+        name: selectedProvider.name,
+        apiKey,
+        endpoint: selectedProvider.requiresEndpoint ? endpoint : undefined,
+        model,
+        defaultMode: selectedMode,
+        provider: selectedProvider.id as AiProviderConfig['provider'],
+      };
+      if (editingId) {
+        await updateConfig(editingId, payload);
+      } else {
+        await saveConfig(payload);
+      }
+      setEditingId(null);
+      goNext();
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Failed to save configuration');
+    } finally {
+      setSaving(false);
+    }
+  }, [selectedProvider, apiKey, endpoint, model, selectedMode, editingId, saveConfig, updateConfig, goNext]);
+
+  const handleEditConfig = useCallback((config: AiProviderConfig) => {
+    const def = PROVIDERS.find(p => p.id === config.provider) ?? null;
+    setSelectedProvider(def);
+    setApiKey(config.apiKey);
+    setEndpoint(config.endpoint ?? def?.defaultEndpoint ?? '');
+    setModel(config.model);
+    setSelectedMode(config.defaultMode ?? 'context');
+    setEditingId(config.id);
+    setTestResult(null);
+    setSaveError(null);
+    setStep('credentials');
+  }, []);
+
+  const handleRemoveConfig = useCallback((config: AiProviderConfig) => {
+    if (typeof confirm === 'function' && !confirm(`Remove "${config.name}"?`)) return;
+    removeConfig(config.id).catch((e) => {
+      console.error('Failed to remove config:', e);
+    });
+  }, [removeConfig]);
 
   const handleTest = useCallback(async () => {
     if (!selectedProvider || !apiKey) return;
@@ -245,10 +301,10 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button className="p-1.5 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors" title="Edit">
+              <button onClick={() => handleEditConfig(config)} className="p-1.5 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors" title="Edit" aria-label={`Edit ${config.name}`}>
                 <Settings size={16} />
               </button>
-              <button className="p-1.5 rounded-lg text-danger hover:text-danger/80 hover:bg-danger/10 transition-colors" title="Remove">
+              <button onClick={() => handleRemoveConfig(config)} className="p-1.5 rounded-lg text-danger hover:text-danger/80 hover:bg-danger/10 transition-colors" title="Remove" aria-label={`Remove ${config.name}`}>
                 <X size={16} />
               </button>
             </div>
@@ -522,9 +578,16 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
                 </button>
               ))}
             </div>
-            <button onClick={goNext} className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover transition-all duration-150">
-              Save & Activate AI
+            <button
+              onClick={handleSaveAndActivate}
+              disabled={saving}
+              className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150"
+            >
+              {saving ? 'Saving…' : 'Save & Activate AI'}
             </button>
+            {saveError && (
+              <p className="text-xs text-danger text-center">{saveError}</p>
+            )}
           </div>
         )}
 
@@ -553,7 +616,7 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
                 <span>Word tab → <strong>Ask AI</strong> for word studies</span>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => { if (onComplete) onComplete(); }}
               className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover transition-all duration-150"
             >

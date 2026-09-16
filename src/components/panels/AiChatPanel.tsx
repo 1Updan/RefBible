@@ -125,7 +125,7 @@ export function AiChatPanel({ verseId, reference, verseText, onClose }: AiChatPa
         ? `${systemPrompt}\n\nExtra instructions:\n${customPrompt}\n\nVerse: ${reference}\n\n${verseText}`
         : `${systemPrompt}\n\nVerse: ${reference}\n\n${verseText}`;
 
-      let assistantMsg: Message = {
+      const assistantMsg: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
         content: '',

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useRef } from 'react'
-import { Sun, Moon, BookMarked, Download, Trash2, CheckCircle, ChevronDown, ChevronRight, BookText, Cloud, FileUp } from 'lucide-react'
+import { Sun, Moon, BookMarked, Download, Trash2, CheckCircle, ChevronDown, ChevronRight, BookText, Cloud, FileUp, Sparkles } from 'lucide-react'
+import { AiConfigPanel } from './AiConfigPanel'
 import clsx from 'clsx'
 import type { Theme } from '@/contexts/theme'
 import { removeTranslation, exportBackupData, importBackupData } from '@/lib/db'
@@ -244,9 +245,38 @@ export function SettingsPanel({
 
         <BackupSection />
 
+        <AiSetupSection />
+
         <DataSourcesSection />
       </div>
     </div>
+  )
+}
+
+function AiSetupSection() {
+  const [openAi, toggleAi] = useSectionState('ai-setup')
+  return (
+    <section>
+      <button
+        type="button"
+        onClick={toggleAi}
+        className="w-full flex items-center gap-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2.5 cursor-pointer"
+      >
+        {openAi ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        <Sparkles size={13} />
+        AI Setup
+      </button>
+
+      {openAi && (
+        <div className="rounded-xl border border-border-subtle overflow-hidden">
+          <AiConfigPanel
+            isFirstRun={false}
+            onBack={toggleAi}
+            onComplete={toggleAi}
+          />
+        </div>
+      )}
+    </section>
   )
 }
 

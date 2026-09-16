@@ -260,6 +260,7 @@ function AppContent() {
       goBack,
       canGoBack,
       setPendingRange,
+      aiTarget,
       setAiTarget,
     } = useNavigation();
   const [ready, setReady] = useState(false);
@@ -754,6 +755,15 @@ function AppContent() {
     switch (activePanel) {
       case "study":
               return <StudyPanel />;
+      case "ai":
+        return (
+          <AiChatPanel
+            verseId={aiTarget?.verseId}
+            reference={aiTarget?.reference}
+            verseText={aiTarget?.text}
+            onClose={() => setActivePanel("none")}
+          />
+        );
       case "settings":
         return (
           <SettingsPanel
@@ -835,7 +845,9 @@ function AppContent() {
             ? "Search"
             : activePanel === "bookmarks"
               ? "Saved"
-              : "Settings"
+              : activePanel === "ai"
+                ? "AI Analysis"
+                : "Settings"
       }
     >
       {activePanel === "study" && <StudyPanel />}
