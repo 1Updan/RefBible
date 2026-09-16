@@ -120,13 +120,32 @@ pub async fn ai_query_stream(
     model: String,
 ) -> Result<(), String> {
     match provider.as_str() {
-        "gemini" => gemini_stream(app, api_key, prompt).await,
+        "gemini" => gemini_stream(app, api_key, prompt, model).await,
         _ => openai_stream(app, api_key, prompt, endpoint, model).await,
     }
 }
 
-async fn gemini_stream(app: tauri::AppHandle, api_key: String, prompt: String) -> Result<(), String> {
-    let url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse";
+async fn gemini_stream(
+    app: tauri::AppHandle,
+    api_key: String,
+    prompt: String,
+    model: String,
+) -> Result<(), String> {
+    // Use the user-configured model (sanitized to model-id characters so a
+    // hostile/stale config value cannot break out of the URL path).
+    let clean: String = model
+        .chars()
+        .filter(|c| c.is_ascii_alphanumeric() || *c == '.' || *c == '_' || *c == '-')
+        .collect();
+    let model = if clean.is_empty() {
+        "gemini-2.0-flash".to_string()
+    } else {
+        clean
+    };
+    let url = format!(
+        "https://generativelanguage.googleapis.com/v1beta/models/{}:streamGenerateContent?alt=sse",
+        model
+    );
 
     let body = serde_json::json!({
         "contents": [{
