@@ -47,6 +47,8 @@ test_insert.py
 ui*.xml
 screen.png
 screen_*.png
+ai_s*.png
+final_*.png
 slim_*.png
 plusfix*.png
 datasrc*.png
