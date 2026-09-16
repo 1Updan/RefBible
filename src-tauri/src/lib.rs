@@ -110,14 +110,16 @@ fn read_bundled_db_gz(app: &tauri::AppHandle) -> Option<Vec<u8>> {
 /// Fresh database bytes: bundled copy if the installer shipped one,
 /// otherwise a verified download. No `include_bytes!` anywhere on
 /// purpose — embedding the 22MB blob would defeat the slim installer.
-fn fresh_db_bytes(app: &tauri::AppHandle) -> Result<Vec<u8>, String> {
+/// Fully async: NEVER block_on this (panics inside the Tauri runtime and
+/// the release profile turns panics into a native crash via abort).
+async fn fresh_db_bytes(app: &tauri::AppHandle) -> Result<Vec<u8>, String> {
     if let Some(buf) = read_bundled_db_gz(app) {
         return Ok(buf);
     }
-    tauri::async_runtime::block_on(download_db_gz(app))
+    download_db_gz(app).await
 }
 
-fn ensure_db(app: &tauri::AppHandle) -> Result<(), String> {
+async fn ensure_db(app: &tauri::AppHandle) -> Result<(), String> {
     let (db_path, marker) = db_paths(app)?;
     if marker.exists() && db_path.exists() {
         return Ok(());
@@ -126,7 +128,7 @@ fn ensure_db(app: &tauri::AppHandle) -> Result<(), String> {
     if let Some(parent) = db_path.parent() {
         fs::create_dir_all(parent).map_err(|e| format!("failed to create app data dir: {}", e))?;
     }
-    let buf = fresh_db_bytes(app)?;
+    let buf = fresh_db_bytes(app).await?;
     fs::write(&db_path, &buf).map_err(|e| format!("failed to write database: {}", e))?;
     fs::write(&marker, b"1").map_err(|e| format!("failed to write marker file: {}", e))?;
     Ok(())
@@ -146,12 +148,14 @@ fn migrate_user_data(app: &tauri::AppHandle) {
     }
 
     let temp_new_db = app_dir.join("refbible.db.new");
-    // Legacy upgrades only: if the fresh bytes can't be obtained (e.g.
-    // offline), leave the old database untouched so the app still runs.
-    let buf = match fresh_db_bytes(app) {
-        Ok(b) => b,
-        Err(e) => {
-            eprintln!("[migrate] skipping user-data migration: {}", e);
+    // Legacy upgrades only, and strictly synchronous: setup must never
+    // block on the network, so only a installer-bundled copy qualifies.
+    // If none is bundled, leave the old database untouched (the app keeps
+    // running on existing data) instead of risking startup.
+    let buf = match read_bundled_db_gz(app) {
+        Some(b) => b,
+        None => {
+            eprintln!("[migrate] no bundled database; leaving existing data in place");
             return;
         }
     };
@@ -266,7 +270,7 @@ async fn download_db(
             return Ok(());
         }
     }
-    ensure_db(&app)?;
+    ensure_db(&app).await?;
     let (db_path, _) = db_paths(&app)?;
     let conn = db::open(db_path)?;
     run_migrations(&conn);
