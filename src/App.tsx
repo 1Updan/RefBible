@@ -740,7 +740,7 @@ function AppContent() {
                 onHighlightColorChange={setActiveHighlightColor}
                       dataRefreshKey={dataRefreshKey}
                       aiVerseRef={aiVerseRef}
-                      handlePanelToggle={() => handlePanelToggle("crossrefs")}
+                      handlePanelToggle={handlePanelToggle}
                     />
     );
 

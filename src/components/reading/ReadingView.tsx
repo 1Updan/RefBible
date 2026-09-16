@@ -46,7 +46,7 @@ interface ReadingViewProps {
   onHighlightColorChange?: (color: HighlightColorId | null) => void;
   dataRefreshKey?: number;
   aiVerseRef?: React.MutableRefObject<AiTarget | null>;
-  handlePanelToggle?: () => void;
+  handlePanelToggle?: (panel: "bookmarks" | "ai" | "settings" | "study" | "search" | "crossrefs") => void;
 }
 
 export function ReadingView({
@@ -737,7 +737,7 @@ const handleTouchEnd = useCallback(
                 onToggleHighlight={handleToggleHighlight}
                 onHighlightColorSelect={handleHighlightColorSelect}
                 onEraseSelection={handleEraseSelection}
-                handlePanelToggle={handlePanelToggle ? () => handlePanelToggle() : undefined}
+                handlePanelToggle={handlePanelToggle}
               />
             )}
 
