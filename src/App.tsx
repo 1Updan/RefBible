@@ -48,6 +48,7 @@ import {
 } from "./lib/verseOfTheDay";
 import { formatVerseId, parseOsisId } from "./lib/utils";
 import { toDbOsis } from "./data/osis";
+import { getVersion } from "@tauri-apps/api/app";
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(
@@ -65,8 +66,11 @@ function useMediaQuery(query: string): boolean {
 /// Update Distribution System ///
 
 // Update metadata endpoint configuration
-const UPDATE_METADATA_ENDPOINT = 'https://1Updan.github.io/RefBible/update-metadata.json';
+const UPDATE_METADATA_ENDPOINT = 'https://1updan.github.io/RefBible/update-metadata.json';
 const CHECK_FOR_UPDATE_KEY = 'refbible:update-check';
+// Fallback when the Tauri app-version API is unavailable (e.g. web preview).
+// MUST match the `version` field in src-tauri/tauri.conf.json.
+const APP_VERSION = '0.1.0';
 
 interface UpdateMetadata {
   current_version: string;
@@ -88,49 +92,68 @@ function useUpdateCheck(): UpdateCheckResult {
   const [hasUpdate, setHasUpdate] = useState(false);
   const [updateMetadata, setUpdateMetadata] = useState<UpdateMetadata | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [checked, setChecked] = useState(false);
+  // Lazily initialise from storage so the effect never needs a
+  // synchronous setState for the already-checked / offline paths.
+  const [checked, setChecked] = useState(() => {
+    try {
+      return localStorage.getItem(CHECK_FOR_UPDATE_KEY) === new Date().toDateString();
+    } catch {
+      return false;
+    }
+  });
 
   const dismissUpdate = () => {
     setShowModal(false);
-    localStorage.setItem(CHECK_FOR_UPDATE_KEY, new Date().toDateString());
+    try {
+      localStorage.setItem(CHECK_FOR_UPDATE_KEY, new Date().toDateString());
+    } catch {
+      // storage unavailable - modal simply reappears next launch
+    }
   };
 
   useEffect(() => {
     // Skip check if already checked today or no internet
-    const lastCheck = localStorage.getItem(CHECK_FOR_UPDATE_KEY);
-    if (lastCheck === new Date().toDateString()) {
-      setChecked(true);
+    if (checked || !navigator.onLine) {
       return;
     }
 
-    if (!navigator.onLine) {
-      setChecked(true);
-      return;
-    }
+    // Compare against the INSTALLED app version (not the metadata's
+    // current_version field), so up-to-date users never see the modal.
+    const getInstalledVersion = async (): Promise<string> => {
+      try {
+        return await getVersion();
+      } catch {
+        return APP_VERSION;
+      }
+    };
 
-    fetch(UPDATE_METADATA_ENDPOINT)
-      .then((res) => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-      })
-      .then((data: UpdateMetadata) => {
-        // Compare versions (simple semver comparison)
-        const versionCompare = (v1: string, v2: string): number => {
-          const a = v1.split('.').map(Number);
-          const b = v2.split('.').map(Number);
-          for (let i = 0; i < 3; i++) {
-            if (a[i] > b[i]) return 1;
-            if (a[i] < b[i]) return -1;
-          }
-          return 0;
-        };
+    // Compare versions (simple semver comparison, tolerant of missing parts)
+    const versionCompare = (v1: string, v2: string): number => {
+      const a = v1.split('.').map((p) => Number(p) || 0);
+      const b = v2.split('.').map((p) => Number(p) || 0);
+      const len = Math.max(a.length, b.length);
+      for (let i = 0; i < len; i++) {
+        if ((a[i] ?? 0) > (b[i] ?? 0)) return 1;
+        if ((a[i] ?? 0) < (b[i] ?? 0)) return -1;
+      }
+      return 0;
+    };
 
-        const comparison = versionCompare(data.latest_version, data.current_version);
+    getInstalledVersion()
+      .then((installed) =>
+        fetch(UPDATE_METADATA_ENDPOINT)
+          .then((res) => {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+          })
+          .then((data: UpdateMetadata) => {
+            const comparison = versionCompare(data.latest_version, installed);
 
-        setUpdateMetadata(data);
-        setHasUpdate(comparison > 0);
-        setShowModal(comparison > 0);
-      })
+            setUpdateMetadata(data);
+            setHasUpdate(comparison > 0);
+            setShowModal(comparison > 0);
+          }),
+      )
       .catch((err) => {
         console.error('Failed to check for updates:', err);
         // Silently fail - don't break app launch
@@ -138,7 +161,7 @@ function useUpdateCheck(): UpdateCheckResult {
       .finally(() => {
         setChecked(true);
       });
-  }, []);
+  }, [checked]);
 
   return { hasUpdate, updateMetadata, showModal, checked, dismissUpdate };
 }

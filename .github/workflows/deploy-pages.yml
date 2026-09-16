@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - '2026-09-16-update-system'
+      - master
+      - main
+    paths:
+      - 'docs/**'
+      - '.github/workflows/deploy-pages.yml'
+
+permissions:
+  contents: write
 
 jobs:
   build-and-deploy:
@@ -12,16 +20,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node (if needed)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Build Docs
-        run: echo "Docs already static - no build needed"
+      - name: Validate update metadata JSON
+        run: python3 -c "import json; d=json.load(open('docs/update-metadata.json')); assert {'current_version','latest_version','changelog','android_store_url','ios_store_url'} <= set(d), 'missing keys'; print('metadata OK:', d['latest_version'])"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -29,4 +29,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
           keep_files: true
-          silent: true
