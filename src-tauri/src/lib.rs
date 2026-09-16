@@ -78,11 +78,24 @@ async fn download_db_gz(app: &tauri::AppHandle) -> Result<Vec<u8>, String> {
             Ok(buf) => {
                 emit_progress(app, "verifying", buf.len() as u64, Some(buf.len() as u64), attempt);
                 let actual = format!("{:x}", Sha256::digest(&buf));
-                if actual == DB_DOWNLOAD_SHA256 {
-                    emit_progress(app, "done", buf.len() as u64, Some(buf.len() as u64), attempt);
-                    return Ok(buf);
+                if actual != DB_DOWNLOAD_SHA256 {
+                    last_err = format!("checksum mismatch on attempt {}", attempt);
+                } else {
+                    // The download is the compressed .gz; the database file
+                    // itself must be stored decompressed (same as the old
+                    // bundled path produced).
+                    let mut gz = GzDecoder::new(&buf[..]);
+                    let mut out = Vec::new();
+                    match gz.read_to_end(&mut out) {
+                        Ok(_) => {
+                            emit_progress(app, "done", out.len() as u64, Some(out.len() as u64), attempt);
+                            return Ok(out);
+                        }
+                        Err(e) => {
+                            last_err = format!("failed to decompress database: {}", e);
+                        }
+                    }
                 }
-                last_err = format!("checksum mismatch on attempt {}", attempt);
             }
             Err(e) => {
                 last_err = e;
