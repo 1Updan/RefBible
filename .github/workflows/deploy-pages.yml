@@ -1,0 +1,31 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - '2026-09-16-update-system'
+      - master
+      - main
+    paths:
+      - 'docs/**'
+      - '.github/workflows/deploy-pages.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate update metadata JSON
+        run: python3 -c "import json; d=json.load(open('docs/update-metadata.json')); assert {'current_version','latest_version','changelog','android_store_url','ios_store_url'} <= set(d), 'missing keys'; print('metadata OK:', d['latest_version'])"
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          keep_files: true

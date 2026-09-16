@@ -48,6 +48,7 @@ import {
 } from "./lib/verseOfTheDay";
 import { formatVerseId, parseOsisId } from "./lib/utils";
 import { toDbOsis } from "./data/osis";
+import { getVersion } from "@tauri-apps/api/app";
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(
@@ -61,6 +62,163 @@ function useMediaQuery(query: string): boolean {
   }, [query]);
   return matches;
 }
+
+/// Update Distribution System ///
+
+// Update metadata endpoint configuration
+const UPDATE_METADATA_ENDPOINT = 'https://1updan.github.io/RefBible/update-metadata.json';
+const CHECK_FOR_UPDATE_KEY = 'refbible:update-check';
+// Fallback when the Tauri app-version API is unavailable (e.g. web preview).
+// MUST match the `version` field in src-tauri/tauri.conf.json.
+const APP_VERSION = '0.1.0';
+
+interface UpdateMetadata {
+  current_version: string;
+  latest_version: string;
+  changelog: string;
+  android_store_url: string;
+  ios_store_url: string;
+}
+
+interface UpdateCheckResult {
+  hasUpdate: boolean;
+  updateMetadata: UpdateMetadata | null;
+  showModal: boolean;
+  checked: boolean;
+  dismissUpdate: () => void;
+}
+
+function useUpdateCheck(): UpdateCheckResult {
+  const [hasUpdate, setHasUpdate] = useState(false);
+  const [updateMetadata, setUpdateMetadata] = useState<UpdateMetadata | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  // Lazily initialise from storage so the effect never needs a
+  // synchronous setState for the already-checked / offline paths.
+  const [checked, setChecked] = useState(() => {
+    try {
+      return localStorage.getItem(CHECK_FOR_UPDATE_KEY) === new Date().toDateString();
+    } catch {
+      return false;
+    }
+  });
+
+  const dismissUpdate = () => {
+    setShowModal(false);
+    try {
+      localStorage.setItem(CHECK_FOR_UPDATE_KEY, new Date().toDateString());
+    } catch {
+      // storage unavailable - modal simply reappears next launch
+    }
+  };
+
+  useEffect(() => {
+    // Skip check if already checked today or no internet
+    if (checked || !navigator.onLine) {
+      return;
+    }
+
+    // Compare against the INSTALLED app version (not the metadata's
+    // current_version field), so up-to-date users never see the modal.
+    const getInstalledVersion = async (): Promise<string> => {
+      try {
+        return await getVersion();
+      } catch {
+        return APP_VERSION;
+      }
+    };
+
+    // Compare versions (simple semver comparison, tolerant of missing parts)
+    const versionCompare = (v1: string, v2: string): number => {
+      const a = v1.split('.').map((p) => Number(p) || 0);
+      const b = v2.split('.').map((p) => Number(p) || 0);
+      const len = Math.max(a.length, b.length);
+      for (let i = 0; i < len; i++) {
+        if ((a[i] ?? 0) > (b[i] ?? 0)) return 1;
+        if ((a[i] ?? 0) < (b[i] ?? 0)) return -1;
+      }
+      return 0;
+    };
+
+    getInstalledVersion()
+      .then((installed) =>
+        fetch(UPDATE_METADATA_ENDPOINT)
+          .then((res) => {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+          })
+          .then((data: UpdateMetadata) => {
+            const comparison = versionCompare(data.latest_version, installed);
+
+            setUpdateMetadata(data);
+            setHasUpdate(comparison > 0);
+            setShowModal(comparison > 0);
+          }),
+      )
+      .catch((err) => {
+        console.error('Failed to check for updates:', err);
+        // Silently fail - don't break app launch
+      })
+      .finally(() => {
+        setChecked(true);
+      });
+  }, [checked]);
+
+  return { hasUpdate, updateMetadata, showModal, checked, dismissUpdate };
+}
+
+/// Update Modal Component ///
+
+const UpdateModal = ({
+  showModal,
+  updateMetadata,
+  onClose,
+  onUpdate,
+}: {
+  showModal: boolean;
+  updateMetadata: UpdateMetadata | null;
+  onClose: () => void;
+  onUpdate: () => void;
+}) => {
+  if (!showModal || !updateMetadata) return null;
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
+    >
+      <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
+        <h3 className="text-xl font-bold text-gray-900 mb-6">
+          Update Available
+        </h3>
+        <p className="text-gray-600 text-sm mb-8">{updateMetadata.changelog}</p>
+
+        <div className="flex flex-col sm:flex-row gap-3 mb-8">
+          <a
+            href={updateMetadata.android_store_url}
+            target="_blank"
+            rel="noopener"
+            onClick={onUpdate}
+            className="flex-1 bg-blue-600 text-white text-center px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+            Update on Play Store
+          </a>
+          <a
+            href={updateMetadata.ios_store_url}
+            target="_blank"
+            rel="noopener"
+            onClick={onUpdate}
+            className="flex-1 bg-green-600 text-white text-center px-4 py-2 rounded hover:bg-green-700 transition-colors">
+            Update on App Store
+          </a>
+        </div>
+
+        <button
+          onClick={onClose}
+          className="w-full py-3 mt-6 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors">
+          Remind me later
+        </button>
+      </div>
+    </div>
+  );
+};
 
 function AppContent() {
   useEffect(() => {
@@ -102,20 +260,21 @@ function AppContent() {
       setPendingRange,
       setAiTarget,
     } = useNavigation();
-    const [ready, setReady] = useState(false);
-    const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
-    const [bookmarkRefresh, setBookmarkRefresh] = useState(0);
-    const [dataRefreshKey, setDataRefreshKey] = useState(0);
-    const [highlightColors, setHighlightColors] = useState<Map<string, string[]>>(
-      new Map(),
-    );
-    const [activeHighlightColor, setActiveHighlightColor] =
-      useState<HighlightColorId | null>(null);
-    const aiVerseRef = useRef<AiTarget | null>(null);
-    const [installedVersions, setInstalledVersions] = useState<string[]>([
-      "KJV",
-      "NASB",
-    ]);
+  const [ready, setReady] = useState(false);
+  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
+  const [bookmarkRefresh, setBookmarkRefresh] = useState(0);
+  const [dataRefreshKey, setDataRefreshKey] = useState(0);
+  const [highlightColors, setHighlightColors] = useState<Map<string, string[]>>(
+    new Map(),
+  );
+  const [activeHighlightColor, setActiveHighlightColor] =
+    useState<HighlightColorId | null>(null);
+  const aiVerseRef = useRef<AiTarget | null>(null);
+  const [installedVersions, setInstalledVersions] = useState<string[]>([
+    "KJV",
+    "NASB",
+  ]);
+  const { updateMetadata, showModal, dismissUpdate } = useUpdateCheck();
 
   const refreshInstalledVersions = useCallback(async () => {
     const codes = await getInstalledTranslations()
@@ -650,6 +809,12 @@ function AppContent() {
           sidebar={renderSidebar()}
           onCloseSidebar={() => setActivePanel("none")}
         />
+        <UpdateModal
+          showModal={showModal}
+          updateMetadata={updateMetadata}
+          onClose={dismissUpdate}
+          onUpdate={dismissUpdate}
+        />
       </div>
     );
   }
@@ -716,6 +881,12 @@ function AppContent() {
           navigateTo(b, c);
           setShowNav(false);
         }}
+      />
+      <UpdateModal
+        showModal={showModal}
+        updateMetadata={updateMetadata}
+        onClose={dismissUpdate}
+        onUpdate={dismissUpdate}
       />
     </>
   );
