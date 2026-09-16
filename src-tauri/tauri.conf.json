@@ -21,7 +21,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' ipc://localhost http://ipc.localhost http://tauri.localhost https://raw.githubusercontent.com ws://localhost:5173 http://localhost:5173; img-src 'self' data:; font-src 'self'"
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' ipc://localhost http://ipc.localhost http://tauri.localhost https://raw.githubusercontent.com https://1updan.github.io ws://localhost:5173 http://localhost:5173; img-src 'self' data:; font-src 'self'"
     }
   },
   "bundle": {
