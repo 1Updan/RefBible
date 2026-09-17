@@ -498,7 +498,7 @@ const AI_MODES: AiModeDef[] = [
 ]
 
 const AI_PROVIDERS = [
-  { id: 'gemini', name: 'Google Gemini', endpoint: '', model: 'gemini-2.0-flash' },
+  { id: 'gemini', name: 'Google Gemini', endpoint: '', model: 'gemini-3.5-flash' },
   { id: 'openai', name: 'OpenAI', endpoint: 'https://api.openai.com/v1', model: 'gpt-4o' },
   { id: 'openrouter', name: 'OpenRouter', endpoint: 'https://openrouter.ai/api/v1', model: 'openai/gpt-4o' },
   { id: 'groq', name: 'Groq', endpoint: 'https://api.groq.com/openai/v1', model: 'llama-3.3-70b-versatile' },

@@ -19,7 +19,7 @@ const PROVIDERS: ProviderDef[] = [
     id: 'gemini', 
     name: 'Google Gemini', 
     icon: Sparkles,
-    defaultModel: 'gemini-2.0-flash',
+    defaultModel: 'gemini-3.5-flash',
     defaultEndpoint: undefined,
     requiresEndpoint: false,
     color: 'from-purple-500 to-pink-500',
@@ -539,9 +539,25 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
                     <p className="text-[10px] text-text-tertiary mt-1">{testResult.error}</p>
                   )}
                   {testResult.models && testResult.models.length > 0 && (
-                    <p className="text-[10px] text-text-tertiary mt-1">
-                      Available models: {testResult.models.slice(0, 5).join(', ')}{testResult.models.length > 5 ? '...' : ''}
-                    </p>
+                    <div className="mt-2">
+                      <p className="text-[10px] text-text-tertiary mb-1.5">Tap a model to use it:</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {testResult.models.slice(0, 8).map((m) => (
+                          <button
+                            key={m}
+                            type="button"
+                            onClick={() => setModel(m)}
+                            className={`px-2 py-1 text-[10px] font-mono rounded-lg border transition-all duration-150 cursor-pointer ${
+                              model === m
+                                ? 'bg-accent text-white border-accent'
+                                : 'bg-surface-elevated text-text-secondary border-border-subtle hover:border-accent/40 hover:text-text-primary'
+                            }`}
+                          >
+                            {m}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

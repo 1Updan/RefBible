@@ -400,7 +400,7 @@ export async function migrateFromLocalStorage(): Promise<{ migrated: number; err
     const apiKey = localStorage.getItem('refbible-ai-key') || '';
     const provider = (localStorage.getItem('refbible-ai-provider') as AiProviderConfig['provider']) || 'gemini';
     const endpoint = localStorage.getItem('refbible-ai-endpoint') || undefined;
-    const model = localStorage.getItem('refbible-ai-model') || 'gemini-2.0-flash';
+    const model = localStorage.getItem('refbible-ai-model') || 'gemini-3.5-flash';
     const saved = localStorage.getItem('refbible-ai-saved') === 'true';
     
     if (apiKey && saved) {

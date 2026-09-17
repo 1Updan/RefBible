@@ -138,7 +138,7 @@ async fn gemini_stream(
         .filter(|c| c.is_ascii_alphanumeric() || *c == '.' || *c == '_' || *c == '-')
         .collect();
     let model = if clean.is_empty() {
-        "gemini-2.0-flash".to_string()
+        "gemini-3.5-flash".to_string()
     } else {
         clean
     };
