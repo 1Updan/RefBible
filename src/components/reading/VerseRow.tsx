@@ -3,7 +3,8 @@ import { BookmarkCheck, MessageSquareMore } from 'lucide-react'
 import { CrossReferenceChip } from './CrossReferenceChip'
 import { InterlinearView } from './InterlinearView'
 import { formatVerseId } from '@/lib/utils'
-import { parseWordsOfChrist } from '@/lib/redLetter'
+import { parseWordsOfChrist, applyChristWords } from '@/lib/redLetter'
+import { getChristWords } from '@/lib/wordsOfChrist'
 import { HIGHLIGHT_COLORS } from '@/lib/highlights'
 import clsx from 'clsx'
 import type { Verse, ContentText, CrossReference, InterlinearWord } from '@/types/db'
@@ -137,6 +138,12 @@ export const VerseRow = memo(function VerseRow({
           versionTexts.map((vt, i) => {
             const size = i === 0 ? fontSize : Math.max(fontSize - 2, 14)
             const colorClass = i === 0 ? 'text-text-primary' : 'text-text-secondary'
+            // Red letters: KJV only, always on. Other translations render plain.
+            // Interlinear branch above is untouched by design.
+            const displayText =
+              vt.translation_code === 'KJV'
+                ? applyChristWords(vt.text_data, getChristWords(formatVerseId(verse.id)))
+                : vt.text_data
             return (
               <div key={vt.translation_code} className="flex items-start gap-1">
                 <div className="flex-1 min-w-0">
@@ -149,7 +156,7 @@ export const VerseRow = memo(function VerseRow({
                       className={clsx('block font-serif leading-[1.65] tracking-[0.01em] text-left', colorClass)}
                       style={{ fontSize: `${size}px` }}
                     >
-                    {parseWordsOfChrist(vt.text_data).map((seg, j) =>
+                    {parseWordsOfChrist(displayText).map((seg, j) =>
                       seg.isWordOfChrist ? (
                         <span key={j} className="text-danger">{seg.text}</span>
                       ) : (

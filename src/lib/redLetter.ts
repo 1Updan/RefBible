@@ -4,7 +4,7 @@ export interface RedLetterSegment {
 }
 
 export function parseWordsOfChrist(text: string): RedLetterSegment[] {
-  if (!text.includes('<WJ>')) return [{ text, isWordOfChrist: false }];
+  if (!text.includes('<WJ>') || !text.includes('</WJ>')) return [{ text, isWordOfChrist: false }];
   const out: RedLetterSegment[] = [];
   const re = /<WJ>([\s\S]*?)<\/WJ>/g;
   let last = 0;
@@ -16,4 +16,16 @@ export function parseWordsOfChrist(text: string): RedLetterSegment[] {
   }
   if (last < text.length) out.push({ text: text.slice(last), isWordOfChrist: false });
   return out.filter((s) => s.text.length > 0);
+}
+
+export function stripRedLetterTags(text: string): string {
+  return text.replace(/<\/?WJ>/g, '');
+}
+
+export function applyChristWords(plainText: string, christWords: string | null | undefined): string {
+  if (!christWords) return plainText;
+  if (christWords === 'full') return `<WJ>${plainText}</WJ>`;
+  const idx = plainText.indexOf(christWords);
+  if (idx === -1) return plainText;
+  return `${plainText.slice(0, idx)}<WJ>${christWords}</WJ>${plainText.slice(idx + christWords.length)}`;
 }
