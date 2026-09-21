@@ -3,6 +3,7 @@ import { BookmarkCheck, MessageSquareMore } from 'lucide-react'
 import { CrossReferenceChip } from './CrossReferenceChip'
 import { InterlinearView } from './InterlinearView'
 import { formatVerseId } from '@/lib/utils'
+import { parseWordsOfChrist } from '@/lib/redLetter'
 import { HIGHLIGHT_COLORS } from '@/lib/highlights'
 import clsx from 'clsx'
 import type { Verse, ContentText, CrossReference, InterlinearWord } from '@/types/db'
@@ -148,7 +149,13 @@ export const VerseRow = memo(function VerseRow({
                       className={clsx('block font-serif leading-[1.65] tracking-[0.01em] text-left', colorClass)}
                       style={{ fontSize: `${size}px` }}
                     >
-                    {vt.text_data}
+                    {parseWordsOfChrist(vt.text_data).map((seg, j) =>
+                      seg.isWordOfChrist ? (
+                        <span key={j} className="text-danger">{seg.text}</span>
+                      ) : (
+                        <span key={j}>{seg.text}</span>
+                      ),
+                    )}
                   </div>
                 </div>
                 {i === 0 && (
