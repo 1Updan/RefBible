@@ -67,4 +67,11 @@ describe('parseWordsOfChrist', () => {
     const text = 'Blessed art thou, Simon Barjona: for flesh and blood.';
     assert.equal(applyChristWords(text, 'Blessed art thou, Simon Bar-jona: for flesh and blood.'), text);
   });
+
+  it('treats thine/thy as the same word', () => {
+    assert.equal(
+      applyChristWords('Stretch forth thy hand.', 'Stretch forth thine hand.'),
+      '<WJ>Stretch forth thy hand</WJ>.',
+    );
+  });
 });

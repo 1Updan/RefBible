@@ -1,17 +1,17 @@
 # Red-letter report: dra
 
-Verses with spans: 1795 / 2007 KJV refs
+Verses with spans: 1799 / 2007 KJV refs
 
 | bucket | count |
 |---|---|
 | full | 1499 |
-| exact | 131 |
-| high | 165 |
-| review | 135 |
+| exact | 133 |
+| high | 167 |
+| review | 131 |
 | gap | 75 |
 | missing_verse | 2 |
 
-## Review queue (renders plain in v1): 135
+## Review queue (renders plain in v1): 131
 
 ### Matthew 3:15 (MAT.3.15) score=0.8
 - KJV quote: Suffer it to be so now: for thus it becometh us to fulfil all righteousness.
@@ -48,10 +48,6 @@ Verses with spans: 1795 / 2007 KJV refs
 ### Matthew 11:17 (MAT.11.17) score=0.8
 - KJV quote: We have piped unto you, and ye have not danced; we have mourned unto you, and ye have not lamented.
 - candidate: We have piped to you, and you have not danced: we have lamented, and you have not
-
-### Matthew 12:13 (MAT.12.13) score=0.75
-- KJV quote: Stretch forth thine hand.
-- candidate: Stretch forth thy hand
 
 ### Matthew 12:39 (MAT.12.39) score=0.76
 - KJV quote: An evil and adulterous generation seeketh after a sign; and there shall no sign be given to it, but the sign of the prophet Jonas:
@@ -173,10 +169,6 @@ Verses with spans: 1795 / 2007 KJV refs
 - KJV quote: They that are whole have no need of the physician, but they that are sick: I came not to call the righteous, but sinners to repentance.
 - candidate: They that are well have no need of a physician, but they that are sick. For I came not to call the just, but sinners
 
-### Mark 3:5 (MRK.3.5) score=0.75
-- KJV quote: Stretch forth thine hand.
-- candidate: Stretch forth thy hand
-
 ### Mark 4:24 (MRK.4.24) score=0.72
 - KJV quote: Take heed what ye hear: with what measure ye mete, it shall be measured to you: and unto you that hear shall more be given.
 - candidate: 
@@ -289,10 +281,6 @@ Verses with spans: 1795 / 2007 KJV refs
 - KJV quote: Unto you it is given to know the mysteries of the kingdom of God: but to others in parables; that seeing they might not see, and hearing they might not understand.
 - candidate: To you it is given to know the mystery of the kingdom of God; but to the rest in parables, that seeing they may not see, and hearing may not understand
 
-### Luke 8:39 (LUK.8.39) score=0.8
-- KJV quote: Return to thine own house, and shew how great things God hath done unto thee.
-- candidate: Return to thy house, and tell how great things God hath done to thee
-
 ### Luke 8:48 (LUK.8.48) score=0.714
 - KJV quote: Daughter, be of good comfort: thy faith hath made thee whole; go in peace.
 - candidate: Daughter, thy faith hath made thee whole; go thy way in peace
@@ -332,10 +320,6 @@ Verses with spans: 1795 / 2007 KJV refs
 ### Luke 12:22 (LUK.12.22) score=0.792
 - KJV quote: Therefore I say unto you, Take no thought for your life, what ye shall eat; neither for the body, what ye shall put on.
 - candidate: Therefore I say to you, be not solicitous for your life, what you shall eat; nor for your body, what you shall put on
-
-### Luke 13:12 (LUK.13.12) score=0.714
-- KJV quote: Woman, thou art loosed from thine infirmity.
-- candidate: Woman, thou art delivered from thy infirmity
 
 ### Luke 15:31 (LUK.15.31) score=0.846
 - KJV quote: Son, thou art ever with me, and all that I have is thine.

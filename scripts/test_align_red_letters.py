@@ -7,11 +7,40 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from align_red_letters import normalize, align_quote, find_span, map_token_span  # noqa: E402
+from align_red_letters import (  # noqa: E402
+    normalize,
+    align_quote,
+    find_span,
+    map_token_span,
+    GENEVA_EXTRA,
+)
 
 
 def test_normalize_archaic_pronouns():
     assert normalize("Thou shalt not tempt thee") == normalize("You shalt not tempt you")
+    # thine/thy are the same word (vowel vs consonant form)
+    assert normalize("Stretch forth thine hand") == normalize("Stretch forth thy hand")
+
+
+def test_geneva_spelling_map_recovers_saying():
+    # "Let be nowe" genuinely differs from "Suffer it to be so now", so this
+    # stays review (plain in v1) -- but the spelling map must at least align
+    # the shared tail ("for thus it becommeth vs to fulfill all righteousnes").
+    span, score, flag = align_quote(
+        "Suffer it to be so now: for thus it becometh us to fulfil all righteousness.",
+        "Then Iesus answering, saide to him, Let be nowe: for thus it becommeth vs "
+        "to fulfill all righteousnes. So he suffered him.",
+        extra=GENEVA_EXTRA,
+    )
+    assert flag == "review"
+    assert span is not None
+    # without the map the same verse scores far lower (proves the map works)
+    _, low_score, _ = align_quote(
+        "Suffer it to be so now: for thus it becometh us to fulfil all righteousness.",
+        "Then Iesus answering, saide to him, Let be nowe: for thus it becommeth vs "
+        "to fulfill all righteousnes. So he suffered him.",
+    )
+    assert score > low_score
 
 
 def test_identical_text_scores_one():

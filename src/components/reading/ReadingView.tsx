@@ -10,6 +10,7 @@ import {
 } from "@/lib/db";
 import type { ChapterVerseContent } from "@/lib/db";
 import { useNavigation } from "@/hooks/useNavigation";
+import { ensureRedSpans } from "@/lib/redSpans";
 import { getBook } from "@/data/books";
 import { parseOsisId } from "@/lib/utils";
 import type {
@@ -107,6 +108,23 @@ export function ReadingView({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectionAnchor, setSelectionAnchor] = useState<string | null>(null);
   const [rangeMode, setRangeMode] = useState(false);
+  // Bumped when lazy red-letter span tables finish loading so memo'd
+  // verse rows re-render (pre-load they render plain, then redden).
+  const [spansEpoch, setSpansEpoch] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    ensureRedSpans(visibleVersions)
+      .then(() => {
+        if (!cancelled) setSpansEpoch((n) => n + 1);
+      })
+      .catch(() => {
+        // plain rendering is the safe fallback; never break reading
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [visibleVersions]);
   const [verseNotes, setVerseNotes] = useState<Set<string>>(new Set());
   const [highlightedVerseId, setHighlightedVerseId] = useState<string | null>(
     null,
@@ -707,6 +725,7 @@ const handleTouchEnd = useCallback(
                 isHighlighted={highlightedVerseId === verse.id}
                 highlightColors={highlightColors?.get(verse.id)}
                 activeHighlightColor={activeHighlightColor}
+                spansEpoch={spansEpoch}
                 onToggleSelect={(e) => handleToggleSelect(verse.id, e.shiftKey)}
                 onNavigateToRef={(targetId) =>
                   handleNavigateToRef(verse.id, targetId)

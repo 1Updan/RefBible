@@ -24,7 +24,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from align_red_letters import align_quote, map_token_span, AUTO_ACCEPT, REVIEW_FLOOR  # noqa: E402
+from align_red_letters import align_quote, map_token_span, GENEVA_EXTRA, AUTO_ACCEPT, REVIEW_FLOOR  # noqa: E402
 
 KJV_BOOKS = [
     ('GEN', 'GEN'), ('EXO', 'EXOD'), ('LEV', 'LEV'), ('NUM', 'NUM'), ('DEU', 'DEUT'),
@@ -301,6 +301,7 @@ def main():
 
     for code in targets:
         t = texts[code]
+        extra = GENEVA_EXTRA if code == 'geneva1599' else None
         out = {}
         stats = {'full': 0, 'exact': 0, 'high': 0, 'review': 0, 'gap': 0, 'missing_verse': 0}
         review_rows = []
@@ -337,7 +338,7 @@ def main():
                         break
                 if mapped:
                     continue
-            s, score, flag = align_quote(quote, text)
+            s, score, flag = align_quote(quote, text, extra=extra)
             if flag in ('exact', 'high'):
                 out[vid] = {'spans': [list(s)], 'hash': h[:HASH_LEN], 'conf': score, 'method': 'align-' + flag}
                 stats['high' if flag == 'high' else 'exact'] += 1

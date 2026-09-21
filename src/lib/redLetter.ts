@@ -62,7 +62,7 @@ const ARCHAIC: Record<string, string> = {
   thou: 'you',
   thee: 'you',
   thy: 'your',
-  thine: 'yours',
+  thine: 'your',
   ye: 'you',
   hath: 'has',
   doth: 'does',

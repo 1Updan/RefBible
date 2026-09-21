@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { sha1Hex, createSpanLookup } from './redSpans.ts';
+import { sha1Hex, createSpanLookup, getRedSpans, ensureRedSpans } from './redSpans.ts';
 
 describe('sha1Hex', () => {
   it('matches the NIST vector', () => {
@@ -30,5 +30,23 @@ describe('createSpanLookup (non-KJV translations)', () => {
   it('returns null for NASB (excluded) and KJV (quote path owns it)', () => {
     assert.equal(lookup('NASB', 'MAT.5.3', 'Blessed are the meek.'), null);
     assert.equal(lookup('KJV', 'MAT.5.3', 'Blessed are the meek.'), null);
+  });
+});
+
+describe('lazy span loading', () => {
+  const GEN_MAT_5_3 = 'Blessed are the poore in spirit, for theirs is the kingdome of heauen.';
+
+  it('returns null before the table is loaded', () => {
+    assert.equal(getRedSpans('GENEVA1599', 'MAT.5.3', GEN_MAT_5_3), null);
+  });
+
+  it('returns spans after ensureRedSpans', async () => {
+    await ensureRedSpans(['GENEVA1599']);
+    assert.deepEqual(getRedSpans('GENEVA1599', 'MAT.5.3', GEN_MAT_5_3), [{ start: 0, end: 70 }]);
+  });
+
+  it('ignores unknown codes without throwing', async () => {
+    await ensureRedSpans(['NASB', 'NOPE']);
+    assert.equal(getRedSpans('NASB', 'MAT.5.3', GEN_MAT_5_3), null);
   });
 });

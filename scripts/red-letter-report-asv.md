@@ -1,17 +1,17 @@
 # Red-letter report: asv
 
-Verses with spans: 1847 / 2007 KJV refs
+Verses with spans: 1850 / 2007 KJV refs
 
 | bucket | count |
 |---|---|
 | full | 1494 |
-| exact | 158 |
-| high | 195 |
-| review | 107 |
+| exact | 160 |
+| high | 196 |
+| review | 104 |
 | gap | 46 |
 | missing_verse | 7 |
 
-## Review queue (renders plain in v1): 107
+## Review queue (renders plain in v1): 104
 
 ### Matthew 3:15 (MAT.3.15) score=0.8
 - KJV quote: Suffer it to be so now: for thus it becometh us to fulfil all righteousness.
@@ -32,10 +32,6 @@ Verses with spans: 1847 / 2007 KJV refs
 ### Matthew 11:25 (MAT.11.25) score=0.778
 - KJV quote: I thank thee, O Father, Lord of heaven and earth, because thou hast hid these things from the wise and prudent, and hast revealed them unto babes.
 - candidate: I thank thee, O Father, Lord of heaven and earth, that thou didst hide these things from the wise and understanding, and didst reveal them unto babes
-
-### Matthew 12:13 (MAT.12.13) score=0.75
-- KJV quote: Stretch forth thine hand.
-- candidate: Stretch forth thy hand
 
 ### Matthew 13:52 (MAT.13.52) score=0.839
 - KJV quote: Therefore every scribe which is instructed unto the kingdom of heaven is like unto a man that is an householder, which bringeth forth out of his treasure things new and old.
@@ -108,10 +104,6 @@ Verses with spans: 1847 / 2007 KJV refs
 ### Mark 3:4 (MRK.3.4) score=0.75
 - KJV quote: Is it lawful to do good on the sabbath days, or to do evil? to save life, or to kill?
 - candidate: Is it lawful on the sabbath day to do good, or to do harm? to save a life, or to kill
-
-### Mark 3:5 (MRK.3.5) score=0.75
-- KJV quote: Stretch forth thine hand.
-- candidate: Stretch forth thy hand
 
 ### Mark 4:13 (MRK.4.13) score=0.846
 - KJV quote: Know ye not this parable? and how then will ye know all parables?
@@ -217,15 +209,11 @@ Verses with spans: 1847 / 2007 KJV refs
 - KJV quote: This day is this scripture fulfilled in your ears.
 - candidate: day hath this scripture been fulfilled in your ears
 
-### Luke 4:23 (LUK.4.23) score=0.833
-- KJV quote: Ye will surely say unto me this proverb, Physician, heal thyself: whatsoever we have heard done in Capernaum, do also here in thy country.
-- candidate: ye will say unto me this parable, Physician, heal thyself: whatsoever we have heard done at Capernaum, do also here in thine own country
-
 ### Luke 5:22 (LUK.5.22) score=0.833
 - KJV quote: What reason ye in your hearts?
 - candidate: reason ye in your hearts
 
-### Luke 5:24 (LUK.5.24) score=0.775
+### Luke 5:24 (LUK.5.24) score=0.8
 - KJV quote: But that ye may know that the Son of man hath power upon earth to forgive sins, (he said unto the sick of the palsy,) I say unto thee, Arise, and take up thy couch, and go into thine house.
 - candidate: 
 
@@ -237,7 +225,7 @@ Verses with spans: 1847 / 2007 KJV refs
 - KJV quote: I will ask you one thing; Is it lawful on the sabbath days to do good, or to do evil? to save life, or to destroy it?
 - candidate: I ask you, Is it lawful on the sabbath to do good, or to do harm? to save a life, or to destroy it
 
-### Luke 8:39 (LUK.8.39) score=0.733
+### Luke 8:39 (LUK.8.39) score=0.8
 - KJV quote: Return to thine own house, and shew how great things God hath done unto thee.
 - candidate: Return to thy house, and declare how great things God hath done for thee
 

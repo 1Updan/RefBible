@@ -1,8 +1,3 @@
-import webSpans from '../data/redSpans.web.json' with { type: 'json' };
-import asvSpans from '../data/redSpans.asv.json' with { type: 'json' };
-import draSpans from '../data/redSpans.dra.json' with { type: 'json' };
-import genevaSpans from '../data/redSpans.geneva1599.json' with { type: 'json' };
-
 export interface RedSpan {
   start: number;
   end: number;
@@ -16,6 +11,32 @@ interface SpanRow {
 }
 
 type SpanTable = Record<string, Record<string, SpanRow>>;
+
+// Static loader map (also the allowlist): span tables load on demand so
+// the main bundle stays lean. Keys must match translation codes exactly.
+const loaders: Record<string, () => Promise<Record<string, SpanRow>>> = {
+  WEB: () => import('../data/redSpans.web.json', { with: { type: 'json' } }).then((m) => m.default.verses),
+  ASV: () => import('../data/redSpans.asv.json', { with: { type: 'json' } }).then((m) => m.default.verses),
+  DRA: () => import('../data/redSpans.dra.json', { with: { type: 'json' } }).then((m) => m.default.verses),
+  GENEVA1599: () =>
+    import('../data/redSpans.geneva1599.json', { with: { type: 'json' } }).then((m) => m.default.verses),
+};
+
+const loaded: Record<string, Record<string, SpanRow> | undefined> = {};
+const inflight: Record<string, Promise<void> | undefined> = {};
+
+export async function ensureRedSpans(codes: string[]): Promise<void> {
+  await Promise.all(
+    codes.map((code) => {
+      if (loaded[code] || !(code in loaders)) return Promise.resolve();
+      inflight[code] ??= loaders[code]().then((verses) => {
+        loaded[code] = verses;
+        inflight[code] = undefined;
+      });
+      return inflight[code] as Promise<void>;
+    }),
+  );
+}
 
 // Compact sync SHA-1 (render path can't await WebCrypto). Standard
 // implementation; verified against the NIST "abc" vector in tests.
@@ -104,13 +125,6 @@ export function createSpanLookup(
   };
 }
 
-const tables: SpanTable = {
-  WEB: (webSpans as { verses: Record<string, SpanRow> }).verses,
-  ASV: (asvSpans as { verses: Record<string, SpanRow> }).verses,
-  DRA: (draSpans as { verses: Record<string, SpanRow> }).verses,
-  GENEVA1599: (genevaSpans as { verses: Record<string, SpanRow> }).verses,
-};
-
 export function getRedSpans(code: string, verseId: string, liveText: string): RedSpan[] | null {
-  return createSpanLookup(tables)(code, verseId, liveText);
+  return createSpanLookup(loaded as SpanTable)(code, verseId, liveText);
 }

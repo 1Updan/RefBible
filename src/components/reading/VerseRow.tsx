@@ -31,6 +31,8 @@ interface VerseRowProps {
   onOpenCrossRefs: (verseId: string) => void
   onSelectWord: (word: InterlinearWord, verseId: string, reference: string) => void
   onHighlightVerse?: (verseId: string, color?: HighlightColorId) => void
+  /** Bumped when lazy red-letter tables load; read by memo comparison only. */
+  spansEpoch?: number
 }
 
 export const VerseRow = memo(function VerseRow({
@@ -53,7 +55,9 @@ export const VerseRow = memo(function VerseRow({
   onOpenCrossRefs,
   onSelectWord,
   onHighlightVerse,
+  spansEpoch,
 }: VerseRowProps) {
+  void spansEpoch
   const guardRef = useRef(false)
 
   const handleContextMenu = (e: React.MouseEvent) => {

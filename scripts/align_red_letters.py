@@ -18,7 +18,7 @@ ARCHAIC = {
     "thou": "you",
     "thee": "you",
     "thy": "your",
-    "thine": "yours",
+    "thine": "your",
     "ye": "you",
     "hath": "has",
     "doth": "does",
@@ -36,6 +36,54 @@ ARCHAIC = {
     "verily": "truly",
 }
 
+# Geneva1599-only: same-word archaic spellings (each entry is one word's
+# period spelling, never a different word). Applied to both sides so KJV
+# text is unaffected (these spellings don't occur in KJV).
+GENEVA_EXTRA = {
+    "iesus": "jesus",
+    "iohn": "john",
+    "iames": "james",
+    "iudas": "judas",
+    "vnto": "unto",
+    "haue": "have",
+    "hee": "he",
+    "sonne": "son",
+    "goe": "go",
+    "doe": "do",
+    "verely": "verily",
+    "yee": "you",
+    "saide": "said",
+    "sayd": "said",
+    "sayde": "said",
+    "kingdome": "kingdom",
+    "heauen": "heaven",
+    "euen": "even",
+    "liues": "lives",
+    "nowe": "now",
+    "righteousnes": "righteousness",
+    "becommeth": "becometh",
+    "marueiled": "marveled",
+    "folowed": "followed",
+    "fulfill": "fulfil",
+    "sauiour": "saviour",
+    "christe": "christ",
+    "toke": "took",
+    "brake": "broke",
+    "loue": "love",
+    "moue": "move",
+    "aboue": "above",
+    "euer": "ever",
+    "neuer": "never",
+    "ouer": "over",
+    "vs": "us",
+    "oure": "our",
+    "youre": "your",
+    "sinne": "sin",
+    "farre": "far",
+    "onely": "only",
+    "truely": "truly",
+}
+
 _WORD_RE = re.compile(r"[A-Za-z0-9']+")
 
 
@@ -44,13 +92,16 @@ def tokenize(text):
     return [(m.group(0), m.start(), m.end()) for m in _WORD_RE.finditer(text)]
 
 
-def norm_token(word):
-    return ARCHAIC.get(word.lower(), word.lower())
+def norm_token(word, extra=None):
+    w = word.lower()
+    if extra and w in extra:
+        return extra[w]
+    return ARCHAIC.get(w, w)
 
 
-def normalize(text):
+def normalize(text, extra=None):
     """Lowercase, archaic-map, strip punctuation, collapse whitespace."""
-    return " ".join(norm_token(w) for w, _, _ in tokenize(text))
+    return " ".join(norm_token(w, extra) for w, _, _ in tokenize(text))
 
 
 def _char_span(text, tok_start_idx, tok_end_idx_excl):
@@ -87,7 +138,7 @@ def find_span(qtokens, ttokens, text):
     return (toks[idx][1], toks[idx + len(run) - 1][2]), score
 
 
-def map_token_span(span_text, target_text):
+def map_token_span(span_text, target_text, extra=None):
     """Map an exact-worded span onto a target text at token level.
 
     Ignores whitespace/punctuation differences (e.g. quote spacing
@@ -95,11 +146,11 @@ def map_token_span(span_text, target_text):
     in target_text coordinates, or None when the token run is absent
     or occurs more than once (ambiguous -- never guess).
     """
-    qtokens = [norm_token(w) for w, _, _ in tokenize(span_text)]
+    qtokens = [norm_token(w, extra) for w, _, _ in tokenize(span_text)]
     if not qtokens:
         return None
     wtoks = tokenize(target_text)
-    wnorm = [norm_token(w) for w, _, _ in wtoks]
+    wnorm = [norm_token(w, extra) for w, _, _ in wtoks]
     hits = []
     for i in range(len(wnorm) - len(qtokens) + 1):
         if wnorm[i:i + len(qtokens)] == qtokens:
@@ -110,16 +161,17 @@ def map_token_span(span_text, target_text):
     return [wtoks[i][1], wtoks[i + len(qtokens) - 1][2]]
 
 
-def align_quote(quote, text):
+def align_quote(quote, text, extra=None):
     """Align a KJV quote onto a verse text.
 
-    Returns (span | None, score, flag) where flag is one of:
-    exact | high | review | ambiguous | absent | low
+    `extra` is an optional additional word-normalization map (e.g.
+    GENEVA_EXTRA). Returns (span | None, score, flag) where flag is one
+    of: exact | high | review | ambiguous | absent | low
     """
     if not quote or not quote.strip():
         return None, 0.0, "absent"
-    nq = normalize(quote)
-    nt = normalize(text)
+    nq = normalize(quote, extra)
+    nt = normalize(text, extra)
     if not nq:
         return None, 0.0, "absent"
     # Ambiguous: the quote occurs more than once in the verse.
@@ -131,7 +183,7 @@ def align_quote(quote, text):
         # Map back to original-text offsets via token runs.
         qtokens = nq.split()
         wtoks = tokenize(text)
-        wnorm = [norm_token(w) for w, _, _ in wtoks]
+        wnorm = [norm_token(w, extra) for w, _, _ in wtoks]
         idx = -1
         for i in range(len(wnorm) - len(qtokens) + 1):
             if wnorm[i:i + len(qtokens)] == qtokens:
@@ -161,7 +213,7 @@ def align_quote(quote, text):
         return None, round(coverage, 3), "review"
     run = ttokens[t_first:t_last]
     wtoks = tokenize(text)
-    wnorm = [norm_token(w) for w, _, _ in wtoks]
+    wnorm = [norm_token(w, extra) for w, _, _ in wtoks]
     idx = -1
     for i in range(len(wnorm) - len(run) + 1):
         if wnorm[i:i + len(run)] == run:
