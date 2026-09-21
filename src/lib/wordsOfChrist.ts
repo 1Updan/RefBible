@@ -9,8 +9,12 @@ let inflight: Promise<void> | undefined;
 
 export async function ensureChristWords(): Promise<void> {
   if (verses) return;
-  inflight ??= import('../data/redLetterVerses.json', { with: { type: 'json' } }).then((m) => {
-    verses = (m.default as { verses: Record<string, string> }).verses;
+  // NOTE: load via the wrapper module (static JSON import inlined into a
+  // lazy chunk). Never dynamic-import raw JSON with import attributes:
+  // bundlers may compile that to a runtime file fetch, and dist ships no
+  // .json files, so verses would silently stay plain.
+  inflight ??= import('./redTables/redKjv.ts').then((m) => {
+    verses = m.verses;
     inflight = undefined;
   });
   return inflight;

@@ -12,14 +12,16 @@ interface SpanRow {
 
 type SpanTable = Record<string, Record<string, SpanRow>>;
 
-// Static loader map (also the allowlist): span tables load on demand so
-// the main bundle stays lean. Keys must match translation codes exactly.
+// Static loader map (also the allowlist): each table lives in its own
+// wrapper module so the JSON inlines into a separate lazy chunk.
+// NOTE: never dynamic-import raw JSON with import attributes here --
+// bundlers may compile that to a runtime file fetch, and dist ships no
+// .json files, so the fetch 404s and verses silently stay plain.
 const loaders: Record<string, () => Promise<Record<string, SpanRow>>> = {
-  WEB: () => import('../data/redSpans.web.json', { with: { type: 'json' } }).then((m) => m.default.verses),
-  ASV: () => import('../data/redSpans.asv.json', { with: { type: 'json' } }).then((m) => m.default.verses),
-  DRA: () => import('../data/redSpans.dra.json', { with: { type: 'json' } }).then((m) => m.default.verses),
-  GENEVA1599: () =>
-    import('../data/redSpans.geneva1599.json', { with: { type: 'json' } }).then((m) => m.default.verses),
+  WEB: () => import('./redTables/redWeb.ts').then((m) => m.verses),
+  ASV: () => import('./redTables/redAsv.ts').then((m) => m.verses),
+  DRA: () => import('./redTables/redDra.ts').then((m) => m.verses),
+  GENEVA1599: () => import('./redTables/redGeneva.ts').then((m) => m.verses),
 };
 
 const loaded: Record<string, Record<string, SpanRow> | undefined> = {};
