@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useTheme } from "./hooks/useTheme";
 import { useReadingPreferences } from "./hooks/useReadingPreferences";
@@ -10,10 +10,31 @@ import { ChapterHeader } from "./components/layout/ChapterHeader";
 import { MobileTabBar } from "./components/layout/MobileTabBar";
 import { DesktopShell } from "./components/layout/AppShell";
 
-import { StudyPanel } from "./components/panels/StudyPanel";
-import { SettingsPanel } from "./components/panels/SettingsPanel";
-import { BookmarksPanel } from "./components/panels/BookmarksPanel";
-import { SearchPanel } from "./components/panels/SearchPanel";
+// Panels load on demand so the first-paint bundle stays lean. Each is only
+// rendered when its side panel / bottom sheet opens.
+const StudyPanel = lazy(() =>
+  import("./components/panels/StudyPanel").then((m) => ({ default: m.StudyPanel })),
+);
+const SettingsPanel = lazy(() =>
+  import("./components/panels/SettingsPanel").then((m) => ({ default: m.SettingsPanel })),
+);
+const BookmarksPanel = lazy(() =>
+  import("./components/panels/BookmarksPanel").then((m) => ({ default: m.BookmarksPanel })),
+);
+const SearchPanel = lazy(() =>
+  import("./components/panels/SearchPanel").then((m) => ({ default: m.SearchPanel })),
+);
+const AiChatPanel = lazy(() =>
+  import("./components/panels/AiChatPanel").then((m) => ({ default: m.AiChatPanel })),
+);
+
+function PanelFallback() {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center p-6">
+      <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 import { BottomSheet } from "./components/sheets/BottomSheet";
 
 import {
@@ -31,7 +52,6 @@ import type { HighlightColorId } from "./lib/highlights";
 import type { AiTarget } from "./contexts/navigation";
 
 import { AiVaultProvider } from "./contexts/AiVaultContext";
-import { AiChatPanel } from "./components/panels/AiChatPanel";
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import {
   isPermissionGranted,
@@ -817,6 +837,8 @@ function AppContent() {
     }
   };
 
+  const sidebar = renderSidebar();
+
   const tabBar = (
         <MobileTabBar
           activePanel={activePanel}
@@ -850,6 +872,7 @@ function AppContent() {
                 : "Settings"
       }
     >
+      <Suspense fallback={<PanelFallback />}>
       {activePanel === "study" && <StudyPanel />}
       {activePanel === "search" && (
         <SearchPanel
@@ -897,6 +920,7 @@ function AppContent() {
                 onClose={() => setActivePanel("none")}
               />
             )}
+      </Suspense>
           </BottomSheet>
         );
 
@@ -935,7 +959,7 @@ function AppContent() {
         <DesktopShell
           nav={nav}
           reading={reading}
-          sidebar={renderSidebar()}
+          sidebar={sidebar ? <Suspense fallback={<PanelFallback />}>{sidebar}</Suspense> : null}
           onCloseSidebar={() => setActivePanel("none")}
         />
         <UpdateModal

@@ -11,6 +11,7 @@ import {
 import type { ChapterVerseContent } from "@/lib/db";
 import { useNavigation } from "@/hooks/useNavigation";
 import { ensureRedSpans } from "@/lib/redSpans";
+import { ensureChristWords } from "@/lib/wordsOfChrist";
 import { getBook } from "@/data/books";
 import { parseOsisId } from "@/lib/utils";
 import type {
@@ -114,7 +115,7 @@ export function ReadingView({
 
   useEffect(() => {
     let cancelled = false;
-    ensureRedSpans(visibleVersions)
+    Promise.all([ensureRedSpans(visibleVersions), ensureChristWords()])
       .then(() => {
         if (!cancelled) setSpansEpoch((n) => n + 1);
       })

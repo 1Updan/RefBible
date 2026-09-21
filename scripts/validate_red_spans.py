@@ -24,10 +24,10 @@ for code, fname in FILES.items():
             print('MISSING TEXT', code, vid)
             bad += 1
             continue
-        if hashlib.sha1(text.encode()).hexdigest()[:12] != row['hash']:
+        if hashlib.sha1(text.encode()).hexdigest()[:12] != row['h']:
             print('HASH MISMATCH', code, vid)
             bad += 1
-        for s, e in row['spans']:
+        for s, e in row['s']:
             if not (0 <= s < e <= len(text)) or not text[s:e].strip():
                 print('BAD SPAN', code, vid, s, e)
                 bad += 1

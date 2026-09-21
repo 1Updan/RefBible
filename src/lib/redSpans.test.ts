@@ -11,7 +11,7 @@ describe('sha1Hex', () => {
 describe('createSpanLookup (non-KJV translations)', () => {
   const lookup = createSpanLookup({
     WEB: {
-      'MAT.5.3': { spans: [[0, 7]], hash: sha1Hex('Blessed are the meek.').slice(0, 12), conf: 1, method: 'full' },
+      'MAT.5.3': { s: [[0, 7]], h: sha1Hex('Blessed are the meek.').slice(0, 12) },
     },
   });
 

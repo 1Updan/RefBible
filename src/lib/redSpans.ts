@@ -4,10 +4,10 @@ export interface RedSpan {
 }
 
 interface SpanRow {
-  spans: number[][];
-  hash: string;
-  conf: number;
-  method: string;
+  /** char-offset spans */
+  s: number[][];
+  /** 12-hex-char text hash prefix */
+  h: string;
 }
 
 type SpanTable = Record<string, Record<string, SpanRow>>;
@@ -111,9 +111,9 @@ export function createSpanLookup(
     const row = tables[code]?.[verseId];
     if (!row) return null;
     // Text-drift guardrail: hashes are 12-hex-char prefixes.
-    if (sha1Hex(liveText).slice(0, 12) !== row.hash) return null;
+    if (sha1Hex(liveText).slice(0, 12) !== row.h) return null;
     const spans: RedSpan[] = [];
-    for (const pair of row.spans) {
+    for (const pair of row.s) {
       const s = pair[0];
       const e = pair[1];
       if (typeof s !== 'number' || typeof e !== 'number') return null;

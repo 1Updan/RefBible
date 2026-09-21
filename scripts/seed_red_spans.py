@@ -315,7 +315,9 @@ def main():
                 continue
             h = sha1(text)
             if quote == 'full':
-                out[vid] = {'spans': [[0, len(text)]], 'hash': h[:HASH_LEN], 'conf': 1.0, 'method': 'full'}
+                # Compact row: {"s": spans, "h": hash12}. conf/method live
+                # only in the markdown reports, never in the shipped JSON.
+                out[vid] = {'s': [[0, len(text)]], 'h': h[:HASH_LEN]}
                 stats['full'] += 1
                 continue
             span = None
@@ -332,7 +334,7 @@ def main():
                     if span is None:
                         span = map_token_span(sub, text)
                     if span is not None:
-                        out[vid] = {'spans': [span], 'hash': h[:HASH_LEN], 'conf': 1.0, 'method': 'web-wj-exact'}
+                        out[vid] = {'s': [span], 'h': h[:HASH_LEN]}
                         stats['exact'] += 1
                         mapped = True
                         break
@@ -340,7 +342,7 @@ def main():
                     continue
             s, score, flag = align_quote(quote, text, extra=extra)
             if flag in ('exact', 'high'):
-                out[vid] = {'spans': [list(s)], 'hash': h[:HASH_LEN], 'conf': score, 'method': 'align-' + flag}
+                out[vid] = {'s': [list(s)], 'h': h[:HASH_LEN]}
                 stats['high' if flag == 'high' else 'exact'] += 1
             elif flag == 'review':
                 stats['review'] += 1

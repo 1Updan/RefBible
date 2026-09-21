@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@resvg/resvg-js": "^2.6.2",
     "@tauri-apps/api": "~2",
     "@tauri-apps/plugin-http": "~2",
     "@tauri-apps/plugin-notification": "^2.3.3",
