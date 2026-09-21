@@ -5,6 +5,7 @@ import { InterlinearView } from './InterlinearView'
 import { formatVerseId } from '@/lib/utils'
 import { parseWordsOfChrist, applyChristWords } from '@/lib/redLetter'
 import { getChristWords } from '@/lib/wordsOfChrist'
+import { getRedSpans } from '@/lib/redSpans'
 import { HIGHLIGHT_COLORS } from '@/lib/highlights'
 import clsx from 'clsx'
 import type { Verse, ContentText, CrossReference, InterlinearWord } from '@/types/db'
@@ -138,12 +139,31 @@ export const VerseRow = memo(function VerseRow({
           versionTexts.map((vt, i) => {
             const size = i === 0 ? fontSize : Math.max(fontSize - 2, 14)
             const colorClass = i === 0 ? 'text-text-primary' : 'text-text-secondary'
-            // Red letters: KJV only, always on. Other translations render plain.
-            // Interlinear branch above is untouched by design.
+            // Red letters: KJV via bundled quotes, WEB/ASV/DRA/GENEVA1599 via
+            // bundled sidecar spans (hash-verified). NASB renders plain by
+            // decision. Interlinear branch above is untouched by design.
+            const sidecar =
+              vt.translation_code === 'KJV'
+                ? null
+                : getRedSpans(vt.translation_code, verse.id, vt.text_data)
             const displayText =
               vt.translation_code === 'KJV'
                 ? applyChristWords(vt.text_data, getChristWords(formatVerseId(verse.id)))
                 : vt.text_data
+            const segments: { text: string; red: boolean }[] = []
+            if (sidecar) {
+              let last = 0
+              for (const sp of sidecar) {
+                if (sp.start > last) segments.push({ text: vt.text_data.slice(last, sp.start), red: false })
+                segments.push({ text: vt.text_data.slice(sp.start, sp.end), red: true })
+                last = sp.end
+              }
+              if (last < vt.text_data.length) segments.push({ text: vt.text_data.slice(last), red: false })
+            } else {
+              for (const seg of parseWordsOfChrist(displayText)) {
+                segments.push({ text: seg.text, red: seg.isWordOfChrist })
+              }
+            }
             return (
               <div key={vt.translation_code} className="flex items-start gap-1">
                 <div className="flex-1 min-w-0">
@@ -156,8 +176,8 @@ export const VerseRow = memo(function VerseRow({
                       className={clsx('block font-serif leading-[1.65] tracking-[0.01em] text-left', colorClass)}
                       style={{ fontSize: `${size}px` }}
                     >
-                    {parseWordsOfChrist(displayText).map((seg, j) =>
-                      seg.isWordOfChrist ? (
+                    {segments.map((seg, j) =>
+                      seg.red ? (
                         <span key={j} className="text-danger">{seg.text}</span>
                       ) : (
                         <span key={j}>{seg.text}</span>
