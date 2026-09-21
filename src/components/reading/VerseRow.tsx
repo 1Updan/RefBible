@@ -93,10 +93,10 @@ export const VerseRow = memo(function VerseRow({
 
   const reference = `${getBookName()} ${verse.chapter_num}:${verse.verse_num}`
 
-  const highlightBg = useMemo(() => {
+  const highlightWash = useMemo(() => {
     if (!highlightColors || highlightColors.length === 0) return undefined
     const c = HIGHLIGHT_COLORS.find((h) => h.id === highlightColors[0])
-    return c ? c.bg + '33' : undefined
+    return c ? `hl-wash-${c.id}` : undefined
   }, [highlightColors])
 
   return (
@@ -106,8 +106,8 @@ export const VerseRow = memo(function VerseRow({
         'group flex gap-3 py-2.5 px-4 rounded-lg transition-colors duration-150 touch-manipulation cursor-pointer',
         isHighlighted || isSelected ? 'bg-accent/20 ring-2 ring-accent/50' : 'hover:bg-surface/50 active:bg-surface/70 active:scale-[0.99]',
         isHighlighted && 'animate-[highlightPulse_2s_ease-out]',
+        highlightWash,
       )}
-      style={highlightBg ? { backgroundColor: highlightBg } : undefined}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
       role="button"
