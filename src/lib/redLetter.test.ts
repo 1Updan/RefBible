@@ -46,4 +46,25 @@ describe('parseWordsOfChrist', () => {
   it('returns plain text when quote not found', () => {
     assert.equal(applyChristWords('In the beginning.', 'come unto me'), 'In the beginning.');
   });
+
+  it('tolerates trailing-punctuation drift (Talitha cumi. vs cumi;)', () => {
+    const text = 'And he took the damsel by the hand, and said unto her, Talitha cumi; which is, being interpreted.';
+    assert.equal(
+      applyChristWords(text, 'Talitha cumi.'),
+      'And he took the damsel by the hand, and said unto her, <WJ>Talitha cumi</WJ>; which is, being interpreted.',
+    );
+  });
+
+  it('tolerates case drift (Son vs son of David)', () => {
+    const text = 'How say the scribes that Christ is the son of David?';
+    assert.equal(
+      applyChristWords(text, 'How say the scribes that Christ is the Son of David?'),
+      '<WJ>How say the scribes that Christ is the son of David</WJ>?',
+    );
+  });
+
+  it('stays plain when words are hyphen-merged (Bar-jona vs Barjona)', () => {
+    const text = 'Blessed art thou, Simon Barjona: for flesh and blood.';
+    assert.equal(applyChristWords(text, 'Blessed art thou, Simon Bar-jona: for flesh and blood.'), text);
+  });
 });
