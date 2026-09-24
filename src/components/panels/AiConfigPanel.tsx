@@ -101,6 +101,9 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  // Furthest wizard step ever visited: completed dots are tappable so users
+  // can jump back (or forward again) freely without losing typed inputs.
+  const [maxStepReached, setMaxStepReached] = useState(0);
 
   // Auto-focus inputs
   useEffect(() => {
@@ -111,7 +114,10 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
   const goNext = useCallback(() => {
     const steps: Step[] = ['welcome', 'provider', 'credentials', 'test', 'mode', 'complete'];
     const idx = steps.indexOf(step);
-    if (idx < steps.length - 1) setStep(steps[idx + 1]);
+    if (idx < steps.length - 1) {
+      setStep(steps[idx + 1]);
+      setMaxStepReached((m) => Math.max(m, idx + 1));
+    }
   }, [step]);
 
   const goBack = useCallback(() => {
@@ -171,6 +177,7 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
     setTestResult(null);
     setSaveError(null);
     setStep('credentials');
+    setMaxStepReached((m) => Math.max(m, 2));
   }, []);
 
   const handleRemoveConfig = useCallback((config: AiProviderConfig) => {
@@ -332,13 +339,20 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
         <div className="flex items-center justify-between">
           {steps.map((s, i) => (
             <div key={s} className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
-                i < currentStepIndex ? 'bg-accent text-white' :
-                i === currentStepIndex ? 'bg-accent/20 text-accent border border-accent' :
-                'bg-surface-elevated text-text-tertiary border border-border'
-              }`}>
+              <button
+                type="button"
+                onClick={() => { if (i <= maxStepReached) { setTestResult(null); setStep(s); } }}
+                disabled={i > maxStepReached}
+                title={i <= maxStepReached ? `Go to step ${i + 1}` : 'Complete earlier steps first'}
+                aria-label={`Step ${i + 1}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
+                  i < currentStepIndex ? 'bg-accent text-white' :
+                  i === currentStepIndex ? 'bg-accent/20 text-accent border border-accent' :
+                  'bg-surface-elevated text-text-tertiary border border-border'
+                } ${i <= maxStepReached ? 'cursor-pointer hover:scale-105' : 'cursor-default'}`}
+              >
                 {i < currentStepIndex ? <CheckCircle size={14} /> : i + 1}
-              </div>
+              </button>
               {i < steps.length - 1 && (
                 <div className={`w-12 h-0.5 mx-1.5 ${
                   i < currentStepIndex ? 'bg-accent' : 'bg-border'
@@ -465,13 +479,15 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
                     type="text"
                     value={endpoint}
                     onChange={e => setEndpoint(e.target.value)}
-                    placeholder={selectedProvider.defaultEndpoint}
+                    placeholder={selectedProvider.defaultEndpoint || 'https://openrouter.ai/api/v1'}
                     className="w-full px-3 py-2 text-sm rounded-lg bg-surface-elevated border border-border text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all duration-150"
                   />
                   <p className="text-[10px] text-text-tertiary">
-                    {selectedProvider.id === 'ollama' 
-                      ? 'Default: http://localhost:11434' 
-                      : 'OpenAI-compatible endpoint URL'}
+                    {selectedProvider.id === 'ollama'
+                      ? 'Default: http://localhost:11434'
+                      : selectedProvider.id === 'custom'
+                        ? 'Example: https://openrouter.ai/api/v1 (https:// is added automatically)'
+                        : 'OpenAI-compatible endpoint URL'}
                   </p>
                 </div>
               )}

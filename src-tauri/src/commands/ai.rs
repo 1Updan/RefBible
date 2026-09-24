@@ -1,6 +1,50 @@
 use tauri::Emitter;
 use futures_util::StreamExt;
 
+/// Normalize a user-entered endpoint base URL so common paste mistakes
+/// can't break provider calls:
+/// - missing scheme ("openrouter.ai/api/v1" -> "https://openrouter.ai/api/v1")
+/// - trailing slashes
+/// - pasted full paths ("/chat/completions", "/models", "/api/tags" are
+///   stripped because the code appends its own path per operation)
+fn normalize_base(endpoint: &str) -> String {
+    let mut base = endpoint.trim().to_string();
+    if !base.is_empty() && !base.contains("://") {
+        base = format!("https://{}", base);
+    }
+    while base.ends_with('/') && base.len() > 1 {
+        base.pop();
+    }
+    for suffix in ["/chat/completions", "/models", "/api/tags"] {
+        if let Some(stripped) = base.strip_suffix(suffix) {
+            if !stripped.is_empty() {
+                base = stripped.to_string();
+            }
+        }
+    }
+    base
+}
+
+/// Translate low-level HTTP errors into hints a non-technical user can act on.
+fn friendly_send_error(e: reqwest::Error) -> String {
+    if e.is_timeout() {
+        return format!(
+            "Timed out after 30 seconds. Check your internet connection and try again. ({})",
+            e
+        );
+    }
+    if e.is_connect() {
+        return format!(
+            "Could not reach the server. Check the endpoint URL for typos. ({})",
+            e
+        );
+    }
+    if e.is_builder() {
+        return "That endpoint URL looks invalid. It should look like https://openrouter.ai/api/v1 .".to_string();
+    }
+    format!("Connection failed: {}", e)
+}
+
 /// Test an AI provider connection from Rust (not the WebView) so the
 /// check works under the app's strict CSP and for any custom endpoint:
 /// WebView fetch is limited to allow-listed domains, reqwest is not.
@@ -25,21 +69,21 @@ pub async fn ai_test_connection(
             None,
         ),
         "ollama" => {
-            let base = endpoint.trim_end_matches('/');
+            let base = normalize_base(&endpoint);
             let base = if base.is_empty() {
                 "http://localhost:11434".to_string()
             } else {
-                base.to_string()
+                base
             };
             (format!("{}/api/tags", base), None)
         }
         _ => {
             // openai / custom / nvidia (all OpenAI-compatible)
-            let base = endpoint.trim_end_matches('/');
+            let base = normalize_base(&endpoint);
             let base = if base.is_empty() {
                 "https://api.openai.com/v1".to_string()
             } else {
-                base.to_string()
+                base
             };
             (
                 format!("{}/models", base),
@@ -58,7 +102,7 @@ pub async fn ai_test_connection(
     let resp = req
         .send()
         .await
-        .map_err(|e| format!("Connection failed: {}", e))?;
+        .map_err(friendly_send_error)?;
     if !resp.status().is_success() {
         let code = resp.status().as_u16();
         let body = resp.text().await.unwrap_or_default();
@@ -217,7 +261,7 @@ async fn openai_stream(
     endpoint: String,
     model: String,
 ) -> Result<(), String> {
-    let base = endpoint.trim_end_matches('/');
+    let base = normalize_base(&endpoint);
     let url = format!("{}/chat/completions", base);
 
     let body = serde_json::json!({
@@ -281,4 +325,54 @@ async fn openai_stream(
 
     app.emit("ai:done", "").ok();
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn adds_missing_scheme() {
+        assert_eq!(
+            normalize_base("openrouter.ai/api/v1"),
+            "https://openrouter.ai/api/v1"
+        );
+    }
+
+    #[test]
+    fn trims_whitespace_and_slashes() {
+        assert_eq!(
+            normalize_base("  https://openrouter.ai/api/v1//  "),
+            "https://openrouter.ai/api/v1"
+        );
+    }
+
+    #[test]
+    fn strips_pasted_full_paths() {
+        assert_eq!(
+            normalize_base("https://openrouter.ai/api/v1/chat/completions"),
+            "https://openrouter.ai/api/v1"
+        );
+        assert_eq!(
+            normalize_base("https://api.openai.com/v1/models"),
+            "https://api.openai.com/v1"
+        );
+        assert_eq!(
+            normalize_base("http://localhost:11434/api/tags"),
+            "http://localhost:11434"
+        );
+    }
+
+    #[test]
+    fn leaves_good_urls_alone() {
+        assert_eq!(
+            normalize_base("https://api.openai.com/v1"),
+            "https://api.openai.com/v1"
+        );
+        assert_eq!(
+            normalize_base("http://localhost:11434"),
+            "http://localhost:11434"
+        );
+        assert_eq!(normalize_base(""), "");
+    }
 }
