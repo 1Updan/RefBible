@@ -414,4 +414,39 @@ export async function importBackupData(data: BackupData): Promise<void> {
   await batchInsert('user_custom_cross_references', ['origin_verse_id', 'target_verse_id', 'created_at'], data.user_cross_references, (x) => [x.origin_verse_id, x.target_verse_id, x.created_at])
 }
 
+export interface PackStatus {
+  nasb: boolean
+  study: boolean
+}
+
+export async function getPackStatus(): Promise<PackStatus> {
+  try {
+    const { invoke } = await import('@tauri-apps/api/core')
+    return await invoke<PackStatus>('pack_status')
+  } catch {
+    return { nasb: true, study: true }
+  }
+}
+
+export async function downloadPack(
+  kind: 'nasb' | 'study',
+  onProgress?: (downloaded: number, total: number | null) => void,
+): Promise<void> {
+  const { invoke } = await import('@tauri-apps/api/core')
+  const { listen } = await import('@tauri-apps/api/event')
+  const unlisten = await listen<{ phase: string; downloaded?: number; total?: number | null }>(
+    'pack-download',
+    (e) => {
+      if (e.payload.phase === 'downloading') {
+        onProgress?.(e.payload.downloaded ?? 0, e.payload.total ?? null)
+      }
+    },
+  )
+  try {
+    await invoke('download_pack', { kind })
+  } finally {
+    unlisten()
+  }
+}
+
 

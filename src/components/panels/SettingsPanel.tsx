@@ -247,7 +247,7 @@ export function SettingsPanel({
 
         <AiSetupSection />
 
-        <DataSourcesSection />
+        <DataSourcesSection onRefreshInstalled={onRefreshInstalled} />
       </div>
     </div>
   )
@@ -280,13 +280,44 @@ function AiSetupSection() {
   )
 }
 
-function DataSourcesSection() {
+function DataSourcesSection({ onRefreshInstalled }: { onRefreshInstalled: () => void }) {
   const [openSources, toggleSources] = useSectionState('datasources')
+  const [packs, setPacks] = useState<{ nasb: boolean; study: boolean } | null>(null)
+  const [packBusy, setPackBusy] = useState<'nasb' | 'study' | null>(null)
+  const [packProgress, setPackProgress] = useState<{ downloaded: number; total: number | null } | null>(null)
+  const [packError, setPackError] = useState<string | null>(null)
+
+  const refreshPacks = async () => {
+    try {
+      const { getPackStatus } = await import('@/lib/db')
+      setPacks(await getPackStatus())
+    } catch {
+      // backend unavailable (web preview) — hide pack rows
+    }
+  }
+
+  const handlePackDownload = async (kind: 'nasb' | 'study') => {
+    setPackBusy(kind)
+    setPackError(null)
+    setPackProgress({ downloaded: 0, total: null })
+    try {
+      const { downloadPack } = await import('@/lib/db')
+      await downloadPack(kind, (downloaded, total) => setPackProgress({ downloaded, total }))
+      await refreshPacks()
+      await onRefreshInstalled()
+    } catch (e) {
+      setPackError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setPackBusy(null)
+      setPackProgress(null)
+    }
+  }
+
   return (
     <section>
       <button
         type="button"
-        onClick={toggleSources}
+        onClick={() => { toggleSources(); refreshPacks(); }}
         className="w-full flex items-center gap-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2.5 cursor-pointer"
       >
         {openSources ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -294,7 +325,26 @@ function DataSourcesSection() {
       </button>
 
       {openSources && (
-        <div className="space-y-2 px-1">
+        <div className="space-y-3 px-1">
+          <div className="space-y-2">
+            <PackRow
+              title="NASB Translation"
+              description="New American Standard Bible · ~1.8 MB download"
+              installed={packs?.nasb ?? true}
+              busy={packBusy === 'nasb'}
+              progress={packBusy === 'nasb' ? packProgress : null}
+              onDownload={() => handlePackDownload('nasb')}
+            />
+            <PackRow
+              title="Study Data"
+              description="Original Hebrew & Greek words + Strong's definitions · ~12.6 MB download"
+              installed={packs?.study ?? true}
+              busy={packBusy === 'study'}
+              progress={packBusy === 'study' ? packProgress : null}
+              onDownload={() => handlePackDownload('study')}
+            />
+            {packError && <p className="text-xs text-danger">{packError}</p>}
+          </div>
           <p className="text-xs text-text-secondary leading-relaxed">
             Cross-references courtesy of{' '}
             <a
@@ -313,6 +363,57 @@ function DataSourcesSection() {
         </div>
       )}
     </section>
+  )
+}
+
+function PackRow({
+  title,
+  description,
+  installed,
+  busy,
+  progress,
+  onDownload,
+}: {
+  title: string
+  description: string
+  installed: boolean
+  busy: boolean
+  progress: { downloaded: number; total: number | null } | null
+  onDownload: () => void
+}) {
+  const pct = progress?.total
+    ? Math.min(100, Math.round((progress.downloaded / progress.total) * 100))
+    : null
+  return (
+    <div className="px-3 py-2.5 rounded-xl bg-surface-elevated border border-border-subtle">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-text-primary flex items-center gap-1.5">
+            {title}
+            {installed && <CheckCircle size={14} className="text-green-500 shrink-0" />}
+          </p>
+          <p className="text-[11px] text-text-tertiary">{description}</p>
+        </div>
+        {!installed && (
+          <button
+            type="button"
+            onClick={onDownload}
+            disabled={busy}
+            className="shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer"
+          >
+            {busy ? (pct !== null ? `${pct}%` : '…') : 'Download'}
+          </button>
+        )}
+      </div>
+      {busy && pct !== null && (
+        <div className="mt-2 h-1.5 rounded-full bg-border overflow-hidden">
+          <div
+            className="h-full rounded-full bg-accent transition-all duration-200"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      )}
+    </div>
   )
 }
 

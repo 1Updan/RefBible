@@ -7,6 +7,7 @@ import { Clipboard, Share2 } from 'lucide-react'
 interface ShareSheetProps {
   reference: string
   verseText: string
+  verses?: { verseId: string; num: number; text: string }[]
   versionLabel: string
   highlightColors?: string[]
   onClose: () => void
@@ -73,7 +74,7 @@ function PlatformIcon({ id }: { id: string }) {
   }
 }
 
-export function ShareSheet({ reference, verseText, versionLabel, highlightColors, onClose }: ShareSheetProps) {
+export function ShareSheet({ reference, verseText, verses, versionLabel, highlightColors, onClose }: ShareSheetProps) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [sharing, setSharing] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -142,6 +143,7 @@ export function ShareSheet({ reference, verseText, versionLabel, highlightColors
             ref={cardRef}
             reference={reference}
             verseText={verseText}
+            verses={verses}
             versionLabel={versionLabel}
             highlightColor={highlightColor}
           />

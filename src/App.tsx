@@ -67,6 +67,7 @@ import {
   setPendingVotdNavigation,
 } from "./lib/verseOfTheDay";
 import { formatVerseId, parseOsisId } from "./lib/utils";
+import { buzz } from "./lib/haptics";
 import { toDbOsis } from "./data/osis";
 import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
@@ -332,9 +333,10 @@ function AppContent() {
   const headerMeasureRef = useRef<HTMLDivElement>(null);
   const tabBarMeasureRef = useRef<HTMLDivElement>(null);
 
-  // First-run Bible database: on fresh installs the database is not
-  // bundled anymore (keeps installs small) and must be downloaded once.
-  const [dbScreen, setDbScreen] = useState<'checking' | 'ready' | 'downloading' | 'error'>('checking');
+  // First-run Bible data: nothing downloads until the user asks for it.
+  // The welcome prompt explains exactly what comes down and how big it
+  // is; extra packs (NASB, study data) live in Settings -> Data Sources.
+  const [dbScreen, setDbScreen] = useState<'checking' | 'prompt' | 'ready' | 'downloading' | 'error'>('checking');
   const [dbProgress, setDbProgress] = useState<{ downloaded: number; total: number | null }>({ downloaded: 0, total: null });
   const [dbError, setDbError] = useState("");
 
@@ -378,7 +380,9 @@ function AppContent() {
           setDbScreen('ready');
           setReady(true);
         } else {
-          startDbDownload();
+          // Never auto-download: the user starts it from the welcome
+          // prompt when they're ready (e.g. on Wi-Fi).
+          setDbScreen('prompt');
         }
       } catch {
         // Backend commands unavailable (e.g. web preview) — proceed as before.
@@ -601,6 +605,52 @@ function AppContent() {
   );
 
   if (!ready) {
+    if (dbScreen === 'prompt') {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-bg">
+          <div className="flex flex-col items-center gap-6 max-w-[300px] text-center px-6">
+            <div className="w-32 h-32 rounded-3xl bg-accent/10 flex items-center justify-center overflow-hidden">
+              <img
+                src="/rblogo.svg"
+                alt="RefBible"
+                className="h-28 w-auto object-contain"
+              />
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <h1 className="text-3xl font-extrabold text-text-primary tracking-tight">
+                RefBible
+              </h1>
+              <p className="text-sm text-text-secondary font-medium">
+                Bible Study Tool
+              </p>
+            </div>
+            <div className="w-12 h-px bg-border-subtle" />
+            <div className="w-full px-4 py-3 rounded-xl bg-surface-elevated border border-border-subtle space-y-2 text-left">
+              <p className="text-xs font-semibold text-text-primary">One download to start reading:</p>
+              {[
+                'King James Bible, all 66 books',
+                '120,000+ cross-references',
+                'About 4.5 MB, kept on your device',
+              ].map((line) => (
+                <p key={line} className="text-xs text-text-secondary">• {line}</p>
+              ))}
+            </div>
+            <div className="w-full space-y-2">
+              <button
+                type="button"
+                onClick={startDbDownload}
+                className="w-full px-3 py-2.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover active:bg-accent-hover transition-all duration-150 cursor-pointer touch-manipulation"
+              >
+                Download Bible Data
+              </button>
+              <p className="text-[11px] text-text-tertiary">
+                Needs internet once. More translations and study tools can be added later in Settings → Data Sources.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
     if (dbScreen === 'downloading' || dbScreen === 'error') {
       const pct = dbProgress.total
         ? Math.min(100, Math.round((dbProgress.downloaded / dbProgress.total) * 100))
@@ -883,6 +933,7 @@ function AppContent() {
           activePanel={activePanel}
           interlinearEnabled={prefs.interlinearEnabled}
           onTabChange={(tab) => {
+                      buzz(8);
                       if (tab === "read") {
                         setNavBookId(bookId);
                         setNavChapter(chapter);

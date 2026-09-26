@@ -12,6 +12,7 @@ import type { ChapterVerseContent } from "@/lib/db";
 import { useNavigation } from "@/hooks/useNavigation";
 import { ensureRedSpans } from "@/lib/redSpans";
 import { ensureChristWords } from "@/lib/wordsOfChrist";
+import { buzz } from "@/lib/haptics";
 import { getBook } from "@/data/books";
 import { parseOsisId } from "@/lib/utils";
 import type {
@@ -407,6 +408,7 @@ const handleTouchEnd = useCallback(
 
   const handleToggleSelect = useCallback(
     (verseId: string, shiftKey?: boolean) => {
+      buzz(8);
       if ((shiftKey || rangeMode) && selectionAnchor) {
         const anchorIdx = verses.findIndex((v) => v.id === selectionAnchor);
         const clickIdx = verses.findIndex((v) => v.id === verseId);
@@ -599,6 +601,7 @@ const handleTouchEnd = useCallback(
   const [shareVerse, setShareVerse] = useState<{
     reference: string;
     text: string;
+    verses: { verseId: string; num: number; text: string }[];
     versionLabel: string;
     highlightColors?: string[];
   } | null>(null);
@@ -613,6 +616,7 @@ const handleTouchEnd = useCallback(
 
   const handleHighlightColorSelect = useCallback(
     (color: HighlightColorId | null) => {
+      if (color) buzz(12);
       if (color && onHighlightVerse) {
         for (const verseId of selectedIds) {
           onHighlightVerse(verseId, color);
@@ -661,9 +665,19 @@ const handleTouchEnd = useCallback(
         : `${book?.name ?? "John"} ${firstVerse?.chapter_num}:${firstVerse?.verse_num}-${lastVerse?.verse_num}`;
 
     const firstId = selectedList[0];
+    const verseParts = selectedList.flatMap((verseId) => {
+      const d = data.get(verseId);
+      const v = verses.find((x) => x.id === verseId);
+      if (!d || !v) return [];
+      const firstText =
+        d.texts.find((t) => t.translation_code === "KJV") ?? d.texts[0];
+      if (!firstText) return [];
+      return [{ verseId, num: v.verse_num, text: firstText.text_data }];
+    });
     setShareVerse({
       reference: ref,
       text: parts.join("\n"),
+      verses: verseParts,
       versionLabel,
       highlightColors: highlightColors?.get(firstId),
     });
@@ -766,6 +780,7 @@ const handleTouchEnd = useCallback(
         <ShareSheet
           reference={shareVerse.reference}
           verseText={shareVerse.text}
+          verses={shareVerse.verses}
           versionLabel={shareVerse.versionLabel}
           highlightColors={shareVerse.highlightColors}
           onClose={() => setShareVerse(null)}

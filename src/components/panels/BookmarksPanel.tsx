@@ -18,16 +18,27 @@ export function BookmarksPanel({ refreshKey, onNavigate }: BookmarksPanelProps) 
   }, [refreshKey])
 
   const handleRemove = async (verseId: string) => {
-    await removeBookmark(verseId)
     setBookmarks((prev) => prev.filter((b) => b.verse_id !== verseId))
+    try {
+      await removeBookmark(verseId)
+    } catch (e) {
+      console.error('Failed to remove bookmark:', e)
+      getBookmarks().then(setBookmarks).catch(() => {})
+    }
   }
 
   return (
     <div className="space-y-1">
       {bookmarks.length === 0 && (
-        <p className="text-xs text-text-tertiary text-center py-8">
-          No bookmarks yet. Tap the bookmark icon on any verse.
-        </p>
+        <div className="flex flex-col items-center text-center py-10 px-6">
+          <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-3">
+            <Bookmark size={24} className="text-accent" />
+          </div>
+          <p className="text-sm font-medium text-text-primary">No saved verses yet</p>
+          <p className="text-xs text-text-tertiary mt-1 leading-relaxed">
+            Long-press any verse and tap Bookmark to build your collection here.
+          </p>
+        </div>
       )}
       {bookmarks.map((b) => {
         const parsed = parseOsisId(b.verse_id)

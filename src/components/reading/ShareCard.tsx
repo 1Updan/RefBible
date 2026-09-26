@@ -1,4 +1,7 @@
 import { forwardRef, useMemo } from 'react'
+import { parseWordsOfChrist, applyChristWords } from '@/lib/redLetter'
+import { getChristWords } from '@/lib/wordsOfChrist'
+import { formatVerseId } from '@/lib/utils'
 
 const CARD_BG_COLORS = [
   '#3b3228',
@@ -14,16 +17,28 @@ const REF_ICON_PATH = 'M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26
 interface ShareCardProps {
   reference: string
   verseText: string
+  verses?: { verseId: string; num: number; text: string }[]
   versionLabel: string
   highlightColor?: string
 }
 
 export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
-  function ShareCard({ reference, verseText, versionLabel, highlightColor }, ref) {
+  function ShareCard({ reference, verseText, verses, versionLabel, highlightColor }, ref) {
     const bgColor = useMemo(
       () => CARD_BG_COLORS[Math.floor(Math.random() * CARD_BG_COLORS.length)],
       [],
     )
+    // Words of Christ in card red (light enough for the dark card); falls
+    // back to plain text when the quote table hasn't loaded yet.
+    const redVerseText = useMemo(() => {
+      if (!verses || verses.length === 0) return null
+      return verses.map((v) => {
+        const tagged = applyChristWords(v.text, getChristWords(formatVerseId(v.verseId)))
+        const segs = parseWordsOfChrist(tagged)
+        if (!segs.some((s) => s.isWordOfChrist)) return null
+        return { num: v.num, segs }
+      })
+    }, [verses])
 
     return (
       <div
@@ -78,7 +93,23 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
             marginBottom: '12px',
           }}
         >
-          {verseText}
+          {redVerseText && redVerseText.some(Boolean) ? (
+            redVerseText.map((v, i) =>
+              v ? (
+                <span key={i}>
+                  {v.segs.map((s, j) =>
+                    s.isWordOfChrist ? (
+                      <span key={j} style={{ color: '#f87171' }}>{s.text}</span>
+                    ) : (
+                      <span key={j}>{s.text}</span>
+                    ),
+                  )}{' '}
+                </span>
+              ) : null,
+            )
+          ) : (
+            verseText
+          )}
         </div>
 
         <div
