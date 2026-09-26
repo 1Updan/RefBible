@@ -20,6 +20,7 @@ interface VerseActionBarProps {
   onHighlightColorSelect?: (color: HighlightColorId | null) => void
   onEraseSelection?: () => void
   handlePanelToggle?: (panel: 'bookmarks' | 'ai' | 'settings' | 'study' | 'search' | 'crossrefs') => void
+  isAiActive?: boolean
 }
 
 export function VerseActionBar({
@@ -38,6 +39,7 @@ export function VerseActionBar({
   onHighlightColorSelect,
   onEraseSelection,
   handlePanelToggle,
+  isAiActive,
 }: VerseActionBarProps) {
   if (isDesktop) {
     return (
@@ -56,13 +58,14 @@ export function VerseActionBar({
         onHighlightColorSelect={onHighlightColorSelect}
         onEraseSelection={onEraseSelection}
         handlePanelToggle={handlePanelToggle}
+        isAiActive={isAiActive}
       />
     )
   }
 
   return (
       <div className="fixed bottom-16 left-0 right-0 z-50 flex flex-col items-center px-2 animate-[slideUp_150ms_ease-out] pointer-events-none">
-        <div className="w-fit max-w-[96vw] flex items-center gap-0.5 px-2 py-1.5 bg-action-bar shadow-2xl rounded-2xl overflow-x-auto scrollbar-none pointer-events-auto">
+        <div className="w-fit max-w-[96vw] flex items-center gap-0.5 px-2 py-1.5 bg-action-bar shadow-2xl rounded-2xl overflow-x-auto scrollbar-none pointer-events-auto ring-1 ring-inset ring-white/10">
                   <span className="text-[8px] sm:text-[10px] text-white/80 font-medium shrink-0 pl-0.5">
                     {selectedCount}
                     <span className="hidden sm:inline">v</span>
@@ -73,7 +76,7 @@ export function VerseActionBar({
                     onClick={onToggleBookmark}
                     className={clsx(
                       'flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg transition-all duration-150 cursor-pointer min-w-[48px]',
-                      allBookmarked ? 'text-accent bg-white/15' : 'text-white/80 hover:text-white',
+                      allBookmarked ? 'bg-white text-action-bar shadow-sm' : 'text-white/80 hover:text-white',
                     )}
                   >
                     {allBookmarked ? <BookmarkCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Bookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
@@ -85,7 +88,7 @@ export function VerseActionBar({
               onClick={onRangeSelect}
               className={clsx(
                 'flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg transition-all duration-150 cursor-pointer',
-                isRangeMode ? 'text-accent bg-white/15' : 'text-white/80 hover:text-white',
+                isRangeMode ? 'bg-white text-action-bar shadow-sm' : 'text-white/80 hover:text-white',
               )}
             >
               {isRangeMode ? <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <List className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
@@ -117,7 +120,7 @@ export function VerseActionBar({
               className={clsx(
                 'flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg transition-all duration-150 cursor-pointer',
                 highlightActive
-                  ? 'text-accent bg-white/15'
+                  ? 'bg-white text-action-bar shadow-sm'
                   : 'text-white/80 hover:text-white',
               )}
             >
@@ -131,7 +134,7 @@ export function VerseActionBar({
                                 onClick={handlePanelToggle ? () => handlePanelToggle("ai") : undefined}
                                 className={clsx(
                                   'flex flex-col items-center justify-center gap-0.5 px-1.5 py-1 sm:px-2.5 sm:py-2 rounded-lg transition-all duration-150 cursor-pointer min-w-[48px]',
-                                  'text-white/80 hover:text-white',
+                                  isAiActive ? 'bg-white text-action-bar shadow-sm' : 'text-white/80 hover:text-white',
                                 )}
                               >
                                 <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -194,6 +197,7 @@ function DesktopActionBar({
   onHighlightColorSelect,
   onEraseSelection,
   handlePanelToggle,
+  isAiActive,
 }: {
   selectedCount: number
   allBookmarked: boolean
@@ -209,6 +213,7 @@ function DesktopActionBar({
   onHighlightColorSelect?: (color: HighlightColorId | null) => void
   onEraseSelection?: () => void
   handlePanelToggle?: (panel: 'bookmarks' | 'ai' | 'settings' | 'study' | 'search' | 'crossrefs') => void
+  isAiActive?: boolean
 }) {
   const [offset, setOffset] = useState<{ x: number; y: number }>(() => {
     try {
@@ -310,7 +315,7 @@ function DesktopActionBar({
                     />
                   )}
                   <ActionButton icon={<BookmarkCheck size={13} />} label="Saved" onClick={onToggleBookmark} highlighted={allBookmarked} />
-                  <ActionButton icon={<Sparkles size={13} />} label="AI" onClick={handlePanelToggle ? () => handlePanelToggle("ai") : undefined} highlighted={false} />
+                  <ActionButton icon={<Sparkles size={13} />} label="AI" onClick={handlePanelToggle ? () => handlePanelToggle("ai") : undefined} highlighted={isAiActive} />
                   <span className="w-px h-4 bg-white/20" />
                 <button
           type="button"
@@ -364,7 +369,7 @@ function ActionButton({ icon, label, onClick, disabled, highlighted }: { icon: R
       disabled={disabled}
       className={clsx(
         'flex items-center gap-0.5 px-1.5 py-1 rounded-lg transition-all duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent',
-        highlighted ? 'text-accent bg-white/15' : 'text-white/80 hover:text-white hover:bg-white/10',
+        highlighted ? 'bg-white text-action-bar shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10',
       )}
     >
       {icon}

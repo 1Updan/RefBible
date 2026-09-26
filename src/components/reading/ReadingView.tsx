@@ -758,6 +758,7 @@ const handleTouchEnd = useCallback(
                 onHighlightColorSelect={handleHighlightColorSelect}
                 onEraseSelection={handleEraseSelection}
                 handlePanelToggle={handlePanelToggle}
+                isAiActive={activePanel === "ai"}
               />
             )}
 

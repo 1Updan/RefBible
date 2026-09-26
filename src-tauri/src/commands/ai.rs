@@ -106,8 +106,15 @@ pub async fn ai_test_connection(
     if !resp.status().is_success() {
         let code = resp.status().as_u16();
         let body = resp.text().await.unwrap_or_default();
-        let snippet: String = body.chars().take(300).collect();
-        return Err(format!("Provider returned HTTP {}: {}", code, snippet));
+        let snippet: String = body.chars().take(200).collect();
+        let hint = match code {
+            401 => "The API key was rejected. Double-check the key and try again.",
+            404 => "Server not found at that address. Double-check the endpoint URL.",
+            429 => "Rate limit reached. Wait a little and try again.",
+            500..=599 => "The provider's server had a problem. Try again in a bit.",
+            _ => "The provider returned an error.",
+        };
+        return Err(format!("{} (HTTP {}) {}", hint, code, snippet));
     }
     let data: serde_json::Value = resp
         .json()
