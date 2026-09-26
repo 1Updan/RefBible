@@ -41,38 +41,38 @@ function renderWordRow(
     : 'font-greek'
 
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-1">
       {words.map((w) => (
         <button
           key={w.id}
           type="button"
           onClick={() => onSelectWord(w, verseId, reference)}
-          className="flex flex-col items-center px-2 py-1.5 rounded-lg border border-border-subtle bg-surface-elevated hover:bg-surface-hover hover:border-accent/30 transition-all duration-150 cursor-pointer text-center min-w-[48px] max-w-[160px]"
+          className="flex flex-col items-center px-2 py-1 rounded-xl bg-surface hover:bg-surface-hover active:scale-[0.97] transition-all duration-150 cursor-pointer text-center min-w-[44px] max-w-[160px] touch-manipulation"
         >
           <span
-            className={`${fontStack} leading-tight text-accent`}
+            className={`${fontStack} leading-tight text-accent font-medium`}
             style={{ fontSize: `${originalSize}px` }}
             dir={language === 'hebrew' ? 'rtl' : 'ltr'}
           >
             {w.original_text}
           </span>
           {w.transliteration && (
-            <span className="text-text-tertiary italic leading-tight mt-0.5" style={{ fontSize: `${Math.max(fontSize - 5, 11)}px` }}>
+            <span className="text-text-tertiary italic leading-tight" style={{ fontSize: `${Math.max(fontSize - 5, 11)}px` }}>
               {w.transliteration}
             </span>
           )}
           {w.gloss && (
-            <span className="text-text-secondary leading-tight mt-0.5" style={{ fontSize: `${Math.max(fontSize - 6, 10)}px` }}>
+            <span className="text-text-secondary leading-snug" style={{ fontSize: `${Math.max(fontSize - 6, 10)}px` }}>
               {w.gloss}
             </span>
           )}
           {w.strongs_number && (
-            <span className="text-accent/50 font-mono leading-tight mt-0.5" style={{ fontSize: `${Math.max(fontSize - 5, 11)}px` }}>
+            <span className="text-accent/45 font-mono leading-tight tracking-tight" style={{ fontSize: '10px' }}>
               {w.strongs_number}
             </span>
           )}
           {w.morphology && (
-            <span className="text-accent/60 font-mono leading-tight mt-0.5" style={{ fontSize: `${Math.max(fontSize - 5, 11)}px` }}>
+            <span className="text-text-tertiary/70 font-mono leading-tight tracking-tight" style={{ fontSize: '10px' }}>
               {w.morphology}
             </span>
           )}

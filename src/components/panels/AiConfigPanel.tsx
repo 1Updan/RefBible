@@ -189,6 +189,10 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
 
   const handleTest = useCallback(async () => {
     if (!selectedProvider || !apiKey) return;
+    if (selectedProvider.requiresEndpoint && !endpoint.trim()) {
+      setTestResult({ valid: false, error: 'Please enter the endpoint URL first (e.g. https://openrouter.ai/api/v1).' });
+      return;
+    }
     
     setTesting(true);
     setTestResult(null);
@@ -524,7 +528,7 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
 
             <button
               onClick={handleTest}
-              disabled={testing || !apiKey}
+              disabled={testing || !apiKey || (selectedProvider.requiresEndpoint && !endpoint.trim())}
               className="w-full px-4 py-3 rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 flex items-center justify-center gap-2"
             >
               {testing ? (
@@ -672,7 +676,7 @@ export function AiConfigPanel({ onComplete, onBack, isFirstRun = true }: AiConfi
         </div>
         <button
           onClick={goNext}
-          disabled={step === 'complete' || step === 'test' && !testResult?.valid || step === 'credentials' && !apiKey}
+          disabled={step === 'complete' || step === 'test' && !testResult?.valid || step === 'credentials' && (!apiKey || (selectedProvider?.requiresEndpoint && !endpoint.trim()))}
           className="px-3 py-1.5 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150"
         >
           {step === 'complete' ? 'Done' : 'Next'}

@@ -68,7 +68,7 @@ export function ChapterHeader({
   }, [])
 
   return (
-    <header className="flex items-center justify-between px-3 py-1.5 border-b border-border bg-bg shrink-0 gap-1">
+    <header className="flex items-center justify-between px-3 py-1.5 bg-bg shrink-0 gap-1 shadow-[0_12px_32px_-20px_rgba(0,0,0,0.35)] relative z-10">
       <div className="flex items-center gap-1 min-w-0">
         {canGoBack && (
           <Tooltip label="Go back">

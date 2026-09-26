@@ -108,7 +108,7 @@ export const VerseRow = memo(function VerseRow({
       id={`verse-${verse.id}`}
       className={clsx(
         'group flex gap-3 py-2.5 px-4 rounded-lg transition-colors duration-150 touch-manipulation cursor-pointer',
-        isHighlighted || isSelected ? 'bg-accent/20 ring-2 ring-accent/50' : 'hover:bg-surface/50 active:bg-surface/70 active:scale-[0.99]',
+        isHighlighted || isSelected ? 'bg-accent/[0.14] ring-1 ring-accent/40' : 'hover:bg-surface/50 active:bg-surface/70 active:scale-[0.99]',
         isHighlighted && 'animate-[highlightPulse_2s_ease-out]',
         highlightWash,
       )}
@@ -211,25 +211,14 @@ export const VerseRow = memo(function VerseRow({
               />
             ))}
             {crossReferences.length > 3 && (
-              <span className="inline-flex items-baseline gap-0.5">
-                {hasHiddenUserXrefs ? (
-                  <button
-                    type="button"
-                    onClick={() => onOpenCrossRefs(verse.id)}
-                    className="text-xs font-medium px-1 cursor-pointer transition-colors duration-150 text-accent hover:text-accent-hover"
-                  >
-                    <span className="text-danger font-bold">+{crossReferences.length - 3} more</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => onOpenCrossRefs(verse.id)}
-                    className="text-xs text-accent hover:text-accent-hover font-medium px-1 cursor-pointer"
-                  >
-                    +{crossReferences.length - 3} more
-                  </button>
-                )}
-              </span>
+              <button
+                type="button"
+                onClick={() => onOpenCrossRefs(verse.id)}
+                className="inline-flex items-center gap-1 text-xs text-accent hover:text-accent-hover font-medium px-1 py-0.5 rounded-md active:scale-95 transition-all duration-150 cursor-pointer"
+              >
+                {hasHiddenUserXrefs && <span className="w-1.5 h-1.5 rounded-full bg-accent" />}
+                +{crossReferences.length - 3} more
+              </button>
             )}
           </div>
         )}

@@ -292,6 +292,13 @@ function AppContent() {
   );
   const [activeHighlightColor, setActiveHighlightColor] =
     useState<HighlightColorId | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  }, []);
   const aiVerseRef = useRef<AiTarget | null>(null);
   const [installedVersions, setInstalledVersions] = useState<string[]>([
     "KJV",
@@ -459,7 +466,7 @@ function AppContent() {
       if (!color) return;
       const existing = highlightColors.get(verseId) ?? [];
       if (existing.includes(color)) {
-        await removeHighlight(verseId, color);
+        // Optimistic removal with rollback on failure.
         setHighlightColors((prev) => {
           const next = new Map(prev);
           const c = (next.get(verseId) ?? []).filter((x) => x !== color);
@@ -467,6 +474,14 @@ function AppContent() {
           else next.delete(verseId);
           return next;
         });
+        try {
+          await removeHighlight(verseId, color);
+        } catch (e) {
+          console.error('Highlight error:', e);
+          const fresh = await getHighlightsForChapter(bookId, chapter).catch(() => null);
+          if (fresh) setHighlightColors(fresh);
+          showToast('Could not remove highlight. Please try again.');
+        }
       } else {
         setHighlightColors((prev) => {
           const next = new Map(prev);
@@ -478,50 +493,73 @@ function AppContent() {
           await toggleHighlight(verseId, color);
         } catch (e) {
           console.error('Highlight error:', e);
-          const fresh = await getHighlightsForChapter(bookId, chapter);
-          setHighlightColors(fresh);
+          const fresh = await getHighlightsForChapter(bookId, chapter).catch(() => null);
+          if (fresh) setHighlightColors(fresh);
+          else {
+            setHighlightColors((prev) => {
+              const next = new Map(prev);
+              const c = (next.get(verseId) ?? []).filter((x) => x !== color);
+              if (c.length > 0) next.set(verseId, c);
+              else next.delete(verseId);
+              return next;
+            });
+          }
+          showToast('Could not save highlight. Please try again.');
         }
       }
     },
-    [activeHighlightColor, highlightColors],
+    [activeHighlightColor, highlightColors, bookId, chapter, showToast],
   );
 
   const handleRemoveHighlight = useCallback(
     async (verseId: string) => {
       const colors = highlightColors.get(verseId);
       if (!colors || colors.length === 0) return;
-      for (const color of colors) {
-        await removeHighlight(verseId, color);
-      }
       setHighlightColors((prev) => {
         const next = new Map(prev);
         next.delete(verseId);
         return next;
       });
+      try {
+        for (const color of colors) {
+          await removeHighlight(verseId, color);
+        }
+      } catch (e) {
+        console.error('Remove highlight error:', e);
+        const fresh = await getHighlightsForChapter(bookId, chapter).catch(() => null);
+        if (fresh) setHighlightColors(fresh);
+        showToast('Could not remove highlight. Please try again.');
+      }
     },
-    [highlightColors],
+    [highlightColors, bookId, chapter, showToast],
   );
 
   const handleToggleBookmark = useCallback(
     async (verseId: string) => {
-      if (bookmarks.has(verseId)) {
-        await removeBookmark(verseId);
+      const adding = !bookmarks.has(verseId);
+      setBookmarks((prev) => {
+        const next = new Set(prev);
+        if (adding) next.add(verseId);
+        else next.delete(verseId);
+        return next;
+      });
+      try {
+        if (adding) await saveBookmark(verseId);
+        else await removeBookmark(verseId);
+      } catch (e) {
+        console.error('Bookmark error:', e);
         setBookmarks((prev) => {
           const next = new Set(prev);
-          next.delete(verseId);
+          if (adding) next.delete(verseId);
+          else next.add(verseId);
           return next;
         });
-      } else {
-        await saveBookmark(verseId);
-        setBookmarks((prev) => {
-          const next = new Set(prev);
-          next.add(verseId);
-          return next;
-        });
+        showToast('Could not save bookmark. Please try again.');
+        return;
       }
       setBookmarkRefresh((n) => n + 1);
     },
-    [bookmarks],
+    [bookmarks, showToast],
   );
 
   const handleOpenNote = useCallback(
@@ -547,12 +585,13 @@ function AppContent() {
       await saveNote(noteVerseId, text);
     } catch (e) {
       console.error("Failed to save note:", e);
+      showToast("Could not save note. Your text is kept — please try again.");
       return;
     }
     setNoteText("");
     closeNote();
     handleDataChange();
-  }, [noteVerseId, noteText, closeNote, handleDataChange]);
+  }, [noteVerseId, noteText, closeNote, handleDataChange, showToast]);
 
   const handleNavigateBookmark = useCallback(
     (_: string, bookId: number, chapter: number) => {
@@ -849,6 +888,7 @@ function AppContent() {
                         setNavChapter(chapter);
                         setShowNav(true);
                       } else if (tab === "interlinear") toggleInterlinear();
+                      else if (tab === "ai") handlePanelToggle("ai");
                       else if (tab === "references") handlePanelToggle("crossrefs");
                       else if (tab === "settings") setActivePanel("settings");
                     }}
@@ -968,6 +1008,7 @@ function AppContent() {
           onClose={dismissUpdate}
           onUpdate={dismissUpdate}
         />
+        {toast && <Toast message={toast} />}
       </div>
     );
   }
@@ -1041,7 +1082,21 @@ function AppContent() {
         onClose={dismissUpdate}
         onUpdate={dismissUpdate}
       />
+      {toast && <Toast message={toast} />}
     </>
+  );
+}
+
+function Toast({ message }: { message: string }) {
+  return (
+    <div className="fixed left-1/2 -translate-x-1/2 bottom-24 z-[60] pointer-events-none">
+      <div
+        role="status"
+        className="px-4 py-2.5 rounded-xl bg-text-primary text-bg text-sm font-medium shadow-xl animate-[fadeIn_150ms_ease-out] max-w-[320px] text-center"
+      >
+        {message}
+      </div>
+    </div>
   );
 }
 
